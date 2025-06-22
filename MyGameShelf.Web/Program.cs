@@ -1,13 +1,21 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MyGameShelf.Application.Configurations;
+using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Infrastructure.Data;
 using MyGameShelf.Infrastructure.Identity;
+using MyGameShelf.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Rawg API Key
+builder.Services.Configure<RawgSettings>(builder.Configuration.GetSection("RawgSettings"));
+builder.Services.AddHttpClient<IRawgApiService, RawgApiService>();
+
 
 // Add DbContext to the DI container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
