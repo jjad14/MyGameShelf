@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyGameShelf.Infrastructure;
+namespace MyGameShelf.Infrastructure.Identity;
 public static class UserRoles
 {
     public const string Admin = "Admin";

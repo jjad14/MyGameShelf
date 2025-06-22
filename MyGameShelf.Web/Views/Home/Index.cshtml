@@ -1,8 +1,202 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Home/_Layout.cshtml";  // For Home views
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Navigation-->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container px-4 px-lg-5">
+        <a class="navbar-brand" href="#page-top">MyGameShelf</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Masthead-->
+<header class="masthead">
+    <div class="container px-4 px-lg-5 d-flex h-100 align-items-center justify-content-center">
+        <div class="d-flex justify-content-center">
+            <div class="text-center">
+                <h1 class="mx-auto my-0 text-uppercase">My Game Shelf</h1>
+                <h2 class="text-white-50 mx-auto mt-2 mb-5">Track, organize, and review your game collection — all in one place.</h2>
+                <a class="btn btn-primary" href="#about">Browse Features</a>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- About-->
+<section class="about-section text-center" id="about">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="text-white mb-4">All Your Games. One Shelf.</h2>
+                <p class="text-white-50">
+                    MyGameShelf is your space to keep track of what you're playing, what you’ve finished, and what’s in your backlog.
+                    Built for gamers who love staying organized — no downloads, no clutter, just your games.
+                </p>
+            </div>
+        </div>
+        <img class="img-fluid" src="assets/img/ipad.png" alt="..." />
+    </div>
+</section>
+<!-- Projects-->
+<section class="projects-section bg-light" id="projects">
+    <div class="container px-4 px-lg-5">
+        <!-- Featured Game Shelf Row -->
+        <div class="row gx-0 mb-4 mb-lg-5 align-items-center">
+            <div class="col-xl-8 col-lg-7">
+                <img class="img-fluid mb-3 mb-lg-0" src="assets/img/bg-masthead.jpg" alt="Gaming dashboard preview" />
+            </div>
+            <div class="col-xl-4 col-lg-5">
+                <div class="featured-text text-center text-lg-left">
+                    <h4>Your Gaming Dashboard</h4>
+                    <p class="text-black-50 mb-0">
+                        Keep track of what you're playing, what's in your backlog, and what you've already completed — all in one place. MyGameShelf gives you a clear view of your gaming progress.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project One Row: Platform Tracking -->
+        <div class="row gx-0 mb-5 mb-lg-0 justify-content-center">
+            <div class="col-lg-6">
+                <img class="img-fluid" src="assets/img/demo-image-01.jpg" alt="Game platforms screenshot" />
+            </div>
+            <div class="col-lg-6">
+                <div class="bg-black text-center h-100 project">
+                    <div class="d-flex h-100">
+                        <div class="project-text w-100 my-auto text-center text-lg-left">
+                            <h4 class="text-white">Track by Platform</h4>
+                            <p class="mb-0 text-white-50">
+                                Organize your collection across PC, Xbox, PlayStation, Switch, and more. Easily filter and find games by where you play.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Two Row: Game Reviews -->
+        <div class="row gx-0 justify-content-center">
+            <div class="col-lg-6">
+                <img class="img-fluid" src="assets/img/demo-image-02.jpg" alt="User review section screenshot" />
+            </div>
+            <div class="col-lg-6 order-lg-first">
+                <div class="bg-black text-center h-100 project">
+                    <div class="d-flex h-100">
+                        <div class="project-text w-100 my-auto text-center text-lg-right">
+                            <h4 class="text-white">Rate & Review</h4>
+                            <p class="mb-0 text-white-50">
+                                Share your thoughts on games you’ve played. Rate them, leave notes, and build a history of your gaming experience.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Signup-->
+<!-- Signup -->
+<section class="signup-section" id="signup">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5">
+            <div class="col-md-10 col-lg-8 mx-auto text-center">
+                <!-- Updated icon to a gamepad -->
+                <i class="fas fa-gamepad fa-2x mb-2 text-white"></i>
+                <!-- New heading -->
+                <h2 class="text-white mb-5">Stay in the Loop with MyGameShelf!</h2>
+
+                <!-- (Optional) If you have your own backend, swap out this form; otherwise keep SB Forms or any service of your choice -->
+                <form class="form-signup" id="signupForm" method="post" action="/Home/Subscribe">
+                    <!-- Email address input -->
+                    <div class="row input-group-newsletter">
+                        <div class="col">
+                            <input class="form-control"
+                                   id="emailAddress"
+                                   name="email"
+                                   type="email"
+                                   placeholder="Enter your email..."
+                                   aria-label="Enter your email"
+                                   required />
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-primary" id="submitButton" type="submit">
+                                Join the Community
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Success message (initially hidden) -->
+                    <div class="d-none" id="submitSuccessMessage">
+                        <div class="text-center mb-3 mt-2 text-white">
+                            <div class="fw-bolder">Thanks for joining!</div>
+                            We’ll send you the latest updates and new features.
+                        </div>
+                    </div>
+
+                    <!-- Error message (initially hidden) -->
+                    <div class="d-none" id="submitErrorMessage">
+                        <div class="text-center text-danger mb-3 mt-2">
+                            Oops! Something went wrong. Please try again.
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact-->
+<section class="contact-section bg-black">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card py-4 h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marked-alt text-primary mb-2"></i>
+                        <h4 class="text-uppercase m-0">Address</h4>
+                        <hr class="my-4 mx-auto" />
+                        <div class="small text-black-50">4923 Market Street, Orlando FL</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card py-4 h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-envelope text-primary mb-2"></i>
+                        <h4 class="text-uppercase m-0">Email</h4>
+                        <hr class="my-4 mx-auto" />
+                        <div class="small text-black-50"><a href="#!">hello@yourdomain.com</a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card py-4 h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-mobile-alt text-primary mb-2"></i>
+                        <h4 class="text-uppercase m-0">Phone</h4>
+                        <hr class="my-4 mx-auto" />
+                        <div class="small text-black-50">+1 (555) 902-8832</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="social d-flex justify-content-center">
+            <a class="mx-2" href="https://github.com/jjad14/MyGameShelf"><i class="fab fa-github"></i></a>
+        </div>
+    </div>
+</section>
+<!-- Footer-->
+<footer class="footer bg-black small text-center text-white-50"><div class="container px-4 px-lg-5">Copyright &copy; MyGameShelf 2025</div></footer>

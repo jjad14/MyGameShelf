@@ -5,6 +5,10 @@
     <ProjectReference Include="..\MyGameShelf.Infrastructure\MyGameShelf.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
