@@ -61,6 +61,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var rawgService = scope.ServiceProvider.GetRequiredService<IRawgApiService>();
+    await rawgService.WarmUpPopularGameCache();
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

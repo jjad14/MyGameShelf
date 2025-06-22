@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MyGameShelf.Infrastructure.External.Rawg.Responses;
-// MyGameShelf.Infrastructure/External/Rawg/Responses/RawgGameListResponse.cs
 
 public class RawgGameListResponse
 {

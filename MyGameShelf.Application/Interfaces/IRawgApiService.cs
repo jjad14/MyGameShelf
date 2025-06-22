@@ -12,7 +12,10 @@ public interface IRawgApiService
 
     Task<GameDto> GetGameDetailsAsync(int rawgId);
 
-    Task<IEnumerable<GameDto>> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string rating, string orderBy, int page = 1, int pageSize = 20);
+    Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string rating, string orderBy, int page = 1, int pageSize = 20);
+
+    // For caching popular/default searches
+    Task WarmUpPopularGameCache();
 
     // Get Developers
 
