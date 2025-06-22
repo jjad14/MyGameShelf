@@ -16,7 +16,7 @@ public class Game
     public string Slug { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public DateTime? Released { get; set; }
-    public string BackgroundImage { get; set; }
+    public string? BackgroundImage { get; set; }
 
     public double? Rating { get; set; }
     public int? RatingsCount { get; set; }
@@ -26,7 +26,7 @@ public class Game
     public int? Metacritic { get; set; }
     public int? Playtime { get; set; }
     public DateTime? Updated { get; set; }
-    public string EsrbRating { get; set; } = string.Empty;
+    public string? EsrbRating { get; set; }
 
     public ICollection<GamePlatform> Platforms { get; set; }
     public ICollection<GameDeveloper> GameDevelopers { get; set; }

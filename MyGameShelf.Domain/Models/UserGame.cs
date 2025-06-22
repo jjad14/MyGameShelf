@@ -1,6 +1,8 @@
 ﻿using MyGameShelf.Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +12,12 @@ namespace MyGameShelf.Domain.Models;
 // Represents the relationship between a user and a game in the system
 public class UserGame
 {
+    [Key]
     public int Id { get; set; }
 
     public string UserId { get; set; }
 
+    [ForeignKey("Game")]
     public int GameId { get; set; }
     public Game Game { get; set; }
 
