@@ -12,7 +12,9 @@ public class GameDto
     public DateTime? Released { get; set; }
     public string BackgroundImage { get; set; }
     public double? Rating { get; set; }
+    public int Metacritic { get; set; }
     public string Description { get; set; } // Optional for detail view
     public IEnumerable<string> Genres { get; set; } 
     public IEnumerable<string> Tags { get; set; } 
+    public IEnumerable<string> Platforms { get; set; } 
 }

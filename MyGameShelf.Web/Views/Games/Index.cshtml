@@ -6,16 +6,19 @@
     ViewData["Title"] = "Game List";
 }
 
-<h2>Games List</h2>
+@* <h2>Games List</h2> *@
+
+
+@await Html.PartialAsync("_GameFilterBar")
 
 <div class="container">
     <div class="row gap-2">
         @if (Model == null || !Model.Games.Any())
         {
             <!-- Skeleton Loader -->
-            @for (int i = 0; i < 6; i++)
+            @for (int i = 0; i < 12; i++)
             {
-                <div class="col-md-4 mb-4">
+                <div class="col mb-4">
                     <div class="card placeholder-glow" style="width: 18rem;">
                         <div class="card-img-top placeholder" style="height: 180px;"></div>
                         <div class="card-body">

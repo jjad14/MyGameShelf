@@ -18,10 +18,17 @@ public interface IRawgApiService
     Task WarmUpPopularGameCache();
 
     // Get Developers
-
-    // Get Publishers
-
-    // Get Creators
+    Task<IEnumerable<DeveloperDto>> GetDevelopersAsync(int page = 1, int pageSize = 20);
 
     // Get Platforms
+    Task<IEnumerable<PlatformDto>> GetPlatformsAsync(int page = 1, int pageSize = 20);
+
+    // Get Genres
+    Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20);
+
+    // Get Publishers
+    Task GetPublishersAsync();
+
+    // Get Creators
+    Task GetCreatorsAsync();
 }

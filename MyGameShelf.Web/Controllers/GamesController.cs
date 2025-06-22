@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Web.ViewModels;
@@ -17,19 +18,39 @@ public class GamesController : Controller
 
     [HttpGet("")]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
-    public async Task<IActionResult> Index(int page = 1, int pageSize = 20)
+    public async Task<IActionResult> Index(string search = null, string platform = null, string genre = null,
+                                           string metacritic = null, string orderBy = null, int page = 1, int pageSize = 20)
     {
-        string search = null;
-        string platform = null;
+        //string search = null;
+        //string platform = null;
         string developer = null;
         string publisher = null;
-        string genre = null;
-        string rating = null;
-        string orderBy = null;
+        //string genre = null;
+        //string rating = null;
+        //string orderBy = null;
+
+        // Make sure these calls return a List<SelectListItem>
+        //ViewBag.Platforms = await _rawgApiService.GetPlatformsAsync(); // 51
+
+        var platforms = await _rawgApiService.GetPlatformsAsync();
+        ViewBag.Platforms = platforms.Select(p => new SelectListItem
+        {
+            Value = p.Id.ToString(),
+            Text = p.Name
+        }).ToList();
+
+
+        //ViewBag.Genres = await _rawgApiService.GetGenresAsync();
+        var genres = await _rawgApiService.GetGenresAsync();
+        ViewBag.Genres = genres.Select(g => new SelectListItem
+        {
+            Value = g.Id.ToString(),
+            Text = g.Name
+        }).ToList();
 
 
         var response = await _rawgApiService.GetGamesBySearchAndFilters(
-            search, platform, developer, publisher, genre, rating, orderBy, page);
+            search, platform, developer, publisher, genre, metacritic, orderBy, page, pageSize);
 
         var gamesVm = new PaginatedGamesViewModel
         {

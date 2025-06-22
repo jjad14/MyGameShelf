@@ -1,0 +1,88 @@
+﻿@* Partial View for Game Filters *@
+@{
+    var query = Context.Request.Query;
+
+    var pageSize = query["pageSize"].ToString();
+    if (string.IsNullOrEmpty(pageSize))
+    {
+        pageSize = "20"; // default value
+    }
+}
+
+
+<form asp-controller="Games" asp-action="Index" method="get" class="mb-4">
+    <div class="row g-2">
+        <!-- Search Bar -->
+        <div class="col-md-3">
+            <input type="text" name="search" class="form-control" placeholder="Search games..." value="@Context.Request.Query["search"]" />
+        </div>
+
+        <!-- Platform -->
+        <div class="col-md-2">
+            <select class="form-select" name="platform">
+                <option value="">All Platforms</option>
+                @foreach (var p in ViewBag.Platforms as List<SelectListItem>)
+                {
+                    <option value="@p.Value" selected="@(query["platform"] == p.Value)">
+                        @p.Text
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Genre -->
+        <div class="col-md-2">
+            <select class="form-select" name="genre">
+                <option value="">All Genres</option>
+                @foreach (var g in ViewBag.Genres as List<SelectListItem>)
+                {
+                    <option value="@g.Value" selected="@(Context.Request.Query["genre"] == g.Value)">
+                        @g.Text
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Rating -->
+        <div class="col-md-1">
+            <select class="form-select" name="metacritic">
+                <option value="">All</option>
+                <option value="96,100" selected="@(query["metacritic"] == "96,100")">Perfect</option>
+                <option value="90,95" selected="@(query["metacritic"] == "90,95")">Great</option>
+                <option value="80,89" selected="@(query["metacritic"] == "80,89")">Good</option>
+                <option value="70,79" selected="@(query["metacritic"] == "70,79")">Fair</option>
+                <option value="60,69" selected="@(query["metacritic"] == "60,69")">Poor</option>
+                <option value="50,59" selected="@(query["metacritic"] == "50,59")">Very Poor</option>
+                <option value="1,49" selected="@(query["metacritic"] == "1,49")">Unacceptable</option>
+            </select>
+        </div>
+
+        <!-- Order -->
+        <div class="col-md-2">
+            <select class="form-select" name="orderBy">
+                <option value="">Default Order</option>
+                <option value="name" selected="@(query["orderBy"] == "name")">Alphabetical</option>
+                <option value="released" selected="@(query["orderBy"] == "released")">Release Date</option>
+                <option value="-added" selected="@(query["orderBy"] == "added")">Recently Added</option>
+                <option value="created" selected="@(query["orderBy"] == "created")">Newly Rated</option>
+                <option value="updated" selected="@(query["orderBy"] == "updated")">Newly Updated</option>
+                <option value="rating" selected="@(query["orderBy"] == "rating")">Rating</option>
+                <option value="-metacritic" selected="@(query["orderBy"] == "-metacritic")">Metacritic</option>
+            </select>
+        </div>
+
+        <!-- Page Size -->
+        <div class="col-md-1">
+            <select class="form-select" name="pageSize">
+                <option value="10" selected="@(pageSize == "10")">10</option>
+                <option value="20" selected="@(pageSize == "20")">20</option>
+                <option value="50" selected="@(pageSize == "50")">50</option>
+            </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary btn-sm px-3 py-2">Filter</button>
+        </div>
+    </div>
+</form>

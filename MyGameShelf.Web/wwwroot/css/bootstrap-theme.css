@@ -108,6 +108,11 @@ body {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+.position-relative:hover .overlay {
+    opacity: 1;
+    pointer-events: auto; /* allow interaction */
+}
+
 hr {
     margin: 1rem 0;
     color: inherit;
@@ -4750,6 +4755,10 @@ textarea.form-control-lg {
     border: var(--bs-card-border-width) solid var(--bs-card-border-color);
     border-radius: var(--bs-card-border-radius);
 }
+
+    .card.h-100 {
+        min-height: 450px; /* adjust to your expanded card height */
+    }
 
     .card > hr {
         margin-right: 0;

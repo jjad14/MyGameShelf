@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Azure;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.DTOs;
@@ -68,7 +69,7 @@ public class RawgApiService : IRawgApiService
         };
     }
 
-    public async Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string rating, string orderBy, int page = 1, int pageSize = 20)
+    public async Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string metacritic, string orderBy, int page = 1, int pageSize = 20)
     {
         bool isDefaultSearch =
             string.IsNullOrWhiteSpace(search) &&
@@ -76,7 +77,7 @@ public class RawgApiService : IRawgApiService
             string.IsNullOrWhiteSpace(developer) &&
             string.IsNullOrWhiteSpace(publisher) &&
             string.IsNullOrWhiteSpace(genre) &&
-            string.IsNullOrWhiteSpace(rating) &&
+            string.IsNullOrWhiteSpace(metacritic) &&
             string.IsNullOrWhiteSpace(orderBy) &&
             page == 1 &&
             pageSize == 20;
@@ -88,7 +89,7 @@ public class RawgApiService : IRawgApiService
         }
 
 
-        string cacheKey = $"rawg:search={search}|platform={platform}|developer={developer}|publisher={publisher}|genre={genre}|rating={rating}|order={orderBy}|page={page}|size={pageSize}";
+        string cacheKey = $"rawg:search={search}|platform={platform}|developer={developer}|publisher={publisher}|genre={genre}|metacritic={metacritic}|order={orderBy}|page={page}|size={pageSize}";
 
         // Try to get from cache
         if (_cache.TryGetValue(cacheKey, out PaginatedGameDto cachedResult))
@@ -115,8 +116,8 @@ public class RawgApiService : IRawgApiService
         if (!string.IsNullOrWhiteSpace(genre))
             query["genres"] = genre;
 
-        if (!string.IsNullOrWhiteSpace(rating))
-            query["metacritic"] = rating;
+        if (!string.IsNullOrWhiteSpace(metacritic))
+            query["metacritic"] = metacritic;
 
         if (!string.IsNullOrWhiteSpace(orderBy))
             query["ordering"] = orderBy;
@@ -125,9 +126,6 @@ public class RawgApiService : IRawgApiService
         query["page_size"] = pageSize.ToString();
 
         string url = $"https://api.rawg.io/api/games?{query}";
-
-        // Requesting URL: https://api.rawg.io/api/games?key=c96b98c100004437a1b4ab2ffac25a1e&page=1&page_size=20
-        //Console.WriteLine("Requesting URL: " + url);
 
         var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -143,9 +141,10 @@ public class RawgApiService : IRawgApiService
                 Name = r.Name,
                 Released = r.Released,
                 BackgroundImage = r.BackgroundImage,
-                Rating = r.Rating,
+                Metacritic = r.Metacritic ?? 1,
                 Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                 Tags = r.Tags?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
             }),
             TotalCount = result.Count
         };
@@ -168,7 +167,71 @@ public class RawgApiService : IRawgApiService
 
     }
 
-    // tied to the code snippet in program.cs
+    public async Task<IEnumerable<DeveloperDto>> GetDevelopersAsync(int page = 1, int pageSize = 20)
+    {
+        var url = $"https://api.rawg.io/api/developers?key={_apiKey}&page={page}&page_size={pageSize}";
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgDeveloperListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result.Results.Select(r => new DeveloperDto
+        {
+            Id = r.Id,
+            Name = r.Name,
+            GamesCount = r.GamesCount,
+            ImageBackground = r.ImageBackground 
+        });
+    }
+
+    public async Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20)
+    {
+        var url = $"https://api.rawg.io/api/genres?key={_apiKey}&page={page}&page_size={pageSize}";
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGenreListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result.Results.Select(r => new GenreDto
+        {
+            Id = r.Id,
+            Name = r.Name,
+            GamesCount = r.GamesCount,
+            ImageBackground = r.ImageBackground
+        });
+    }
+
+    public async Task<IEnumerable<PlatformDto>> GetPlatformsAsync(int page = 1, int pageSize = 20)
+    {
+        var url = $"https://api.rawg.io/api/platforms?key={_apiKey}&page={page}&page_size={pageSize}";
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgPlatformListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result.Results.Select(r => new PlatformDto
+        {
+            Id = r.Id,
+            Name = r.Name,
+            GamesCount = r.GamesCount,
+            ImageBackground = r.ImageBackground
+        });
+    }
+
+    public Task GetPublishersAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task GetCreatorsAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    // Cache common rawg api calls
     public async Task WarmUpPopularGameCache()
     {
         // Example default search (already cached now)
@@ -180,6 +243,7 @@ public class RawgApiService : IRawgApiService
         // Example popular platform
         await GetGamesBySearchAndFilters(null, "4", null, null, null, null, null, 1, 20);
     }
+
 
 
 }
