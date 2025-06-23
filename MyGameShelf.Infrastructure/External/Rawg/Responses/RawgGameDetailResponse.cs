@@ -15,11 +15,17 @@ public class RawgGameDetailResponse
 
     [JsonPropertyName("name_original")]
     public string NameOriginal { get; set; }
+
+    [JsonPropertyName("alternative_names")]
+    public List<string>? AlternativeNames { get; set; }
     public string Description { get; set; }  // Raw HTML
 
     [JsonPropertyName("description_raw")]
     public string DescriptionRaw { get; set; } // No HTML
     public int? Metacritic { get; set; }
+
+
+
 
     [JsonPropertyName("metacritic_platforms")]
     public List<MetacriticPlatform> MetacriticPlatforms { get; set; }
@@ -39,8 +45,6 @@ public class RawgGameDetailResponse
 
     [JsonPropertyName("rating_top")]
     public int? RatingTop { get; set; }
-    //public int? RatingsCount { get; set; }
-    //public int? SuggestionsCount { get; set; }
     public int? Added { get; set; }
     public int? Playtime { get; set; }
 
@@ -49,9 +53,6 @@ public class RawgGameDetailResponse
 
     [JsonPropertyName("reddit_url")]
     public string? RedditUrl { get; set; }
-
-    [JsonPropertyName("alternative_names")]
-    public List<string> AlternativeNames { get; set; }
 
     [JsonPropertyName("metacritic_url")]
     public string? MetacriticUrl { get; set; }
