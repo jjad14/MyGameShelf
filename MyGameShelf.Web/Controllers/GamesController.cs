@@ -50,8 +50,23 @@ public class GamesController : Controller
             CurrentPage = page,
             TotalPages = (int)Math.Ceiling(response.TotalCount / (double)pageSize)
         };
-        
-
+       
         return View(gamesVm);
     }
+
+    [HttpGet("details/{id}")]
+    public async Task<IActionResult> Details(int id)
+    { 
+        var response = await _rawgApiService.GetGameDetailsAsync(id);
+
+        var gameDetailsVM = new GameDetailsViewModel
+        { 
+            Game = response
+        };
+
+        return View(gameDetailsVM);
+    }
+
+
+
 }

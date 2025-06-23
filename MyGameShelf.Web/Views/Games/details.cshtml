@@ -1,0 +1,218 @@
+﻿@using MyGameShelf.Web.Helpers
+@using MyGameShelf.Web.ViewModels
+
+@model GameDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Game.Name;
+}
+
+<div class="container mt-4">
+    <div class="row g-4">
+        <!-- Game Image -->
+        <div class="col-md-5 d-flex flex-column">
+            <div class="position-relative">
+                <img src="@Model.Game.BackgroundImage"
+                     alt="@Model.Game.Name"
+                     class="img-fluid rounded shadow"
+                     style="max-height: 500px; object-fit: cover; width: 100%;" />
+
+                <button type="button" id="favoriteBtn" class="btn btn-link p-0 position-absolute top-0 end-0 m-2"
+                        style="color: white; font-size: 2rem;">
+                    <i class="fa-regular fa-star"></i>
+                    
+                </button>
+            </div>
+
+            <hr />
+
+            <form method="post" asp-controller="UserGames" asp-action="Add" class="">
+                    <input type="hidden" name="GameId" value="@Model.Game.Id" />
+
+                    <div class="mb-3">
+                        <label for="GameStatus" class="form-label">Game Status</label>
+                        <select id="GameStatus" name="GameStatus" class="form-select" required>
+                            <option value="">Select status...</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Dropped">Dropped</option>
+                            <option value="Wishlist">Wishlist</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Plan to Play">Plan to Play</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Rating" class="form-label">Rating</label>
+                        <select id="Rating" name="Rating" class="form-select" required>
+                            <option value="">Select rating...</option>
+                            <option value="10">10 - Perfect</option>
+                            <option value="9">9 - Great</option>
+                            <option value="8">8 - Very Good</option>
+                            <option value="7">7 - Good</option>
+                            <option value="6">6 - Above Average</option>
+                            <option value="5">5 - Average</option>
+                            <option value="4">4 - Below Average</option>
+                            <option value="3">3 - Poor</option>
+                            <option value="2">2 - Very Poor</option>
+                            <option value="1">1 - Unacceptable</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Difficulty" class="form-label">Difficulty</label>
+                        <select id="Difficulty" name="Difficulty" class="form-select" required>
+                            <option value="">Select difficulty...</option>
+                            <option value="10">10 - Extremely Hard</option>
+                            <option value="9">9 - Very Hard</option>
+                            <option value="8">8 - Hard</option>
+                            <option value="7">7 - Challenging</option>
+                            <option value="6">6 - Moderately Hard</option>
+                            <option value="5">5 - Medium</option>
+                            <option value="4">4 - Fairly Easy</option>
+                            <option value="3">3 - Easy</option>
+                            <option value="2">2 - Very Easy</option>
+                            <option value="1">1 - Extremely Easy</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Review" class="form-label">Your Review</label>
+                        <textarea id="Review" name="Review" class="form-control" rows="4" placeholder="Write your review here..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-sm">Add to My Games</button>
+                </form>
+
+        </div>
+
+        <!-- Game Info -->
+        <div class="col-md-7">
+            <h2 class="mb-1">
+                @Model.Game.Name @(Model.Game.Released.HasValue ? $"({Model.Game.Released.Value.Year})" : "")
+            </h2>
+
+            @if (Model.Game.Metacritic.HasValue && Model.Game.Metacritic > 0)
+                {
+                    <span class="badge"
+                      style="background-color:@MetacriticHelper.GetMetacriticColor(Model.Game.Metacritic.Value);
+                            color:white;
+                            border: 2px solid @MetacriticHelper.GetMetacriticBorder(Model.Game.Metacritic.Value);
+                            text-align: center;
+                            display: inline-block;">
+                        <span>Metacritic: </span>
+                        <strong>@Model.Game.Metacritic</strong>
+                    </span> 
+                }
+
+            <p class="mt-3">@Model.Game.Description</p>
+
+            <div class="mb-2">
+                <strong>ESRB Rating:</strong> @Model.Game.EsrbRating
+            </div>
+
+            @if (Model.Game.Platforms?.Any() == true)
+            {
+                <div class="mb-2">
+                    <strong>Platforms:</strong><br />
+                    @foreach (var platform in Model.Game.Platforms)
+                    {
+                        var p = platform.ToLower();
+                        var color = p.Contains("playstation") ? "#003791" :
+                        p.Contains("xbox") ? "#107C10" :
+                        p.Contains("nintendo") ? "#E60012" :
+                        p.Contains("pc") ? "#6f42c1" :
+                        "#fd7e14";
+
+                        <span class="badge me-1" style="background-color:@color; color:white;">@platform</span>
+                    }
+                </div>
+            }
+
+            @if (Model.Game.Genres?.Any() == true)
+            {
+                <div class="mb-2">
+                    <strong>Genres:</strong><br />
+                    @foreach (var genre in Model.Game.Genres)
+                    {
+                        <span class="badge bg-warning text-dark me-1">@genre</span>
+                    }
+                </div>
+            }
+
+            @if (Model.Game.Tags?.Any() == true)
+            {
+                <div class="mb-2">
+                    <strong>Tags:</strong><br />
+                    @foreach (var tag in Model.Game.Tags)
+                    {
+                        <span class="badge me-1" style="background-color: #20c997; color: white;">@tag</span>
+                    }
+                </div>
+            }
+
+            @if (Model.Game.Developers?.Any() == true)
+            {
+                <div class="mb-2">
+                    <strong>Developer(s):</strong> @string.Join(", ", Model.Game.Developers)
+                </div>
+            }
+
+            @if (Model.Game.Publishers?.Any() == true)
+            {
+                <div class="mb-2">
+                    <strong>Publisher(s):</strong> @string.Join(", ", Model.Game.Publishers)
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.Game.PlatformRequirements?.Any(pr =>
+        !string.IsNullOrWhiteSpace(pr.MinimumRequirements) ||
+        !string.IsNullOrWhiteSpace(pr.RecommendedRequirements)) == true)
+{
+    <hr />
+    <div class="mb-2">
+        <strong>System Requirements:</strong>
+
+        @foreach (var req in Model.Game.PlatformRequirements
+            .Where(pr => !string.IsNullOrWhiteSpace(pr.MinimumRequirements) || !string.IsNullOrWhiteSpace(pr.RecommendedRequirements)))
+        {
+            <div class="mt-2">
+                <h6>@req.Name</h6>
+
+                @if (!string.IsNullOrWhiteSpace(req.MinimumRequirements))
+                {
+                    <p class="mb-1"><strong>Minimum:</strong><br />@Html.Raw(req.MinimumRequirements)</p>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(req.RecommendedRequirements))
+                {
+                    <p><strong>Recommended:</strong><br />@Html.Raw(req.RecommendedRequirements)</p>
+                }
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const favoriteBtn = document.getElementById('favoriteBtn');
+            let isFavorited = false;
+
+            favoriteBtn.addEventListener('click', () => {
+                isFavorited = !isFavorited;
+                if (isFavorited) {
+                    favoriteBtn.style.color = '#FFD700'; // Bright gold
+                    favoriteBtn.innerHTML = '<i class="fa-solid fa-star"></i>'; // Filled star
+                    // TODO: Add your AJAX call here to save favorite state
+                } else {
+                    favoriteBtn.style.color = 'white';
+                    favoriteBtn.innerHTML = '<i class="fa-regular fa-star"></i>'; // Outline star
+                    // TODO: Add your AJAX call here to remove favorite
+                }
+            });
+        });
+    </script>
+}

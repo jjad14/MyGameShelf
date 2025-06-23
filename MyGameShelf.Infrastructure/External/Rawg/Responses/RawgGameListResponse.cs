@@ -62,8 +62,8 @@ public class RawgPlatformWrapper
     [JsonPropertyName("released_at")]
     public string ReleasedAt { get; set; }
 
-    [JsonPropertyName("requirements_en")]
-    public RawgRequirements Requirements { get; set; }
+    [JsonPropertyName("requirements")]
+    public RawgRequirements? Requirements { get; set; }
 }
 
 public class RawgPlatform
@@ -71,12 +71,18 @@ public class RawgPlatform
     public int Id { get; set; }
     public string Name { get; set; }
     public string Slug { get; set; }
+
+    // Platform - Game data
+    //--------------------------
+    // Game platform image
+    [JsonPropertyName("image_background")]
+    public string? ImageBackground { get; set; }
 }
 
 public class RawgRequirements
 {
-    public string Minimum { get; set; }
-    public string Recommended { get; set; }
+    public string? Minimum { get; set; }
+    public string? Recommended { get; set; }
 }
 
 public class RawgGenres

@@ -10,7 +10,7 @@ public interface IRawgApiService
 {
     Task<IEnumerable<GameDto>> GetPopularGamesAsync(int page = 1, int pageSize = 20);
 
-    Task<GameDto> GetGameDetailsAsync(int rawgId);
+    Task<GameDetailDto> GetGameDetailsAsync(int rawgId);
 
     Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string rating, string orderBy, int page = 1, int pageSize = 20);
 
