@@ -29,6 +29,13 @@ public class ApplicationUser : IdentityUser
     public ICollection<Review> Reviews { get; set; }
     public ICollection<Favorite> Favorites { get; set; }
 
-    // Todo: Future Feature - Followers
-    //public ICollection<ApplicationUser> Followers { get; set; }
+
+    // Users this user is following
+    public ICollection<UserFollow> Following { get; set; }
+
+    // Users who are following this user
+    public ICollection<UserFollow> Followers { get; set; }
+
+    public ICollection<DeveloperFollow> FollowedDevelopers { get; set; } = new List<DeveloperFollow>();
+    public ICollection<PublisherFollow> FollowedPublishers { get; set; } = new List<PublisherFollow>();
 }
