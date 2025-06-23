@@ -143,7 +143,7 @@ public class RawgApiService : IRawgApiService
                 BackgroundImage = r.BackgroundImage,
                 Metacritic = r.Metacritic ?? 1,
                 Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
-                Tags = r.Tags?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
                 Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
             }),
             TotalCount = result.Count

@@ -21,17 +21,10 @@ public class GamesController : Controller
     public async Task<IActionResult> Index(string search = null, string platform = null, string genre = null,
                                            string metacritic = null, string orderBy = null, int page = 1, int pageSize = 20)
     {
-        //string search = null;
-        //string platform = null;
         string developer = null;
         string publisher = null;
-        //string genre = null;
-        //string rating = null;
-        //string orderBy = null;
 
         // Make sure these calls return a List<SelectListItem>
-        //ViewBag.Platforms = await _rawgApiService.GetPlatformsAsync(); // 51
-
         var platforms = await _rawgApiService.GetPlatformsAsync();
         ViewBag.Platforms = platforms.Select(p => new SelectListItem
         {
@@ -39,8 +32,7 @@ public class GamesController : Controller
             Text = p.Name
         }).ToList();
 
-
-        //ViewBag.Genres = await _rawgApiService.GetGenresAsync();
+        // Make sure these calls return a List<SelectListItem>
         var genres = await _rawgApiService.GetGenresAsync();
         ViewBag.Genres = genres.Select(g => new SelectListItem
         {

@@ -16,31 +16,114 @@ else
                 <img src="@Model.BackgroundImage" class="card-img-top" alt="@Model.Name" style="height: 200px; object-fit: cover;">
                 @if (Model.Metacritic > 0)
                 {
-                    <span class="badge position-absolute top-0 end-0 m-2 bg-warning text-dark
-                        @(Model.Metacritic >= 75 ? "bg-success" : Model.Metacritic >= 50 ? "bg-warning text-dark" : "bg-danger")"
-                        style="font-size: 0.85rem;">
+                    var metacriticScore = Model.Metacritic;
+                    string badgeColor;
+                    string borderColor;
+
+                    if (metacriticScore >= 95)
+                    {
+                        badgeColor = "#4caf50";    // Perfect
+                        borderColor = "#388e3c";
+                    }
+                    else if (metacriticScore >= 85)
+                    {
+                        badgeColor = "#8bc34a";    // Great
+                        borderColor = "#689f38";
+                    }
+                    else if (metacriticScore >= 75)
+                    {
+                        badgeColor = "#cddc39";    // Good
+                        borderColor = "#afb42b";
+                    }
+                    else if (metacriticScore >= 60)
+                    {
+                        badgeColor = "#ffeb3b";    // Fair
+                        borderColor = "#fbc02d";
+                    }
+                    else if (metacriticScore >= 45)
+                    {
+                        badgeColor = "#ff9800";    // Poor
+                        borderColor = "#ef6c00";
+                    }
+                    else if (metacriticScore >= 30)
+                    {
+                        badgeColor = "#f44336";    // Very Poor
+                        borderColor = "#c62828";
+                    }
+                    else
+                    {
+                        badgeColor = "#b71c1c";    // Unacceptable
+                        borderColor = "#7f0000";
+                    }
+
+                    <span class="badge position-absolute top-0 end-0 m-2 text-dark"
+                          style="background-color:@badgeColor; font-size: 0.85rem; border-radius: 25%; border: 2px solid @borderColor;">
                         <strong>@Model.Metacritic</strong>
                     </span>
                 }
+
+
+
             </div>
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">@Model.Name</h5>
-                <p class="card-text text-truncate">@Model.Description</p>
+                <hr />
+                @if (Model.Platforms != null && Model.Platforms.Any())
+                {
+                    <div class="mb-1">
+                        <strong>Platforms:</strong>
+                        @foreach (var platform in Model.Platforms)
+                        {
+                            var platformName = platform.ToLower();
+                            var badgeColor = platformName switch
+                            {
+                                var p when p.ToLower().Contains("playstation") => "#003791",   // PlayStation
+                                var p when p.ToLower().Contains("xbox") => "#107C10",           // Xbox
+                                var p when p.ToLower().Contains("nintendo") => "#E60012",       // Nintendo
+                                var p when p.ToLower().Contains("pc") || p.Contains("windows") => "#6f42c1", // PC
+                                _ => "#fd7e14"                                        // Other
+                            };
+
+                            <span class="badge me-1" style="background-color:@badgeColor; color: white;">@platform</span>
+                        }
+                    </div>
+                }
                 <a href="/Games/Details/@Model.Id" class="btn btn-primary mt-auto">View Details</a>
             </div>
             <div class="card-footer bg-transparent border-top-0">
-                <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails-@Model.Id" aria-expanded="false" aria-controls="collapseDetails-@Model.Id">
-                    Show Details
+                <button class="btn btn-link text-decoration-none w-100"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseDetails-@Model.Id"
+                        aria-expanded="false"
+                        aria-controls="collapseDetails-@Model.Id"
+                        style="background-color: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 0.25rem; height: 32px;">
+                    Show Details <i class="fas fa-chevron-down ms-1"></i>
                 </button>
                 <div class="collapse mt-2" id="collapseDetails-@Model.Id">
-                    @if (Model.Platforms != null && Model.Platforms.Any())
+                    @if (Model.Genres != null && Model.Genres.Any())
                     {
-                        <div class="mb-1">
-                            <strong>Platforms:</strong>
-                            @foreach (var platform in Model.Platforms)
-                            {
-                                <span class="badge bg-info text-dark me-1">@platform</span>
-                            }
+                        <div class="mb-2">
+                            <strong>Genres:</strong>
+                            <div>
+                                @foreach (var genre in Model.Genres.Take(3))
+                                {
+                                    <span class="badge me-1" style="background-color: #ffc107; color: black;">@genre</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Tags != null && Model.Tags.Any())
+                    {
+                        <div>
+                            <strong>Tags:</strong>
+                            <div>
+                                @foreach (var tag in Model.Tags.Take(10))
+                                {
+                                    <span class="badge me-1" style="background-color: #20c997; color: black;">@tag</span>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
