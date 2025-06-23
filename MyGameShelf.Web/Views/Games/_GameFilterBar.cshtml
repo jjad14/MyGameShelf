@@ -62,11 +62,9 @@
             <select class="form-select" name="orderBy">
                 <option value="">Default Order</option>
                 <option value="name" selected="@(query["orderBy"] == "name")">Alphabetical</option>
-                <option value="released" selected="@(query["orderBy"] == "released")">Release Date</option>
-                <option value="-added" selected="@(query["orderBy"] == "added")">Recently Added</option>
-                <option value="created" selected="@(query["orderBy"] == "created")">Newly Rated</option>
-                <option value="updated" selected="@(query["orderBy"] == "updated")">Newly Updated</option>
-                <option value="rating" selected="@(query["orderBy"] == "rating")">Rating</option>
+                <option value="-released" selected="@(query["orderBy"] == "-released")">Release Date</option>
+                <option value="-created" selected="@(query["orderBy"] == "-created")">Newly Rated</option> 
+                <option value="-updated" selected="@(query["orderBy"] == "-updated")">Newly Updated</option>
                 <option value="-metacritic" selected="@(query["orderBy"] == "-metacritic")">Metacritic</option>
             </select>
         </div>

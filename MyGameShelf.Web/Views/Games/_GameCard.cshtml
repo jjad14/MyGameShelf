@@ -61,12 +61,10 @@ else
                         <strong>@Model.Metacritic</strong>
                     </span>
                 }
-
-
-
             </div>
+
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title">@Model.Name</h5>
+                <h5 class="card-title">@Model.Name @(Model.Released.HasValue ? $"({Model.Released.Value.Year})" : "")</h5>
                 <hr />
                 @if (Model.Platforms != null && Model.Platforms.Any())
                 {
