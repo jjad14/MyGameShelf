@@ -13,7 +13,4 @@ public class Publisher
     // This connects the publisher to the many games they have published
     public ICollection<GamePublisher> GamePublishers { get; set; }
 
-    // Users who follow this publisher
-    public ICollection<PublisherFollow> Followers { get; set; } = new List<PublisherFollow>();
-
 }

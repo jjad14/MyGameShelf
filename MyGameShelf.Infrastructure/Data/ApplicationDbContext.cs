@@ -39,9 +39,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<UserFollow> UserFollows { get; set; }
 
-    public DbSet<DeveloperFollow> DeveloperFollows { get; set; }
-
-    public DbSet<PublisherFollow> PublisherFollows { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     { 
@@ -102,41 +99,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(f => f.FolloweeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // DeveloperFollow config
-        //modelBuilder.Entity<DeveloperFollow>()
-        //    .HasKey(f => new { f.UserId, f.DeveloperId });
-        modelBuilder.Entity<DeveloperFollow>()
-            .HasKey(f => f.Id);
-
-        modelBuilder.Entity<DeveloperFollow>()
-            .HasOne(f => f.Developer)
-            .WithMany()
-            .HasForeignKey(f => f.DeveloperId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<DeveloperFollow>()
-            .HasOne<ApplicationUser>() // no navigation to user in domain, so configure from here
-            .WithMany(u => u.FollowedDevelopers)
-            .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // PublisherFollow config
-        //modelBuilder.Entity<PublisherFollow>()
-        //    .HasKey(f => new { f.UserId, f.PublisherId });
-        modelBuilder.Entity<PublisherFollow>()
-            .HasKey(f => f.Id);
-
-        modelBuilder.Entity<PublisherFollow>()
-            .HasOne(f => f.Publisher)
-            .WithMany()
-            .HasForeignKey(f => f.PublisherId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<PublisherFollow>()
-            .HasOne<ApplicationUser>()
-            .WithMany(u => u.FollowedPublishers)
-            .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 
 }

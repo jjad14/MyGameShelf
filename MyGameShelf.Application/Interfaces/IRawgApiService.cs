@@ -14,21 +14,22 @@ public interface IRawgApiService
 
     Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string rating, string orderBy, int page = 1, int pageSize = 20);
 
-    // For caching popular/default searches
-    Task WarmUpPopularGameCache();
-
-    // Get Developers
-    Task<IEnumerable<DeveloperDto>> GetDevelopersAsync(int page = 1, int pageSize = 20);
-
     // Get Platforms
     Task<IEnumerable<PlatformDto>> GetPlatformsAsync(int page = 1, int pageSize = 20);
 
     // Get Genres
     Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20);
 
-    // Get Publishers
-    Task GetPublishersAsync();
+    //Get Games by publisher - sort by newest
+    Task<IEnumerable<GameDto>> GetGamesByPublisher(string publisher);
 
-    // Get Creators
-    Task GetCreatorsAsync();
+    //Get Games dlcs
+    Task<IEnumerable<GameDto>> GetGamesDLCs(string gameId);
+
+    //Get Games sequels
+    Task<IEnumerable<GameDto>> GetGamesSequels(string gameId);
+
+
+    // For caching popular/default searches
+    Task WarmUpPopularGameCache();
 }

@@ -24,7 +24,7 @@ public class GamesController : Controller
         string developer = null;
         string publisher = null;
 
-        // Make sure these calls return a List<SelectListItem>
+        // Get a list of platforms for filtering
         var platforms = await _rawgApiService.GetPlatformsAsync();
         ViewBag.Platforms = platforms.Select(p => new SelectListItem
         {
@@ -32,7 +32,7 @@ public class GamesController : Controller
             Text = p.Name
         }).ToList();
 
-        // Make sure these calls return a List<SelectListItem>
+        // Get a list of genres for filtering
         var genres = await _rawgApiService.GetGenresAsync();
         ViewBag.Genres = genres.Select(g => new SelectListItem
         {

@@ -35,7 +35,4 @@ public class ApplicationUser : IdentityUser
 
     // Users who are following this user
     public ICollection<UserFollow> Followers { get; set; }
-
-    public ICollection<DeveloperFollow> FollowedDevelopers { get; set; } = new List<DeveloperFollow>();
-    public ICollection<PublisherFollow> FollowedPublishers { get; set; } = new List<PublisherFollow>();
 }

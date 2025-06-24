@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Interfaces;
+using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.External.Rawg.Responses;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MyGameShelf.Infrastructure.Services;
 public class RawgApiService : IRawgApiService
@@ -181,24 +183,6 @@ public class RawgApiService : IRawgApiService
 
     }
 
-    public async Task<IEnumerable<DeveloperDto>> GetDevelopersAsync(int page = 1, int pageSize = 20)
-    {
-        var url = $"https://api.rawg.io/api/developers?key={_apiKey}&page={page}&page_size={pageSize}";
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-
-        var json = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<RawgDeveloperListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        return result.Results.Select(r => new DeveloperDto
-        {
-            Id = r.Id,
-            Name = r.Name,
-            GamesCount = r.GamesCount,
-            ImageBackground = r.ImageBackground 
-        });
-    }
-
     public async Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20)
     {
         var url = $"https://api.rawg.io/api/genres?key={_apiKey}&page={page}&page_size={pageSize}";
@@ -235,14 +219,29 @@ public class RawgApiService : IRawgApiService
         });
     }
 
-    public Task GetPublishersAsync()
+    public async Task<IEnumerable<GameDto>> GetGamesByPublisher(string publisher)
     {
-        throw new NotImplementedException();
+        // publisher = id or slug
+        string url = $"https://api.rawg.io/api/games?&publishers={publisher}&ordering=-released&search_precise=true";
+
+        return Enumerable.Empty<GameDto>();
     }
 
-    public Task GetCreatorsAsync()
+    //Get Games dlcs
+    public async Task<IEnumerable<GameDto>> GetGamesDLCs(string gameId)
     {
-        throw new NotImplementedException();
+        string url = $"https://api.rawg.io/api/games/{gameId}/additions";
+
+
+        return Enumerable.Empty<GameDto>();
+    }
+
+    //Get Games sequels
+    public async Task<IEnumerable<GameDto>> GetGamesSequels(string gameId)
+    {
+        string url = $"https://api.rawg.io/api/games/{gameId}/game-series";
+
+        return Enumerable.Empty<GameDto>();
     }
 
     // Cache common rawg api calls
@@ -251,11 +250,13 @@ public class RawgApiService : IRawgApiService
         // Example default search (already cached now)
         await GetGamesBySearchAndFilters(null, null, null, null, null, null, null, 1, 20);
 
-        // Example popular genre
-        await GetGamesBySearchAndFilters(null, null, null, null, "action", null, null, 1, 20);
-
         // Example popular platform
         await GetGamesBySearchAndFilters(null, "4", null, null, null, null, null, 1, 20);
+        await GetGamesBySearchAndFilters(null, "187", null, null, null, null, null, 1, 20);
+        await GetGamesBySearchAndFilters(null, "1", null, null, null, null, null, 1, 20);
+        await GetGamesBySearchAndFilters(null, "18", null, null, null, null, null, 1, 20);
+        await GetGamesBySearchAndFilters(null, "186", null, null, null, null, null, 1, 20);
+        await GetGamesBySearchAndFilters(null, "7", null, null, null, null, null, 1, 20);
     }
 
 

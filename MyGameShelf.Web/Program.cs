@@ -61,6 +61,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+// Cache common rawg api calls
 using (var scope = app.Services.CreateScope())
 {
     var rawgService = scope.ServiceProvider.GetRequiredService<IRawgApiService>();

@@ -13,6 +13,4 @@ public class Developer
     // This connects the developer to the many games they have worked on
     public ICollection<GameDeveloper> GameDevelopers { get; set; }
 
-    // Users who follow this developer
-    public ICollection<DeveloperFollow> Followers { get; set; } = new List<DeveloperFollow>();
 }
