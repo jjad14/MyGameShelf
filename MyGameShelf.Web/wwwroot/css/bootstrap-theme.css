@@ -108,6 +108,15 @@ body {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+.body-page {
+    background-image: url('/assets/img/wallpaper_wide.jpg');
+    background-size: cover; /* Make it cover the whole viewport */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Don’t repeat */
+    background-attachment: fixed; /* Optional: makes the background fixed on scroll */
+    color: white;
+}
+
 /*Related Games by Publisher cards*/
 #gamesByPublisherContent .card {
     flex: 0 0 auto;
