@@ -45,7 +45,9 @@ public class RawgApiService : IRawgApiService
             Id = r.Id,
             Name = r.Name,
             Released = r.Released,
-            BackgroundImage = r.BackgroundImage,
+            BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
+                    ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
+                    : r.BackgroundImage,
             Rating = r.Rating,
             Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
             Tags = r.Tags?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
@@ -69,7 +71,9 @@ public class RawgApiService : IRawgApiService
             Description = result.DescriptionRaw,
             Metacritic = result.Metacritic,
             Released = result.Released,
-            BackgroundImage = result.BackgroundImage,
+            BackgroundImage = string.IsNullOrEmpty(result.BackgroundImage)
+                    ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
+                    : result.BackgroundImage,
             EsrbRating = result.EsrbRating.Name ?? "Not Rated",
             Genres = result.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
             Tags = result.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
@@ -168,7 +172,9 @@ public class RawgApiService : IRawgApiService
                 Id = r.Id,
                 Name = r.Name,
                 Released = r.Released,
-                BackgroundImage = r.BackgroundImage,
+                BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
+                    ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
+                    : r.BackgroundImage,
                 Metacritic = r.Metacritic,
                 Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                 Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
