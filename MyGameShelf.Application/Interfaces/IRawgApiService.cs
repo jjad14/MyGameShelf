@@ -26,10 +26,14 @@ public interface IRawgApiService
     Task<bool> HasOtherGamesByPublisher(string publisherIds, int currentGameId);
 
     //Get Games dlcs
-    Task<IEnumerable<GameDto>> GetGamesDLCs(string gameId);
+    Task<IEnumerable<GameDto>> GetGamesDLCs(int? gameId);
+
+    Task<bool> HasGameDLCs(int gameId);
 
     //Get Games sequels
-    Task<IEnumerable<GameDto>> GetGamesSequels(string gameId);
+    Task<IEnumerable<GameDto>> GetGamesSequels(int? gameId);
+
+    Task<bool> HasGameSequels(int gameId);
 
 
     // For caching popular/default searches

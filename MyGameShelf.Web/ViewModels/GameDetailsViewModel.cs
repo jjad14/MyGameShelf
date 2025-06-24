@@ -8,4 +8,6 @@ public class GameDetailsViewModel
 
     public string? PublisherIdsString { get; set; }
     public bool HasRelatedGames { get; set; }
+    public bool HasSequels { get; set; }
+    public bool HasAdditions { get; set; }
 }

@@ -281,7 +281,7 @@ public class RawgApiService : IRawgApiService
 
     public async Task<bool> HasOtherGamesByPublisher(string publisherIds, int currentGameId)
     {
-        string url = $"https://api.rawg.io/api/games?key={_apiKey}&publishers={publisherIds}&page_size=5&ordering=-released&search_precise=true";
+        string url = $"https://api.rawg.io/api/games?key={_apiKey}&publishers={publisherIds}&page_size=2&ordering=-released&search_precise=true";
 
         using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -292,11 +292,10 @@ public class RawgApiService : IRawgApiService
         return result?.Results?.Any(g => g.Id != currentGameId) == true;
     }
 
-
     //Get Games dlcs
-    public async Task<IEnumerable<GameDto>> GetGamesDLCs(string gameId)
+    public async Task<IEnumerable<GameDto>> GetGamesDLCs(int? gameId)
     {
-        string url = $"https://api.rawg.io/api/games/{gameId}/additions?key={_apiKey}";
+        string url = $"https://api.rawg.io/api/games/{gameId}/additions?key={_apiKey}&ordering=-released";
 
         using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -309,25 +308,42 @@ public class RawgApiService : IRawgApiService
             return Enumerable.Empty<GameDto>();
         }
 
-        var gameDtos = result.Results.Select(r => new GameDto
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Released = r.Released,
-            BackgroundImage = r.BackgroundImage,
-            Metacritic = r.Metacritic,
-            Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
-            Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
-            Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
-        });
+        var gameDtos = result.Results
+            .Where(r => !gameId.HasValue || r.Id != gameId.Value) // exclude current game if specified
+            .Select(r => new GameDto
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Released = r.Released,
+                BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
+                        ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
+                        : r.BackgroundImage,
+                Metacritic = r.Metacritic,
+                Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
+            });
 
         return gameDtos;
     }
 
-    //Get Games sequels
-    public async Task<IEnumerable<GameDto>> GetGamesSequels(string gameId)
+    public async Task<bool> HasGameDLCs(int gameId)
     {
-        string url = $"https://api.rawg.io/api/games/{gameId}/game-series?key={_apiKey}";
+        string url = $"https://api.rawg.io/api/games/{gameId}/additions?key={_apiKey}&page_size=2&search_precise=true";
+
+        using var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGameListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result?.Results?.Any(g => g.Id != gameId) == true;
+    }
+
+    //Get Games sequels
+    public async Task<IEnumerable<GameDto>> GetGamesSequels(int? gameId)
+    {
+        string url = $"https://api.rawg.io/api/games/{gameId}/game-series?key={_apiKey}&ordering=-released";
 
         using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -340,19 +356,36 @@ public class RawgApiService : IRawgApiService
             return Enumerable.Empty<GameDto>();
         }
 
-        var gameDtos = result.Results.Select(r => new GameDto
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Released = r.Released,
-            BackgroundImage = r.BackgroundImage,
-            Metacritic = r.Metacritic,
-            Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
-            Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
-            Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
-        });
+        var gameDtos = result.Results
+            .Where(r => !gameId.HasValue || r.Id != gameId.Value) // exclude current game if specified
+            .Select(r => new GameDto
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Released = r.Released,
+                BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
+                        ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
+                        : r.BackgroundImage,
+                Metacritic = r.Metacritic,
+                Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
+            });
 
         return gameDtos;
+    }
+
+    public async Task<bool> HasGameSequels(int gameId)
+    {
+        string url = $"https://api.rawg.io/api/games/{gameId}/game-series?key={_apiKey}&page_size=2&search_precise=true";
+
+        using var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGameListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result?.Results?.Any(g => g.Id != gameId) == true;
     }
 
     // Cache common rawg api calls
@@ -369,7 +402,5 @@ public class RawgApiService : IRawgApiService
         await GetGamesBySearchAndFilters(null, "186", null, null, null, null, null, 1, 20);
         await GetGamesBySearchAndFilters(null, "7", null, null, null, null, null, 1, 20);
     }
-
-
 
 }

@@ -56,7 +56,7 @@ public class GamesController : Controller
 
     [HttpGet("details/{id}")]
     public async Task<IActionResult> Details(int id)
-    { 
+    {
         var response = await _rawgApiService.GetGameDetailsAsync(id);
 
         if (response == null) 
@@ -78,11 +78,16 @@ public class GamesController : Controller
             hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, id);
         }
 
+        bool hasAdditions = await _rawgApiService.HasGameDLCs(id);
+        bool hasSequels = await _rawgApiService.HasGameSequels(id);
+
         var gameDetailsVM = new GameDetailsViewModel
         { 
             Game = response,
             PublisherIdsString = publisherIdString,
-            HasRelatedGames = hasOtherGames
+            HasRelatedGames = hasOtherGames,
+            HasAdditions = hasAdditions,
+            HasSequels = hasSequels
         };
 
         return View(gameDetailsVM);
@@ -97,6 +102,31 @@ public class GamesController : Controller
         }
 
         var games = await _rawgApiService.GetGamesByPublisher(publisherIds, excludeId);
+        return Ok(games);
+    }
+
+    [HttpGet("additions")]
+    public async Task<IActionResult> GetGameAdditions([FromQuery] int? gameId)
+    {
+        if (!gameId.HasValue)
+        {
+            return BadRequest("Game ID is required.");
+        }
+
+        var games = await _rawgApiService.GetGamesDLCs(gameId.Value);
+        return Ok(games);
+    }
+
+
+    [HttpGet("sequels")]
+    public async Task<IActionResult> GetGameSequels([FromQuery] int? gameId)
+    {
+        if (!gameId.HasValue)
+        {
+            return BadRequest("Game ID is required.");
+        }
+
+        var games = await _rawgApiService.GetGamesSequels(gameId.Value);
         return Ok(games);
     }
 

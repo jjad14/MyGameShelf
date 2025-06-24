@@ -170,6 +170,49 @@
     </div>
 </div>
 
+@if (Model.HasSequels)
+{
+    <hr />
+    <button class="btn btn-link no-shadow d-inline-flex align-items-center gap-1"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#gamesSequelsCollapse"
+            aria-expanded="false"
+            aria-controls="gamesSequelsCollapse"
+            onclick="loadGameSequels()">
+        Related Games in the Series
+        <i class="fa-solid fa-chevron-down"></i>
+    </button>
+
+    <div class="collapse mt-2" id="gamesSequelsCollapse">
+        <div id="gameSequelsContent" class="d-flex flex-wrap gap-3">
+            <p>Loading...</p>
+        </div>
+    </div>
+}
+
+
+@if (Model.HasAdditions)
+{
+    <hr />
+    <button class="btn btn-link no-shadow d-inline-flex align-items-center gap-1"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#gamesDLCsCollapse"
+            aria-expanded="false"
+            aria-controls="gamesDLCsCollapse"
+            onclick="loadGameDLCs()">
+        Downloadable Content (DLC) & Extras
+        <i class="fa-solid fa-chevron-down"></i>
+    </button>
+
+    <div class="collapse mt-2" id="gamesDLCsCollapse">
+        <div id="gameDLCsContent" class="d-flex flex-wrap gap-3">
+            <p>Loading...</p>
+        </div>
+    </div>
+}
+
 @if (Model.HasRelatedGames && !string.IsNullOrWhiteSpace(Model.PublisherIdsString))
 {
     <hr />
@@ -224,6 +267,8 @@
     <script>
         const gameId = @Model.Game.Id;
         let hasLoadedPublisherGames = false;
+        let hasLoadedGameDLCs = false;
+        let hasLoadedGameSequels = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             const favoriteBtn = document.getElementById('favoriteBtn');
@@ -284,6 +329,90 @@
             });
 
             hasLoadedPublisherGames = true;
+        }
+
+        async function loadGameDLCs() {
+            if (hasLoadedGameDLCs) return;
+
+            const response = await fetch(`/games/additions?gameId=${gameId}`);
+            const container = document.getElementById('gameDLCsContent');
+
+            if (!response.ok) {
+                container.innerText = "Failed to load games.";
+                return;
+            }
+
+            const games = await response.json();
+
+            if (games.length === 0) {
+                container.innerText = "This game has no DLCs";
+                return;
+            }
+
+            container.innerHTML = ''; // Clear the loading text or any existing content
+
+            games.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.width = '12rem';
+
+                card.innerHTML = `
+                    <img src="${game.backgroundImage}" class="card-img-top related-game-image" alt="${game.name}" />
+                    <div class="card-body p-2">
+                        <p class="card-text text-center mb-0">
+                            <a href="/games/details/${game.id}" class="text-decoration-none">
+                                ${game.name}
+                            </a>
+                        </p>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            hasLoadedGameDLCs = true;
+        }
+
+        async function loadGameSequels() {
+            if (hasLoadedGameSequels) return;
+
+            const response = await fetch(`/games/sequels?gameId=${gameId}`);
+            const container = document.getElementById('gameSequelsContent');
+
+            if (!response.ok) {
+                container.innerText = "Failed to load games.";
+                return;
+            }
+
+            const games = await response.json();
+
+            if (games.length === 0) {
+                container.innerText = "This game has no sequels/prequels";
+                return;
+            }
+
+            container.innerHTML = ''; // Clear the loading text or any existing content
+
+            games.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.width = '12rem';
+
+                card.innerHTML = `
+                    <img src="${game.backgroundImage}" class="card-img-top related-game-image" alt="${game.name}" />
+                    <div class="card-body p-2">
+                        <p class="card-text text-center mb-0">
+                            <a href="/games/details/${game.id}" class="text-decoration-none">
+                                ${game.name}
+                            </a>
+                        </p>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            hasLoadedGameSequels = true;
         }
 
 
