@@ -31,8 +31,10 @@ public class RawgApiService : IRawgApiService
 
     public async Task<IEnumerable<GameDto>> GetPopularGamesAsync(int page = 1, int pageSize = 20)
     {
+        // Check pagesize to ensure no tampering
+
         var url = $"https://api.rawg.io/api/games?key={_apiKey}&page={page}&page_size={pageSize}";
-        var response = await _httpClient.GetAsync(url);
+        using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -54,7 +56,7 @@ public class RawgApiService : IRawgApiService
     public async Task<GameDetailDto> GetGameDetailsAsync(int rawgId)
     {
         var url = $"https://api.rawg.io/api/games/{rawgId}?key={_apiKey}";
-        var response = await _httpClient.GetAsync(url);
+        using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -73,7 +75,15 @@ public class RawgApiService : IRawgApiService
             Tags = result.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
             Platforms = result.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
             Developers = result.Developers?.Select(p => p.Name) ?? Enumerable.Empty<string>(),
-            Publishers = result.Publishers?.Select(p => p.Name) ?? Enumerable.Empty<string>(),
+            //Publishers = result.Publishers?.Select(p => p.Name) ?? Enumerable.Empty<string>(),
+            Publishers = result.Publishers?
+                .Where(p => p != null)
+                .Select(p => new GameDetailsPublisherDto
+                { 
+                    Id = p.Id,
+                    Name = p.Name,
+                    Slug = p.Slug
+                }) ?? Enumerable.Empty<GameDetailsPublisherDto>(),
             PlatformRequirements = result.Platforms?
                 .Where(p => p.Requirements != null)
                 .Select(p => new PlatformRequirementsDto
@@ -87,6 +97,8 @@ public class RawgApiService : IRawgApiService
 
     public async Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string metacritic, string orderBy, int page = 1, int pageSize = 20)
     {
+        // Check pagesize to ensure no tampering
+
         bool isDefaultSearch =
             string.IsNullOrWhiteSpace(search) &&
             string.IsNullOrWhiteSpace(platform) &&
@@ -143,7 +155,7 @@ public class RawgApiService : IRawgApiService
 
         string url = $"https://api.rawg.io/api/games?{query}&search_precise=true";
 
-        var response = await _httpClient.GetAsync(url);
+        using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -185,8 +197,11 @@ public class RawgApiService : IRawgApiService
 
     public async Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20)
     {
+        // Check pagesize to ensure no tampering
+
         var url = $"https://api.rawg.io/api/genres?key={_apiKey}&page={page}&page_size={pageSize}";
-        var response = await _httpClient.GetAsync(url);
+
+        using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -203,8 +218,11 @@ public class RawgApiService : IRawgApiService
 
     public async Task<IEnumerable<PlatformDto>> GetPlatformsAsync(int page = 1, int pageSize = 20)
     {
+        // Check pagesize to ensure no tampering
+
         var url = $"https://api.rawg.io/api/platforms?key={_apiKey}&page={page}&page_size={pageSize}";
-        var response = await _httpClient.GetAsync(url);
+
+        using var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -219,29 +237,116 @@ public class RawgApiService : IRawgApiService
         });
     }
 
-    public async Task<IEnumerable<GameDto>> GetGamesByPublisher(string publisher)
+    public async Task<IEnumerable<GameDto>> GetGamesByPublisher(string publishers, int? excludeId = null)
     {
         // publisher = id or slug
-        string url = $"https://api.rawg.io/api/games?&publishers={publisher}&ordering=-released&search_precise=true";
+        string url = $"https://api.rawg.io/api/games?key={_apiKey}&publishers={publishers}&ordering=-released&search_precise=true";
 
-        return Enumerable.Empty<GameDto>();
+        using var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGameListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (result?.Results == null)
+        { 
+            return Enumerable.Empty<GameDto>();
+        }
+
+
+        var gameDtos = result.Results
+            .Where(r => !excludeId.HasValue || r.Id != excludeId.Value) // exclude current game if specified
+            .Select(r => new GameDto
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Released = r.Released,
+                BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
+                    ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
+                    : r.BackgroundImage,
+                Metacritic = r.Metacritic,
+                Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
+                Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
+            }) ?? Enumerable.Empty<GameDto>();
+
+        return gameDtos;
     }
+
+    public async Task<bool> HasOtherGamesByPublisher(string publisherIds, int currentGameId)
+    {
+        string url = $"https://api.rawg.io/api/games?key={_apiKey}&publishers={publisherIds}&page_size=5&ordering=-released&search_precise=true";
+
+        using var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGameListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result?.Results?.Any(g => g.Id != currentGameId) == true;
+    }
+
 
     //Get Games dlcs
     public async Task<IEnumerable<GameDto>> GetGamesDLCs(string gameId)
     {
-        string url = $"https://api.rawg.io/api/games/{gameId}/additions";
+        string url = $"https://api.rawg.io/api/games/{gameId}/additions?key={_apiKey}";
 
+        using var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
 
-        return Enumerable.Empty<GameDto>();
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGameListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (result?.Results == null)
+        {
+            return Enumerable.Empty<GameDto>();
+        }
+
+        var gameDtos = result.Results.Select(r => new GameDto
+        {
+            Id = r.Id,
+            Name = r.Name,
+            Released = r.Released,
+            BackgroundImage = r.BackgroundImage,
+            Metacritic = r.Metacritic,
+            Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+            Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
+            Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
+        });
+
+        return gameDtos;
     }
 
     //Get Games sequels
     public async Task<IEnumerable<GameDto>> GetGamesSequels(string gameId)
     {
-        string url = $"https://api.rawg.io/api/games/{gameId}/game-series";
+        string url = $"https://api.rawg.io/api/games/{gameId}/game-series?key={_apiKey}";
 
-        return Enumerable.Empty<GameDto>();
+        using var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<RawgGameListResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (result?.Results == null)
+        {
+            return Enumerable.Empty<GameDto>();
+        }
+
+        var gameDtos = result.Results.Select(r => new GameDto
+        {
+            Id = r.Id,
+            Name = r.Name,
+            Released = r.Released,
+            BackgroundImage = r.BackgroundImage,
+            Metacritic = r.Metacritic,
+            Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
+            Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
+            Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
+        });
+
+        return gameDtos;
     }
 
     // Cache common rawg api calls

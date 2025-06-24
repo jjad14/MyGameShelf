@@ -23,7 +23,7 @@ public class GameDetailDto
     public IEnumerable<string> Genres { get; set; }
     public IEnumerable<string> Tags { get; set; }
     public IEnumerable<string> Platforms { get; set; }
-    public IEnumerable<string> Publishers { get; set; }
+    public IEnumerable<GameDetailsPublisherDto> Publishers { get; set; }
     public IEnumerable<string> Developers { get; set; }
 
     public IEnumerable<PlatformRequirementsDto>? PlatformRequirements { get; set; }

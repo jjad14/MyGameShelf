@@ -21,7 +21,9 @@ public interface IRawgApiService
     Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20);
 
     //Get Games by publisher - sort by newest
-    Task<IEnumerable<GameDto>> GetGamesByPublisher(string publisher);
+    Task<IEnumerable<GameDto>> GetGamesByPublisher(string publisher, int? excludeId = null);
+
+    Task<bool> HasOtherGamesByPublisher(string publisherIds, int currentGameId);
 
     //Get Games dlcs
     Task<IEnumerable<GameDto>> GetGamesDLCs(string gameId);

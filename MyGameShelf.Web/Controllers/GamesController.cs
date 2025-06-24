@@ -59,14 +59,45 @@ public class GamesController : Controller
     { 
         var response = await _rawgApiService.GetGameDetailsAsync(id);
 
+        if (response == null) 
+        { 
+            return NotFound();
+        }
+
+        // Build the publisher ID string
+        var publisherIds = response.Publishers?
+            .Where(p => p != null)
+            .Select(p => p.Id.ToString());
+
+        string publisherIdString = string.Join(",", publisherIds ?? Enumerable.Empty<string>());
+
+        bool hasOtherGames = false;
+
+        if (!string.IsNullOrWhiteSpace(publisherIdString))
+        {
+            hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, id);
+        }
+
         var gameDetailsVM = new GameDetailsViewModel
         { 
-            Game = response
+            Game = response,
+            PublisherIdsString = publisherIdString,
+            HasRelatedGames = hasOtherGames
         };
 
         return View(gameDetailsVM);
     }
 
+    [HttpGet("publisher")]
+    public async Task<IActionResult> GetGamesByPublisher([FromQuery] string publisherIds, [FromQuery] int? excludeId)
+    {
+        if (string.IsNullOrWhiteSpace(publisherIds))
+        {
+            return BadRequest("Publisher IDs are required.");
+        }
 
+        var games = await _rawgApiService.GetGamesByPublisher(publisherIds, excludeId);
+        return Ok(games);
+    }
 
 }
