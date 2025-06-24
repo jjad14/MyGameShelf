@@ -13,6 +13,7 @@ namespace MyGameShelf.Web.Controllers
             _logger = logger;
         }
 
+        [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, NoStore = false)]
         public IActionResult Index()
         {
             return View();
