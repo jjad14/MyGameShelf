@@ -120,6 +120,11 @@ body {
     border-radius: 4px;
 }
 
+.no-shadow {
+    box-shadow: none !important;
+}
+
+
 .position-relative:hover .overlay {
     opacity: 1;
     pointer-events: auto; /* allow interaction */

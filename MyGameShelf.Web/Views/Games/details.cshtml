@@ -173,14 +173,15 @@
 @if (Model.HasRelatedGames && !string.IsNullOrWhiteSpace(Model.PublisherIdsString))
 {
     <hr />
-
-    <button class="btn btn-link" type="button"
+    <button class="btn btn-link no-shadow d-inline-flex align-items-center gap-1"
+            type="button"
             data-bs-toggle="collapse"
             data-bs-target="#gamesByPublisherCollapse"
             aria-expanded="false"
             aria-controls="gamesByPublisherCollapse"
             onclick="loadGamesByPublisher('@Model.PublisherIdsString')">
         Show Other Games by Publisher(s)
+        <i class="fa-solid fa-chevron-down"></i>
     </button>
 
     <div class="collapse mt-2" id="gamesByPublisherCollapse">
