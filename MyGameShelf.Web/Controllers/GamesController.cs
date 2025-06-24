@@ -55,6 +55,7 @@ public class GamesController : Controller
     }
 
     [HttpGet("details/{id}")]
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> Details(int id)
     {
         var response = await _rawgApiService.GetGameDetailsAsync(id);
@@ -94,6 +95,7 @@ public class GamesController : Controller
     }
 
     [HttpGet("publisher")]
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> GetGamesByPublisher([FromQuery] string publisherIds, [FromQuery] int? excludeId)
     {
         if (string.IsNullOrWhiteSpace(publisherIds))
@@ -106,6 +108,7 @@ public class GamesController : Controller
     }
 
     [HttpGet("additions")]
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> GetGameAdditions([FromQuery] int? gameId)
     {
         if (!gameId.HasValue)
@@ -117,8 +120,8 @@ public class GamesController : Controller
         return Ok(games);
     }
 
-
     [HttpGet("sequels")]
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> GetGameSequels([FromQuery] int? gameId)
     {
         if (!gameId.HasValue)
