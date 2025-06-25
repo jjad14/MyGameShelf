@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Web.ViewModels;
 
 namespace MyGameShelf.Web.Controllers;
 
+[Authorize]
 [Route("profile")]
 public class ProfileController : Controller
 {
@@ -15,6 +17,7 @@ public class ProfileController : Controller
         _userManager = userManager;
     }
 
+    [AllowAnonymous]
     [HttpGet("/profile/{username}")]
     public async Task<IActionResult> Index(string username)
     {
@@ -48,5 +51,12 @@ public class ProfileController : Controller
         };
 
         return View(model);
+    }
+
+
+    [HttpGet]
+    public IActionResult Settings() 
+    { 
+        return View();
     }
 }
