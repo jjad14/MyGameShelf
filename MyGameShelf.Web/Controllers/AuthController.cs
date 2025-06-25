@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Interfaces;
@@ -172,6 +173,7 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Games");
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> Logout()
     {
