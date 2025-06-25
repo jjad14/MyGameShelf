@@ -6,6 +6,7 @@ using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Infrastructure.Data;
 using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Infrastructure.Services;
+using MyGameShelf.Web.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,10 @@ builder.Services.AddControllersWithViews();
 // Rawg API Key
 builder.Services.Configure<RawgSettings>(builder.Configuration.GetSection("RawgSettings"));
 builder.Services.AddHttpClient<IRawgApiService, RawgApiService>();
+
+// Cloudinary
+builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 
 // Add DbContext to the DI container
@@ -49,9 +54,9 @@ builder.Services.AddSession();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // Path for login page
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/Auth/Login"; // Path for login page
+    options.LogoutPath = "/Auth/Logout";
+    //options.AccessDeniedPath = "/Account/AccessDenied";
     options.Cookie.Name = "MyGameShelfAuthCookie";
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
@@ -60,6 +65,22 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 
 var app = builder.Build();
+
+// Add roles 
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = new[] { UserRoles.Admin, UserRoles.User };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
 
 // Cache common rawg api calls
 using (var scope = app.Services.CreateScope())

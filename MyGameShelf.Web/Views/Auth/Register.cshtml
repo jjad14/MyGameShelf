@@ -1,0 +1,167 @@
+﻿@using MyGameShelf.Web.ViewModels
+
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="mx-auto" style="max-width: 800px;">
+    <form asp-action="Register" enctype="multipart/form-data" method="post">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white text-center fs-4">
+                Create Your MyGameShelf Account
+            </div>
+
+            <div class="card-body">
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                        {
+                            <p>Error: @error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                @* Personal Info Section *@
+                <h5 class="mb-3 border-bottom pb-2">Personal Information</h5>
+                <div class="row g-3">
+                    @* First/Last Name *@
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    @* Email/Username *@
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="UserName" class="form-label"></label>
+                        <input asp-for="UserName" class="form-control" />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+
+                    @* Gender/Birthday *@
+                    <div class="col-md-6">
+                        <label asp-for="Gender" class="form-label"></label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                            <option>Prefer not to say</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Birthday" class="form-label"></label>
+                        <input asp-for="Birthday" class="form-control" type="date" min="@DateTime.Today.AddYears(-100).ToString("yyyy-MM-dd")"
+                               max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="Birthday" class="text-danger"></span>
+                    </div>
+
+                    @* Address Fields *@
+                    <div class="col-md-12">
+                        <label asp-for="Street" class="form-label"></label>
+                        <input asp-for="Street" class="form-control" />
+                        <span asp-validation-for="Street" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="City" class="form-label"></label>
+                        <input asp-for="City" class="form-control" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Province" class="form-label"></label>
+                        <input asp-for="Province" class="form-control" />
+                        <span asp-validation-for="Province" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PostalCode" class="form-label"></label>
+                        <input asp-for="PostalCode" class="form-control" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Country" class="form-label"></label>
+                        <input asp-for="Country" class="form-control" />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                @* Profile Info Section *@
+                <h5 class="mb-3 border-bottom pb-2">Profile Information</h5>
+                <div class="row g-3">
+                    @* Profile Picture *@
+                    <div class="col-md-12">
+                        <label asp-for="ProfilePicture" class="form-label"></label>
+                        <input asp-for="ProfilePicture" type="file" class="form-control" />
+                        <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                    </div>
+
+                    @* Socials *@
+                    <div class="col-md-6">
+                        <label asp-for="XSocialLink" class="form-label"></label>
+                        <input asp-for="XSocialLink" class="form-control" />
+                        <span asp-validation-for="XSocialLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="InstagramSocialLink" class="form-label"></label>
+                        <input asp-for="InstagramSocialLink" class="form-control" />
+                        <span asp-validation-for="InstagramSocialLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FacebookSocialLink" class="form-label"></label>
+                        <input asp-for="FacebookSocialLink" class="form-control" />
+                        <span asp-validation-for="FacebookSocialLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="YoutubeSocialLink" class="form-label"></label>
+                        <input asp-for="YoutubeSocialLink" class="form-control" />
+                        <span asp-validation-for="YoutubeSocialLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="TwitchSocialLink" class="form-label"></label>
+                        <input asp-for="TwitchSocialLink" class="form-control" />
+                        <span asp-validation-for="TwitchSocialLink" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        @* Passwords *@
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center">
+                <button type="submit" class="btn btn-success px-5 text-light">Register</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

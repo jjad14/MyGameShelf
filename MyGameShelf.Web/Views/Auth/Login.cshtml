@@ -1,0 +1,52 @@
+﻿@using MyGameShelf.Web.ViewModels
+@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container d-flex justify-content-center" style="padding-top: 3rem; padding-bottom: 3rem;">
+    <div class="card shadow-sm p-4" style="min-width: 350px; max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4">@ViewData["Title"]</h2>
+
+        <form asp-action="Login" method="post" novalidate>
+            @* @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+            {
+                <div class="alert alert-danger text-center d-flex align-items-center p-1" role="alert" style="height: 50px;">
+                    <p class="mb-0 w-100">Error: @ViewData.ModelState[string.Empty].Errors[0].ErrorMessage</p>
+                </div>
+            } *@
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger text-center d-flex align-items-center p-1" role="alert" style="height: 50px;">
+                    <p class="mb-0 w-100">Error: @TempData["ErrorMessage"]</p>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="EmailOrUsername" class="form-label"></label>
+                <input asp-for="EmailOrUsername" class="form-control" />
+                <span asp-validation-for="EmailOrUsername" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="RememberMe" class="form-check-input" type="checkbox" />
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

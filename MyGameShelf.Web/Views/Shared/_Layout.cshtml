@@ -33,12 +33,36 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">
-                                <i class="fa-solid fa-user"></i>
-                                <span>My Profile</span>
-                            </a>
-                        </li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span>@User.Identity.Name</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                    <li class="nav-item pl-2">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">
+                                            My Profile
+                                        </a>
+                                    </li>
+                                    <li class="nav-item pl-2">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Logout</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Register">Register</a>
+                            </li>                            
+                        }
+
                     </ul>
                 </div>
             </div>
@@ -67,7 +91,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/scripts.js" asp-append-version="true"></script>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/0bbe7107ed.js" crossorigin="anonymous"></script>
+    @* <script src="https://kit.fontawesome.com/0bbe7107ed.js" crossorigin="anonymous"></script> *@
 
     @await RenderSectionAsync("Scripts", required: false)
 
