@@ -27,7 +27,7 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <li class="nav-item">
-                        <a class="nav-link my-0 py-2 mx-2" asp-area="" asp-controller="Profile" asp-action="Index">
+                        <a class="nav-link my-0 py-2 mx-2" asp-area="" asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name">
                             My Profile
                         </a>
                     </li>

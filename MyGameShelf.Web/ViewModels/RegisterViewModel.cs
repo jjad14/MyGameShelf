@@ -28,6 +28,7 @@ public class RegisterViewModel
 
     [Required]
     [Display(Name = "Username")]
+    [RegularExpression(@"^[a-zA-Z0-9_-]+$", ErrorMessage = "Username can only contain letters, numbers, underscores, and hyphens.")]
     public string UserName { get; set; }
 
     [Display(Name = "Profile Picture")]

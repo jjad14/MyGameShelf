@@ -32,7 +32,7 @@ public class ProfileController : Controller
 
         var model = new ProfileViewModel
         {
-            Username = user.UserName,
+            Username = user.UserName!,
             FirstName = user.FirstName,
             LastName = user.LastName,
             ProfilePictureUrl = user.ProfilePictureUrl,

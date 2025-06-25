@@ -43,7 +43,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                                     <li class="nav-item pl-2">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name">
                                             My Profile
                                         </a>
                                     </li>
