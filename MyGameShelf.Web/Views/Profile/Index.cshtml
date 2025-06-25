@@ -1,6 +1,10 @@
 ﻿@using MyGameShelf.Web.ViewModels
 @model ProfileViewModel
 
+@{
+    ViewData["Title"] = $"{Model.Username}'s Profile";
+}
+
 <h4 class="text-center text-md-start mx-md-2">@Model.Username Profile</h4>
 <div class="container mt-2 px-0">
     <div class="row">
