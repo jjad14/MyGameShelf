@@ -2,7 +2,11 @@
 @model ProfileViewModel
 
 @{
-    ViewData["Title"] = $"{Model.Username}'s Profile";
+    ViewData["Title"] = $"{Model.Username ?? "User"}'s Profile";
+
+    var lastActive = Model.LastActive;
+    var now = DateTime.Now;
+    var isWithinLastHour = (now - lastActive).TotalMinutes <= 60;
 }
 
 <h4 class="text-center text-md-start mx-md-2">@Model.Username Profile</h4>
@@ -17,20 +21,23 @@
 
             <!-- Profile Info -->
             <div class="bg-light text-dark rounded p-2">
-                <h4 class="h2 h4-md text-center text-md-start col-12 mb-3 ">@($"{Model.FirstName} {Model.LastName}")</h4>
+                <h4 class="text-center text-md-start col-12 mb-3 ">@($"{Model.FirstName} {Model.LastName}")</h4>
 
                 <dl class="row px-4 px-md-0">
-                    <dt class="col-6 responsive-font">Gender</dt>
-                    <dd class="col-6 responsive-font">@Model.Gender</dd>
+                    <dt class="col-5 responsive-font">Last Online</dt>
+                    <dd class="col-7 responsive-font">@(isWithinLastHour ? "Now" : lastActive.ToString("MMM dd, yyyy"))</dd>
 
-                    <dt class="col-6 responsive-font">Birthday</dt>
-                    <dd class="col-6 responsive-font">@Model.Birthday</dd>
+                    <dt class="col-5 responsive-font">Gender</dt>
+                    <dd class="col-7 responsive-font">@Model.Gender</dd>
 
-                    <dt class="col-6 responsive-font">Location</dt>
-                    <dd class="col-6 responsive-font">@($"{Model.Address.City}, {Model.Address.Country}")</dd>
+                    <dt class="col-5 responsive-font">Birthday</dt>
+                    <dd class="col-7 responsive-font">@Model.Birthday.ToString("MMM dd, yyyy")</dd>
 
-                    <dt class="col-6 responsive-font">Joined</dt>
-                    <dd class="col-6 responsive-font">@Model.CreatedAt</dd>
+                    <dt class="col-5 responsive-font">Location</dt>
+                    <dd class="col-7 responsive-font">@($"{Model.Address.City}, {Model.Address.Country}")</dd>
+
+                    <dt class="col-5 responsive-font">Joined</dt>
+                    <dd class="col-7 responsive-font">@Model.CreatedAt.ToString("MMM dd, yyyy")</dd>
                 </dl>
 
                 <hr class="my-3"/>
@@ -59,7 +66,7 @@
 
             <!-- Profile Stats -->
             <div class="bg-light text-dark rounded p-2">
-                <h3 class="text-center text-md-start col-12 mb-3 ">Statistics</h3>
+                <h4 class="text-center text-md-start col-12 mb-3 ">Statistics</h4>
                 <dl class="row px-4 px-md-0">
                     <dt class="col-8 responsive-font">Games Tracked</dt>
                     <dd class="col-4 responsive-font">42</dd>
@@ -100,7 +107,10 @@
         <div class="col-md-9 d-flex flex-column gap-3">
             <!-- Profile Message -->
             <div class="p-3 border rounded bg-light text-dark" style="min-height: 150px; max-height: 200px; overflow-y: auto;">
-                <p>@Model.ProfileMessage ?? ""</p>
+                @if (!string.IsNullOrWhiteSpace(Model.ProfileMessage))
+                {
+                    <p>@Model.ProfileMessage</p>
+                }
             </div>
 
             <!-- Game List -->

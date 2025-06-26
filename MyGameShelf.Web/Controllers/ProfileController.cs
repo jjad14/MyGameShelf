@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Web.ViewModels;
 
@@ -26,7 +27,9 @@ public class ProfileController : Controller
             return NotFound();
         }
 
-        var user = await _userManager.FindByNameAsync(username);
+        var user = await _userManager.Users
+            .Include(u => u.Address)
+            .FirstOrDefaultAsync(u => u.UserName == username);
 
         if (user == null)
         { 
@@ -35,7 +38,7 @@ public class ProfileController : Controller
 
         var model = new ProfileViewModel
         {
-            Username = user.UserName!,
+            Username = user.UserName,
             FirstName = user.FirstName,
             LastName = user.LastName,
             ProfilePictureUrl = user.ProfilePictureUrl,
