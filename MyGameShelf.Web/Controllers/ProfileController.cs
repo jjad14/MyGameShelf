@@ -48,6 +48,8 @@ public class ProfileController : Controller
             FacebookSocialLink = user.FacebookSocialLink,
             YoutubeSocialLink = user.YoutubeSocialLink,
             TwitchSocialLink = user.TwitchSocialLink,
+            CreatedAt = user.CreatedAt,
+            LastActive = user.LastActive
         };
 
         return View(model);

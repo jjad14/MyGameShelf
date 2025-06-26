@@ -40,4 +40,7 @@ public class ApplicationUser : IdentityUser
 
     // Users who are following this user
     public ICollection<UserFollow> Followers { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+    public DateTime LastActive { get; set; }
 }

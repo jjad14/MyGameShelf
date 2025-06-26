@@ -17,4 +17,6 @@ public class ProfileViewModel
     public string? FacebookSocialLink { get; set; }
     public string? YoutubeSocialLink { get; set; }
     public string? TwitchSocialLink { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime LastActive { get; set; }
 }

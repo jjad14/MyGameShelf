@@ -12,25 +12,25 @@
         <div class="col-md-3 d-flex flex-column gap-3">
             <!-- Profile Picture -->
             <div class="text-center" style="width: 100%; height: 100%;">
-                <img src="/assets/img/user.jpg" alt="Profile Picture" class="img-fluid rounded img-thumbnail" style="width: 100%; height: auto; max-width: 300px; object-fit: cover;">
+                <img src="@Model.ProfilePictureUrl" alt="@Model.Username" class="img-fluid rounded img-thumbnail" style="width: 100%; height: auto; max-width: 300px; object-fit: cover;">
             </div>
 
             <!-- Profile Info -->
             <div class="bg-light text-dark rounded p-2">
-                <h4 class="h2 h4-md text-center text-md-start col-12 mb-3 ">John Doe</h4>
+                <h4 class="h2 h4-md text-center text-md-start col-12 mb-3 ">@($"{Model.FirstName} {Model.LastName}")</h4>
 
                 <dl class="row px-4 px-md-0">
                     <dt class="col-6 responsive-font">Gender</dt>
-                    <dd class="col-6 responsive-font">Male</dd>
+                    <dd class="col-6 responsive-font">@Model.Gender</dd>
 
                     <dt class="col-6 responsive-font">Birthday</dt>
-                    <dd class="col-6 responsive-font">June 24, 1990</dd>
+                    <dd class="col-6 responsive-font">@Model.Birthday</dd>
 
                     <dt class="col-6 responsive-font">Location</dt>
-                    <dd class="col-6 responsive-font">Toronto, Canada</dd>
+                    <dd class="col-6 responsive-font">@($"{Model.Address.City}, {Model.Address.Country}")</dd>
 
                     <dt class="col-6 responsive-font">Joined</dt>
-                    <dd class="col-6 responsive-font">January 2022</dd>
+                    <dd class="col-6 responsive-font">@Model.CreatedAt</dd>
                 </dl>
 
                 <hr class="my-3"/>
@@ -100,16 +100,7 @@
         <div class="col-md-9 d-flex flex-column gap-3">
             <!-- Profile Message -->
             <div class="p-3 border rounded bg-light text-dark" style="min-height: 150px; max-height: 200px; overflow-y: auto;">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et 
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip 
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
-                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt 
-                    mollit anim id est laborum..Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                    mollit anim id est laborum..
-                </p>
+                <p>@Model.ProfileMessage ?? ""</p>
             </div>
 
             <!-- Game List -->

@@ -101,10 +101,10 @@ public class AuthController : Controller
             FacebookSocialLink = registerViewModel.FacebookSocialLink,
             YoutubeSocialLink = registerViewModel.YoutubeSocialLink,
             TwitchSocialLink = registerViewModel.TwitchSocialLink,
-            IsPublic = true
+            IsPublic = true,
+            CreatedAt = DateTime.Now,
+            LastActive = DateTime.Now
         };
-
-        // Street   City    Province    PostalCode  Country
 
         var result = await _userManager.CreateAsync(user, registerViewModel.Password);
 
@@ -164,6 +164,10 @@ public class AuthController : Controller
             TempData["ErrorMessage"] = "Invalid login attempt.";
             return RedirectToAction("Login");
         }
+
+        user.LastActive = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
 
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
