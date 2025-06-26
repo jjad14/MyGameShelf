@@ -165,8 +165,8 @@ public class AuthController : Controller
             return RedirectToAction("Login");
         }
 
-        user.LastActive = DateTime.UtcNow;
-        await _userManager.UpdateAsync(user);
+        //user.LastActive = DateTime.UtcNow;
+        //await _userManager.UpdateAsync(user);
 
 
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))

@@ -7,6 +7,7 @@ using MyGameShelf.Infrastructure.Data;
 using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Infrastructure.Services;
 using MyGameShelf.Web.Helpers;
+using MyGameShelf.Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -104,6 +105,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+
+app.UseMiddleware<LastActiveMiddleware>();
 
 app.UseAuthorization();
 
