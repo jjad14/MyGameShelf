@@ -21,9 +21,11 @@ public class GamesController : Controller
     public async Task<IActionResult> Index(string search = null, string platform = null, string genre = null,
                                            string metacritic = null, string orderBy = null, int page = 1, int pageSize = 20)
     {
+        // default search - future configuration
         string developer = null;
         string publisher = null;
 
+        // Endure pageSize is always between 1 and 50
         pageSize = Math.Clamp(pageSize, 1, 50);
 
         // Get a list of platforms for filtering
@@ -43,9 +45,11 @@ public class GamesController : Controller
         }).ToList();
 
 
+        // Get Game List
         var response = await _rawgApiService.GetGamesBySearchAndFilters(
             search, platform, developer, publisher, genre, metacritic, orderBy, page, pageSize);
 
+        // Map results of Game List to View Model
         var gamesVm = new PaginatedGamesViewModel
         {
             Games = response.Games,
@@ -60,8 +64,10 @@ public class GamesController : Controller
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> Details(int id)
     {
+        // Get Game by Id
         var response = await _rawgApiService.GetGameDetailsAsync(id);
 
+        // No Game Found Case
         if (response == null) 
         { 
             return NotFound();
@@ -72,18 +78,22 @@ public class GamesController : Controller
             .Where(p => p != null)
             .Select(p => p.Id.ToString());
 
+        // Join Publisher ids into a comma separated string
         string publisherIdString = string.Join(",", publisherIds ?? Enumerable.Empty<string>());
 
         bool hasOtherGames = false;
 
+        // Check if Game Publisher(s) has other games
         if (!string.IsNullOrWhiteSpace(publisherIdString))
         {
             hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, id);
         }
 
+        // Check if Game has additions (DLCs) or Prequels/Sequels
         bool hasAdditions = await _rawgApiService.HasGameDLCs(id);
         bool hasSequels = await _rawgApiService.HasGameSequels(id);
 
+        // Map result to View Model
         var gameDetailsVM = new GameDetailsViewModel
         { 
             Game = response,
@@ -100,11 +110,14 @@ public class GamesController : Controller
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> GetGamesByPublisher([FromQuery] string publisherIds, [FromQuery] int? excludeId)
     {
+        // Methods acts as a AjAX HttpGet request from client side
+
         if (string.IsNullOrWhiteSpace(publisherIds))
         {
             return BadRequest("Publisher IDs are required.");
         }
 
+        // Get games by Publisher id(s) - excluding current game
         var games = await _rawgApiService.GetGamesByPublisher(publisherIds, excludeId);
         return Ok(games);
     }
@@ -113,11 +126,14 @@ public class GamesController : Controller
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> GetGameAdditions([FromQuery] int? gameId)
     {
+        // Methods acts as a AjAX HttpGet request from client side
+
         if (!gameId.HasValue)
         {
             return BadRequest("Game ID is required.");
         }
 
+        // Get Games DLCs by gameId
         var games = await _rawgApiService.GetGamesDLCs(gameId.Value);
         return Ok(games);
     }
@@ -126,11 +142,14 @@ public class GamesController : Controller
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> GetGameSequels([FromQuery] int? gameId)
     {
+        // Methods acts as a AjAX HttpGet request from client side
+
         if (!gameId.HasValue)
         {
             return BadRequest("Game ID is required.");
         }
 
+        // Get Games Sequels by game Id
         var games = await _rawgApiService.GetGamesSequels(gameId.Value);
         return Ok(games);
     }

@@ -24,7 +24,7 @@ public class ProfileController : Controller
     }
 
     [AllowAnonymous]
-    [HttpGet("/profile/{username}")]
+    [HttpGet("profile/{username:regex(^[[a-zA-Z0-9_-]]+$)}")]
     public async Task<IActionResult> Index(string username)
     {
         if (string.IsNullOrEmpty(username))
@@ -77,6 +77,7 @@ public class ProfileController : Controller
             return NotFound();
         }
 
+        // Get EditProfileViewModel with all properties from user
         var model = await LoadEditProfileViewModel(user);
 
         return View(model);
@@ -151,7 +152,7 @@ public class ProfileController : Controller
             return View(editProfileViewModel);
         }
 
-        // Optionally set a success message (TempData, ViewData, etc.)
+        // Set a success message (TempData, ViewData, etc.)
         TempData["SuccessMessage"] = "Profile updated successfully.";
 
         // Redirect back to profile page
@@ -191,10 +192,13 @@ public class ProfileController : Controller
             }
         }
 
+        // Update User
         var updateResult = await _userManager.UpdateAsync(user);
 
+        // Check if update succeded
         if (!updateResult.Succeeded)
         {
+            // Return Model State errors
             foreach (var error in updateResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -220,7 +224,7 @@ public class ProfileController : Controller
             return NotFound();
         }
 
-
+        // Save profile picture ID
         var profileId = user.ProfilePicturePublicId;
         var result = await _userManager.DeleteAsync(user);
 
@@ -234,6 +238,7 @@ public class ProfileController : Controller
             return View("Settings", await LoadEditProfileViewModel(user));
         }
 
+        // Delete Profile Picture
         await _photoService.DeletePhotoAsync(profileId);
 
         await _signInManager.SignOutAsync();
@@ -253,6 +258,7 @@ public class ProfileController : Controller
             return NotFound();
         }
 
+        // If action type is enable, we enable 2FA
         if (actionType == "enable")
         {
             var result = await _userManager.SetTwoFactorEnabledAsync(user, true);
@@ -268,7 +274,7 @@ public class ProfileController : Controller
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-        }
+        } // If action type is disable, we disable 2FA
         else if (actionType == "disable")
         {
             var result = await _userManager.SetTwoFactorEnabledAsync(user, false);
@@ -284,7 +290,7 @@ public class ProfileController : Controller
                 }
 
             }
-        }
+        } // If action type is invalid, throw model state error
         else
         {
             ModelState.AddModelError(string.Empty, "Invalid action.");
@@ -305,6 +311,7 @@ public class ProfileController : Controller
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return NotFound();
 
+        // Generate Authenticator Key
         var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
         if (string.IsNullOrEmpty(unformattedKey))
         {
@@ -313,9 +320,14 @@ public class ProfileController : Controller
         }
 
         var email = await _userManager.GetEmailAsync(user);
+
+        // Format Key
         var sharedKey = FormatKey(unformattedKey);
+
+        // Generate QR Code using user email and Authenticator Key
         var authenticatorUri = GenerateQrCodeUri(email, unformattedKey);
 
+        // Create View Model
         var model = new TwoFactorSetupViewModel
         {
             SharedKey = sharedKey,
@@ -346,6 +358,7 @@ public class ProfileController : Controller
             return View(model);
         }
 
+        // Verify Authenticator Code
         var is2FATokenValid = await _userManager.VerifyTwoFactorTokenAsync(
             user, _userManager.Options.Tokens.AuthenticatorTokenProvider, model.VerificationCode);
 
@@ -355,13 +368,17 @@ public class ProfileController : Controller
             return View(model);
         }
 
+        // Set 2FA to enabled
         await _userManager.SetTwoFactorEnabledAsync(user, true);
+
         TempData["SuccessMessage"] = "Two-Factor Authentication has been enabled.";
+
         return RedirectToAction("Settings");
     }
 
     private async Task<EditProfileViewModel> LoadEditProfileViewModel(ApplicationUser user)
     {
+        // Using User, create a Profile View Model
         return new EditProfileViewModel
         {
             FirstName = user.FirstName,
@@ -388,6 +405,7 @@ public class ProfileController : Controller
 
     private string FormatKey(string unformattedKey)
     {
+        // Format key 4 character spaced
         return string.Join(" ", Enumerable.Range(0, unformattedKey.Length / 4)
             .Select(i => unformattedKey.Substring(i * 4, 4)));
     }
@@ -397,6 +415,7 @@ public class ProfileController : Controller
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(unformattedKey))
             return string.Empty;
 
+        // Return generated QR Code
         return string.Format(
             "otpauth://totp/{0}?secret={1}&issuer={2}&digits=6",
             Uri.EscapeDataString("MyGameShelf:" + email),

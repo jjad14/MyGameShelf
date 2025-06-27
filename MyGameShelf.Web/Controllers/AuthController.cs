@@ -41,13 +41,14 @@ public class AuthController : Controller
             return View(registerViewModel);
         }
 
-        // Check if user already exists by email or username
+        // Check if user already exists by email
         if (await _userManager.FindByEmailAsync(registerViewModel.Email) != null)
         {
             ModelState.AddModelError(string.Empty, "An account with this email already exists.");
             return View(registerViewModel);
         }
 
+        // Check if user already exists by username
         if (await _userManager.FindByNameAsync(registerViewModel.UserName) != null)
         {
             ModelState.AddModelError(string.Empty, "Username is already taken.");
@@ -62,6 +63,7 @@ public class AuthController : Controller
         // Upload profile picture if provided
         if (registerViewModel.ProfilePicture != null && registerViewModel.ProfilePicture.Length > 0)
         {
+            // Add photo
             uploadResult = await _photoService.AddPhotoAsync(registerViewModel.ProfilePicture);
 
             if (uploadResult != null)
@@ -158,7 +160,7 @@ public class AuthController : Controller
             return RedirectToAction("Login");
         }
 
-        // user.UserName! means UserName will not be null as we require users to have a username when registrating 
+        // Sign in via username and passwod
         var result = await _signInManager.PasswordSignInAsync(
             user.UserName!, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: false);
 
@@ -201,7 +203,6 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Games");
     }
 
-
     [HttpGet]
     public IActionResult LoginWith2fa(string returnUrl = null, bool rememberMe = false)
     {
@@ -229,7 +230,7 @@ public class AuthController : Controller
             return RedirectToAction("Login");
         }
 
-        // if 2fa auth fails
+        // Check if 2FA authentication fails
         if (!result.Succeeded)
         {
             ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
@@ -249,6 +250,7 @@ public class AuthController : Controller
     [HttpGet]
     public async Task<IActionResult> Logout()
     {
+        // log user out and redirect to Home
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
