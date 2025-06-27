@@ -378,6 +378,8 @@ public class ProfileController : Controller
 
     private async Task<EditProfileViewModel> LoadEditProfileViewModel(ApplicationUser user)
     {
+        var logins = await _userManager.GetLoginsAsync(user);
+
         // Using User, create a Profile View Model
         return new EditProfileViewModel
         {
@@ -398,7 +400,9 @@ public class ProfileController : Controller
             YoutubeSocialLink = user.YoutubeSocialLink,
             TwitchSocialLink = user.TwitchSocialLink,
             IsPublic = user.IsPublic,
-            TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user)
+            TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
+            HasPassword = await _userManager.HasPasswordAsync(user),
+            IsExternalLogin = logins.Any(l => l.LoginProvider != "Local")
         };
     }
 

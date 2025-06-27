@@ -37,7 +37,9 @@
         <div class="col-md-3 d-flex flex-column gap-3">
             <!-- Profile Picture -->
             <div class="text-center" style="width: 100%; height: 100%;">
-                <img src="@Model.ProfilePictureUrl" alt="@Model.Username" class="img-fluid rounded img-thumbnail" style="width: 100%; height: auto; max-width: 300px; object-fit: cover;">
+                <img src="@(string.IsNullOrEmpty(Model.ProfilePictureUrl) 
+                ? Url.Content("~/assets/img/user.jpg") 
+                : Model.ProfilePictureUrl)"  alt="@Model.Username" class="img-fluid rounded img-thumbnail" style="width: 100%; height: auto; max-width: 300px; object-fit: cover;">
             </div>
 
             <!-- Profile Info -->
@@ -54,10 +56,20 @@
                         <dd class="col-7 responsive-font">@Model.Gender</dd>
 
                         <dt class="col-5 responsive-font">Birthday</dt>
-                        <dd class="col-7 responsive-font">@Model.Birthday.ToString("MMM dd, yyyy")</dd>
+                        <dd class="col-7 responsive-font">
+                            @(Model.Birthday > DateTime.MinValue 
+                                ? Model.Birthday.ToString("MMM dd, yyyy") 
+                                : "-")
+                        </dd>
 
                         <dt class="col-5 responsive-font">Location</dt>
-                        <dd class="col-7 responsive-font">@($"{Model.Address.City}, {Model.Address.Country}")</dd>
+                        <dd class="col-7 responsive-font">@(
+                            Model.Address != null && 
+                            !string.IsNullOrWhiteSpace(Model.Address.City) && 
+                            !string.IsNullOrWhiteSpace(Model.Address.Country)
+                                ? $"{Model.Address.City}, {Model.Address.Country}" 
+                                : "-"
+                        )</dd>
 
                         <dt class="col-5 responsive-font">Joined</dt>
                         <dd class="col-7 responsive-font">@Model.CreatedAt.ToString("MMM dd, yyyy")</dd>

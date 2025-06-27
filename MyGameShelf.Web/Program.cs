@@ -50,20 +50,30 @@ builder.Services.AddMemoryCache();
 // This means you can keep track of user data like login status, preferences, etc., during their session.
 builder.Services.AddSession();
 
-// Configure authentication to use cookies
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie();
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Auth/Login"; // Path for login page
     options.LogoutPath = "/Auth/Logout";
-    //options.AccessDeniedPath = "/Account/AccessDenied";
+    //options.AccessDeniedPath = "/Auth/AccessDenied";
     options.Cookie.Name = "MyGameShelfAuthCookie";
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
 });
+
+// Mapping Google Auth Keys to GoogleAuthSettings
+var googleAuthSettings = builder.Configuration
+    .GetSection("Authentication:Google")
+    .Get<GoogleAuthSettings>();
+
+// Adding Google Authentication
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = googleAuthSettings.ClientId;
+        options.ClientSecret = googleAuthSettings.ClientSecret;
+    });
+
 
 
 var app = builder.Build();

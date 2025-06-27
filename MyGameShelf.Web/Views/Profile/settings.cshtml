@@ -7,7 +7,7 @@
 <div class="container my-5" style="max-width: 900px;">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <i class="fa-solid fa-gear"></i> Account Settings
+            <i class="fa-solid fa-gear"></i> Settings
         </div>
         <div class="card-body">
             @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
@@ -189,31 +189,35 @@
                             <div class="alert alert-success">@TempData["SuccessMessage"]</div>
                         }
 
-                        <div class="mb-4">
-                            <h5>Password Reset</h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label asp-for="CurrentPassword" class="form-label">Current Password</label>
-                                    <input asp-for="CurrentPassword" class="form-control" type="password" />
-                                    <span asp-validation-for="CurrentPassword" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6"></div>
+                        @if (Model.HasPassword)
+                        {
+                            <div class="mb-4">
+                                <h5>Password Reset</h5>
+                                <div class="row g-3">
 
-                                <div class="col-md-6">
-                                    <label asp-for="NewPassword" class="form-label">New Password</label>
-                                    <input asp-for="NewPassword" class="form-control" type="password" />
-                                    <span asp-validation-for="NewPassword" class="text-danger"></span>
-                                </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="CurrentPassword" class="form-label">Current Password</label>
+                                        <input asp-for="CurrentPassword" class="form-control" type="password" />
+                                        <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6"></div>
 
-                                <div class="col-md-6">
-                                    <label asp-for="ConfirmNewPassword" class="form-label">Confirm New Password</label>
-                                    <input asp-for="ConfirmNewPassword" class="form-control" type="password" />
-                                    <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                                    <div class="col-md-6">
+                                        <label asp-for="NewPassword" class="form-label">New Password</label>
+                                        <input asp-for="NewPassword" class="form-control" type="password" />
+                                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label asp-for="ConfirmNewPassword" class="form-label">Confirm New Password</label>
+                                        <input asp-for="ConfirmNewPassword" class="form-control" type="password" />
+                                        <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <hr />
+                            <hr />                            
+                        }
 
                         <div class="mb-4">
                             <h5>Profile Visibility</h5>
@@ -233,29 +237,32 @@
 
                     <hr />
 
-                    @* Separate form for Two-Factor Authentication *@
-                    <form asp-action="ToggleTwoFactorAuthentication" method="post" class="mx-auto" style="max-width: 800px;">
-                        <h5>Two-Factor Authentication</h5>
+                    @if (!Model.IsExternalLogin)
+                    {
+                        @* Separate form for Two-Factor Authentication *@
+                        <form asp-action="ToggleTwoFactorAuthentication" method="post" class="mx-auto" style="max-width: 800px;">
+                            <h5>Two-Factor Authentication</h5>
     
-                        @if (Model.TwoFactorEnabled)
-                        {
-                            <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
+                            @if (Model.TwoFactorEnabled)
+                            {
+                                <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
 
-                            <button type="submit" name="actionType" value="disable" class="btn btn-warning">
-                                Disable 2FA
-                            </button>
-                        }
-                        else
-                        {
-                            <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
+                                <button type="submit" name="actionType" value="disable" class="btn btn-warning">
+                                    Disable 2FA
+                                </button>
+                            }
+                            else
+                            {
+                                <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
         
-                            <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">
-                                Enable 2FA
-                            </a>
-                        }
-                    </form>
+                                <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">
+                                    Enable 2FA
+                                </a>
+                            }
+                        </form>
 
-                    <hr />
+                        <hr />
+                    }
 
                     @* Separate form for Delete Account *@
                     <form asp-action="DeleteAccount" method="post" class="mx-auto" style="max-width: 800px;">

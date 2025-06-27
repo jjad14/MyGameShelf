@@ -6,6 +6,7 @@ using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Web.ViewModels;
+using System.Security.Claims;
 
 namespace MyGameShelf.Web.Controllers;
 public class AuthController : Controller
@@ -246,6 +247,99 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Games");
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult ExternalLogin(string provider, string returnUrl = null)
+    {
+        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth", new { returnUrl });
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+    {
+        if (remoteError != null)
+        {
+            return RedirectToAction("Login", new { ErrorMessage = $"Error from external provider: {remoteError}" });
+        }
+
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
+        {
+            return RedirectToAction("Login", new { ErrorMessage = "Error loading external login info." });
+        }
+
+        var signInResult = await _signInManager.ExternalLoginSignInAsync(
+            info.LoginProvider,
+            info.ProviderKey,
+            isPersistent: false,
+            bypassTwoFactor: true);
+
+        if (signInResult.Succeeded)
+        {
+            return RedirectToLocal(returnUrl);
+        }
+
+        // Extract data from external provider (Google)
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+        var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+        var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
+        var picture = info.Principal.FindFirstValue("picture");
+
+        // Check if the user already exists by email
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        if (existingUser != null)
+        {
+            // Link login if needed
+            await _userManager.AddLoginAsync(existingUser, info);
+            await _signInManager.SignInAsync(existingUser, isPersistent: false);
+            return RedirectToAction("Index", "Games");
+        }
+
+        // Need to create a user name using the email, since email syntax is not a valid username (@symbol)
+        var baseUsername = email?.Split('@')[0] ?? "user";
+        var username = await GenerateUniqueUsername(baseUsername);
+
+        // Create new ApplicationUser
+        var user = new ApplicationUser
+        {
+            UserName = username,
+            Email = email,
+            FirstName = firstName ?? string.Empty,
+            LastName = lastName ?? string.Empty,
+            ProfilePictureUrl = picture,
+            IsPublic = true,
+            CreatedAt = DateTime.UtcNow,
+            LastActive = DateTime.UtcNow,
+            Address = new Address(), // Prevents null issues
+            Gender = "Not Specified",
+            Birthday = DateTime.MinValue
+        };
+
+
+        var createResult = await _userManager.CreateAsync(user);
+
+        if (!createResult.Succeeded) 
+        {
+            foreach (var error in createResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return RedirectToAction("Login");
+        }
+
+        await _userManager.AddToRoleAsync(user, UserRoles.User);
+        await _userManager.AddLoginAsync(user, info);
+
+        await _signInManager.SignInAsync(user, isPersistent: false);
+
+        return RedirectToLocal(returnUrl);
+    }
+
+
+
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> Logout()
@@ -254,4 +348,29 @@ public class AuthController : Controller
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
+
+    private IActionResult RedirectToLocal(string? returnUrl)
+    {
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction("Index", "Games");
+    }
+
+    private async Task<string> GenerateUniqueUsername(string baseUsername)
+    {
+        string username = baseUsername;
+        int suffix = 1;
+
+        while (await _userManager.FindByNameAsync(username) != null)
+        {
+            username = $"{baseUsername}{suffix}";
+            suffix++;
+        }
+
+        return username;
+    }
+
 }

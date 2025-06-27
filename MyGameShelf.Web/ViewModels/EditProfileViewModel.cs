@@ -83,4 +83,8 @@ public class EditProfileViewModel
     [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
     public string ConfirmNewPassword { get; set; }
 
+
+    // Props to check if user was signed in locally or google auth
+    public bool HasPassword { get; set; }
+    public bool IsExternalLogin { get; set; }
 }
