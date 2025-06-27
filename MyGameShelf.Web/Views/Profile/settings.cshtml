@@ -236,19 +236,22 @@
                     @* Separate form for Two-Factor Authentication *@
                     <form asp-action="ToggleTwoFactorAuthentication" method="post" class="mx-auto" style="max-width: 800px;">
                         <h5>Two-Factor Authentication</h5>
+    
                         @if (Model.TwoFactorEnabled)
                         {
                             <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
-                            @* <button type="submit" name="actionType" value="disable" class="btn btn-warning">Disable 2FA</button> *@
 
-                            <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">Enable 2FA</a>
+                            <button type="submit" name="actionType" value="disable" class="btn btn-warning">
+                                Disable 2FA
+                            </button>
                         }
                         else
                         {
                             <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
-                            @* <button type="submit" name="actionType" value="enable" class="btn btn-primary">Enable 2FA</button> *@
-                            <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">Enable 2FA</a>
-
+        
+                            <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">
+                                Enable 2FA
+                            </a>
                         }
                     </form>
 
