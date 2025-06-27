@@ -32,6 +32,8 @@ public class RawgApiService : IRawgApiService
     public async Task<IEnumerable<GameDto>> GetPopularGamesAsync(int page = 1, int pageSize = 20)
     {
         // Check pagesize to ensure no tampering
+        // Ensure pageSize is always between 1 and 50
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
         var url = $"https://api.rawg.io/api/games?key={_apiKey}&page={page}&page_size={pageSize}";
         using var response = await _httpClient.GetAsync(url);
@@ -79,7 +81,6 @@ public class RawgApiService : IRawgApiService
             Tags = result.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
             Platforms = result.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
             Developers = result.Developers?.Select(p => p.Name) ?? Enumerable.Empty<string>(),
-            //Publishers = result.Publishers?.Select(p => p.Name) ?? Enumerable.Empty<string>(),
             Publishers = result.Publishers?
                 .Where(p => p != null)
                 .Select(p => new GameDetailsPublisherDto
@@ -102,6 +103,8 @@ public class RawgApiService : IRawgApiService
     public async Task<PaginatedGameDto> GetGamesBySearchAndFilters(string search, string platform, string developer, string publisher, string genre, string metacritic, string orderBy, int page = 1, int pageSize = 20)
     {
         // Check pagesize to ensure no tampering
+        // Ensure pageSize is always between 1 and 50
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
         bool isDefaultSearch =
             string.IsNullOrWhiteSpace(search) &&
@@ -152,9 +155,15 @@ public class RawgApiService : IRawgApiService
             query["metacritic"] = metacritic;
 
         if (!string.IsNullOrWhiteSpace(orderBy))
+        {
             query["ordering"] = orderBy;
+        }
+        else
+        {
+            query["ordering"] = "-released";
+        }
 
-        query["page"] = page.ToString();
+            query["page"] = page.ToString();
         query["page_size"] = pageSize.ToString();
 
         string url = $"https://api.rawg.io/api/games?{query}&search_precise=true";
@@ -204,6 +213,8 @@ public class RawgApiService : IRawgApiService
     public async Task<IEnumerable<GenreDto>> GetGenresAsync(int page = 1, int pageSize = 20)
     {
         // Check pagesize to ensure no tampering
+        // Ensure pageSize is always between 1 and 50
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
         var url = $"https://api.rawg.io/api/genres?key={_apiKey}&page={page}&page_size={pageSize}";
 
@@ -225,6 +236,8 @@ public class RawgApiService : IRawgApiService
     public async Task<IEnumerable<PlatformDto>> GetPlatformsAsync(int page = 1, int pageSize = 20)
     {
         // Check pagesize to ensure no tampering
+        // Ensure pageSize is always between 1 and 50
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
         var url = $"https://api.rawg.io/api/platforms?key={_apiKey}&page={page}&page_size={pageSize}";
 

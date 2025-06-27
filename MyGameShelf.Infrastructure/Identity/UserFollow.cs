@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MyGameShelf.Infrastructure.Identity;
+
+// Join Table For Users Followers and Followees
 public class UserFollow
 {
     [ForeignKey(nameof(Follower))]

@@ -6,6 +6,8 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MyGameShelf.Infrastructure.External.Rawg.Responses;
+
+// Reponses from RAWG API
 public class RawgPlatformListResponse
 {
     public int Count { get; set; }

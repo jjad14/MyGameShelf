@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MyGameShelf.Infrastructure.External.Rawg.Responses;
 
+// Reponses from RAWG API
 public class RawgGameDetailResponse
 {
     public int Id { get; set; }

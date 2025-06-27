@@ -31,13 +31,19 @@ public class PhotoService : IPhotoService
 
     public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file)
     {
+        // Check if file exist
         if (file == null || file.Length == 0) 
-        { 
+        {
+            // Return null to indicate no photo was uploaded
             return null;
         }
 
+        // Open a stream to read the file contents
         using var stream = file.OpenReadStream();
 
+        // Prepare parameters for the Cloudinary image upload
+        // Apply image transformation:
+        // Limit the image size to max 500x500 pixels without cropping
         var uploadParams = new ImageUploadParams
         {
             File = new FileDescription(file.FileName, stream),
@@ -52,6 +58,7 @@ public class PhotoService : IPhotoService
             return null;
         }
 
+        // Return the result containing the secure URL and public ID of the uploaded image
         return new PhotoUploadResult
         {
             Url = uploadResult.SecureUrl.ToString(),
@@ -61,6 +68,7 @@ public class PhotoService : IPhotoService
 
     public async Task<bool> DeletePhotoAsync(string publicId)
     {
+        // Delete Cloudinary Photo using public ID - Stored in Users table
         var deletionParams = new DeletionParams(publicId);
 
         var deletionResult = await _cloudinary.DestroyAsync(deletionParams);

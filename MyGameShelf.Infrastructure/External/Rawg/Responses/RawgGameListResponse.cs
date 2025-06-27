@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace MyGameShelf.Infrastructure.External.Rawg.Responses;
 
+// Reponses from RAWG API
+
 public class RawgGameListResponse
 {
     public int Count { get; set; }

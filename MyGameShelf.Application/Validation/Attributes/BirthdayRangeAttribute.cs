@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace MyGameShelf.Application.Validation.Attributes;
 public class BirthdayRangeAttribute : ValidationAttribute
 {
+    // Attribute to check valid birthdays
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         if (value is DateTime date)

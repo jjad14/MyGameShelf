@@ -25,7 +25,7 @@ public class GamesController : Controller
         string developer = null;
         string publisher = null;
 
-        // Endure pageSize is always between 1 and 50
+        // Ensure pageSize is always between 1 and 50
         pageSize = Math.Clamp(pageSize, 1, 50);
 
         // Get a list of platforms for filtering
