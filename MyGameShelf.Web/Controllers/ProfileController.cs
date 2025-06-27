@@ -238,6 +238,8 @@ public class ProfileController : Controller
             return View("Settings", await LoadEditProfileViewModel(user));
         }
 
+        // Check if user does have a profile picture
+        // Is required for a user to have one, but if they log in with Google then they wont have one, so we need to check
         if (!String.IsNullOrEmpty(profileId))
         {
             // Delete Profile Picture
