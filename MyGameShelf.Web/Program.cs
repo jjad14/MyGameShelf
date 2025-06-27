@@ -37,6 +37,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         options.Password.RequireUppercase = true;
         options.Password.RequiredUniqueChars = 1;
         options.Password.RequiredLength = 8;
+        options.SignIn.RequireConfirmedAccount = true; // recommended for 2FA
 
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()

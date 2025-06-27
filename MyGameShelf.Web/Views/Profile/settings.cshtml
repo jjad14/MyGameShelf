@@ -1,7 +1,249 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@using MyGameShelf.Web.ViewModels
+@model EditProfileViewModel
 
-<h1>Settings</h1>
+@* <a asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name" class="btn btn-secondary mb-3">
+    &larr; Back to Profile
+</a> *@
+<div class="container my-5" style="max-width: 900px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <i class="fa-solid fa-gear"></i> Account Settings
+        </div>
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                    {
+                        <p>@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                            type="button" role="tab" aria-controls="profile" aria-selected="true">
+                        Edit Profile
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account"
+                            type="button" role="tab" aria-controls="account" aria-selected="false">
+                        Account Settings
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content pt-4" id="settingsTabsContent">
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <form asp-action="Settings" method="post" enctype="multipart/form-data">
+                        @* Validation summary *@
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                        {
+                            <div class="alert alert-danger">
+                                @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="ProfileMessage" class="form-label"></label>
+                                <textarea asp-for="ProfileMessage" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="ProfileMessage" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Current Profile Picture</label><br />
+                                @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                                {
+                                    <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="img-thumbnail mb-2" style="max-width: 150px; max-height: 150px;" />
+                                }
+                                else
+                                {
+                                    <p>No profile picture uploaded.</p>
+                                }
+
+                                <label asp-for="NewProfilePicture" class="form-label mt-3">Upload New Profile Picture</label>
+                                <input asp-for="NewProfilePicture" type="file" class="form-control" />
+                                <span asp-validation-for="NewProfilePicture" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label"></label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                    <option>Prefer not to say</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Birthday" class="form-label"></label>
+                                <input asp-for="Birthday" type="date" class="form-control" />
+                                <span asp-validation-for="Birthday" class="text-danger"></span>
+                            </div>
+
+                            <hr class="my-3" />
+
+                            <div class="col-md-12">
+                                <label asp-for="Street" class="form-label"></label>
+                                <input asp-for="Street" class="form-control" />
+                                <span asp-validation-for="Street" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="City" class="form-label"></label>
+                                <input asp-for="City" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Province" class="form-label"></label>
+                                <input asp-for="Province" class="form-control" />
+                                <span asp-validation-for="Province" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="PostalCode" class="form-label"></label>
+                                <input asp-for="PostalCode" class="form-control" />
+                                <span asp-validation-for="PostalCode" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Country" class="form-label"></label>
+                                <input asp-for="Country" class="form-control" />
+                                <span asp-validation-for="Country" class="text-danger"></span>
+                            </div>
+
+                            <hr class="my-3" />
+
+                            <div class="col-md-6">
+                                <label asp-for="XSocialLink" class="form-label"></label>
+                                <input asp-for="XSocialLink" class="form-control" />
+                                <span asp-validation-for="XSocialLink" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="InstagramSocialLink" class="form-label"></label>
+                                <input asp-for="InstagramSocialLink" class="form-control" />
+                                <span asp-validation-for="InstagramSocialLink" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="FacebookSocialLink" class="form-label"></label>
+                                <input asp-for="FacebookSocialLink" class="form-control" />
+                                <span asp-validation-for="FacebookSocialLink" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="YoutubeSocialLink" class="form-label"></label>
+                                <input asp-for="YoutubeSocialLink" class="form-control" />
+                                <span asp-validation-for="YoutubeSocialLink" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="TwitchSocialLink" class="form-label"></label>
+                                <input asp-for="TwitchSocialLink" class="form-control" />
+                                <span asp-validation-for="TwitchSocialLink" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success px-5 text-light">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab">
+                    <form asp-action="Settings" method="post" class="mx-auto" style="max-width: 800px;">
+                        <h4 class="mb-4 border-bottom pb-2">Account Settings</h4>
+
+                        <div class="mb-4">
+                            <h5>Password Reset</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="CurrentPassword" class="form-label">Current Password</label>
+                                    <input asp-for="CurrentPassword" class="form-control" type="password" />
+                                    <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6"></div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="NewPassword" class="form-label">New Password</label>
+                                    <input asp-for="NewPassword" class="form-control" type="password" />
+                                    <span asp-validation-for="NewPassword" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="ConfirmNewPassword" class="form-label">Confirm New Password</label>
+                                    <input asp-for="ConfirmNewPassword" class="form-control" type="password" />
+                                    <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="mb-4">
+                            <h5>Profile Visibility</h5>
+                            <div class="form-check form-switch">
+                                <input asp-for="IsPublic" class="form-check-input" type="checkbox" role="switch" />
+                                <label asp-for="IsPublic" class="form-check-label">
+                                    Make my profile public
+                                </label>
+                            </div>
+                            <span asp-validation-for="IsPublic" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="mb-4">
+                            <h5>Two-Factor Authentication</h5>
+                            @if (Model.TwoFactorEnabled)
+                            {
+                                <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
+                                <button type="submit" name="Disable2FA" class="btn btn-warning">Disable 2FA</button>
+                            }
+                            else
+                            {
+                                <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
+                                <button type="submit" name="Enable2FA" class="btn btn-primary">Enable 2FA</button>
+                            }
+                        </div>
+
+                        <div class="mb-4 border-top pt-4">
+                            <h5 class="text-danger">Delete Account</h5>
+                            <p class="text-muted">This action is irreversible. All your data will be permanently deleted.</p>
+                            <button type="submit" name="DeleteAccount" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                                Delete My Account
+                            </button>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success text-light">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
