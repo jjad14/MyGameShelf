@@ -238,8 +238,11 @@ public class ProfileController : Controller
             return View("Settings", await LoadEditProfileViewModel(user));
         }
 
-        // Delete Profile Picture
-        await _photoService.DeletePhotoAsync(profileId);
+        if (!String.IsNullOrEmpty(profileId))
+        {
+            // Delete Profile Picture
+            await _photoService.DeletePhotoAsync(profileId);
+        }
 
         await _signInManager.SignOutAsync();
 
