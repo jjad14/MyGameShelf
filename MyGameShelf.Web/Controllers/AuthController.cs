@@ -42,7 +42,6 @@ public class AuthController : Controller
         }
 
         // Check if user already exists by email or username
-        // Check if email or username already taken
         if (await _userManager.FindByEmailAsync(registerViewModel.Email) != null)
         {
             ModelState.AddModelError(string.Empty, "An account with this email already exists.");
@@ -55,6 +54,7 @@ public class AuthController : Controller
             return View(registerViewModel);
         }
 
+        // Photo info
         string? photoUrl = null;
         string? photoUrlId = null;
         PhotoUploadResult? uploadResult = null;
@@ -106,8 +106,10 @@ public class AuthController : Controller
             LastActive = DateTime.Now
         };
 
+        // Create User
         var result = await _userManager.CreateAsync(user, registerViewModel.Password);
 
+        // If creation fails return error messages
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -149,6 +151,7 @@ public class AuthController : Controller
             ? await _userManager.FindByEmailAsync(loginViewModel.EmailOrUsername)
             : await _userManager.FindByNameAsync(loginViewModel.EmailOrUsername);
 
+        // If no user exists return error message
         if (user == null) 
         {
             TempData["ErrorMessage"] = "Invalid login attempt.";
@@ -159,19 +162,84 @@ public class AuthController : Controller
         var result = await _signInManager.PasswordSignInAsync(
             user.UserName!, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: false);
 
+        // Check if user's email is not confirmed, if no then it wont be allowed
+        if (result.IsNotAllowed)
+        {
+            // User email is not confirmed
+            TempData["ErrorMessage"] = "You need to confirm your email before you can log in.";
+            return RedirectToAction("Login");
+        }
+
+        // Check if User has 2FA enabled
+        if (result.RequiresTwoFactor)
+        {
+            // Redirect to 2FA verification page with returnUrl and RememberMe info
+            return RedirectToAction("LoginWith2fa", new { returnUrl, loginViewModel.RememberMe });
+        }
+
+        // Check if User is locked out
+        if (result.IsLockedOut)
+        {
+            // Handle lockout case (optional)
+            TempData["ErrorMessage"] = "User account locked out.";
+            return RedirectToAction("Login");
+        }
+
+        // Check if login succeded
         if (!result.Succeeded)
         {
             TempData["ErrorMessage"] = "Invalid login attempt.";
             return RedirectToAction("Login");
         }
 
-        //user.LastActive = DateTime.UtcNow;
-        //await _userManager.UpdateAsync(user);
-
-
+        // Check if there is a redirectURL - if so use this instead of the default redirection
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
+        }
+
+        return RedirectToAction("Index", "Games");
+    }
+
+
+    [HttpGet]
+    public IActionResult LoginWith2fa(string returnUrl = null, bool rememberMe = false)
+    {
+        var model = new LoginWith2faViewModel { ReturnUrl = returnUrl, RememberMe = rememberMe };
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // sign in via 2FA, requires two factor code
+        var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(
+            model.TwoFactorCode, model.RememberMe, rememberClient: model.RememberMachine);
+
+        // if user is locked out
+        if (result.IsLockedOut)
+        {
+            TempData["ErrorMessage"] = "User account locked out.";
+            return RedirectToAction("Login");
+        }
+
+        // if 2fa auth fails
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+            return View(model);
+        }
+
+        // Check for redirect URL
+        if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+        {
+            return Redirect(model.ReturnUrl);
         }
 
         return RedirectToAction("Index", "Games");

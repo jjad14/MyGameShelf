@@ -41,7 +41,7 @@
             </ul>
             <div class="tab-content pt-4" id="settingsTabsContent">
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                    <form asp-action="Settings" method="post" enctype="multipart/form-data">
+                    <form asp-action="UpdateProfileSettings" method="post" enctype="multipart/form-data">
                         @* Validation summary *@
                         @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
                         {
@@ -169,8 +169,25 @@
                 </div>
 
                 <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab">
-                    <form asp-action="Settings" method="post" class="mx-auto" style="max-width: 800px;">
+
+                    @* Main form for password & profile visibility *@
+                    <form asp-action="UpdateAccountSettings" method="post" class="mx-auto" style="max-width: 800px;">
                         <h4 class="mb-4 border-bottom pb-2">Account Settings</h4>
+
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
 
                         <div class="mb-4">
                             <h5>Password Reset</h5>
@@ -209,35 +226,44 @@
                             <span asp-validation-for="IsPublic" class="text-danger"></span>
                         </div>
 
-                        <hr />
-
-                        <div class="mb-4">
-                            <h5>Two-Factor Authentication</h5>
-                            @if (Model.TwoFactorEnabled)
-                            {
-                                <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
-                                <button type="submit" name="Disable2FA" class="btn btn-warning">Disable 2FA</button>
-                            }
-                            else
-                            {
-                                <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
-                                <button type="submit" name="Enable2FA" class="btn btn-primary">Enable 2FA</button>
-                            }
-                        </div>
-
-                        <div class="mb-4 border-top pt-4">
-                            <h5 class="text-danger">Delete Account</h5>
-                            <p class="text-muted">This action is irreversible. All your data will be permanently deleted.</p>
-                            <button type="submit" name="DeleteAccount" class="btn btn-danger"
-                                    onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
-                                Delete My Account
-                            </button>
-                        </div>
-
                         <div class="text-end">
                             <button type="submit" class="btn btn-success text-light">Save Changes</button>
                         </div>
                     </form>
+
+                    <hr />
+
+                    @* Separate form for Two-Factor Authentication *@
+                    <form asp-action="ToggleTwoFactorAuthentication" method="post" class="mx-auto" style="max-width: 800px;">
+                        <h5>Two-Factor Authentication</h5>
+                        @if (Model.TwoFactorEnabled)
+                        {
+                            <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
+                            @* <button type="submit" name="actionType" value="disable" class="btn btn-warning">Disable 2FA</button> *@
+
+                            <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">Enable 2FA</a>
+                        }
+                        else
+                        {
+                            <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
+                            @* <button type="submit" name="actionType" value="enable" class="btn btn-primary">Enable 2FA</button> *@
+                            <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">Enable 2FA</a>
+
+                        }
+                    </form>
+
+                    <hr />
+
+                    @* Separate form for Delete Account *@
+                    <form asp-action="DeleteAccount" method="post" class="mx-auto" style="max-width: 800px;">
+                        <h5 class="text-danger">Delete Account</h5>
+                        <p class="text-muted">This action is irreversible. All your data will be permanently deleted.</p>
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                            Delete My Account
+                        </button>
+                    </form>
+
                 </div>
 
 

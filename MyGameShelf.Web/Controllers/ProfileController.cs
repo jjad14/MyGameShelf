@@ -13,11 +13,13 @@ namespace MyGameShelf.Web.Controllers;
 public class ProfileController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IPhotoService _photoService;
 
-    public ProfileController(UserManager<ApplicationUser> userManager, IPhotoService photoService)
+    public ProfileController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IPhotoService photoService)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _photoService = photoService;
     }
 
@@ -62,7 +64,8 @@ public class ProfileController : Controller
         return View(model);
     }
 
-    [HttpGet]
+
+    [HttpGet("settings")]
     public async Task<IActionResult> Settings() 
     {
         var user = await _userManager.Users
@@ -74,34 +77,15 @@ public class ProfileController : Controller
             return NotFound();
         }
 
-        var model = new EditProfileViewModel
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            ProfileMessage = user.ProfileMessage,
-            ProfilePictureUrl = user.ProfilePictureUrl,
-            Gender = user.Gender,
-            Birthday = user.Birthday,
-            Street = user.Address.Street,
-            City = user.Address.City,
-            Province = user.Address.Province,
-            PostalCode = user.Address.PostalCode,
-            Country = user.Address.Country,
-            XSocialLink = user.XSocialLink,
-            InstagramSocialLink = user.InstagramSocialLink,
-            FacebookSocialLink = user.FacebookSocialLink,
-            YoutubeSocialLink = user.YoutubeSocialLink,
-            TwitchSocialLink = user.TwitchSocialLink,
-            IsPublic = user.IsPublic,
-            TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user)
-        };
+        var model = await LoadEditProfileViewModel(user);
 
         return View(model);
     }
 
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Settings(EditProfileViewModel editProfileViewModel)
+    public async Task<IActionResult> UpdateProfileSettings(EditProfileViewModel editProfileViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -174,6 +158,250 @@ public class ProfileController : Controller
         //return RedirectToAction("Index", new { username = user.UserName });
         return RedirectToAction("Settings");
 
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateAccountSettings(EditProfileViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // Update profile visibility
+        user.IsPublic = model.IsPublic;
+
+        // Change password if provided
+        if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
+        {
+            var changePassResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (!changePassResult.Succeeded)
+            {
+                foreach (var error in changePassResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View("Settings", model);
+            }
+        }
+
+        var updateResult = await _userManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
+        {
+            foreach (var error in updateResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View("Settings", model);
+        }
+
+        TempData["SuccessMessage"] = "Account settings updated successfully.";
+
+        return RedirectToAction("Settings");
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+
+        var profileId = user.ProfilePicturePublicId;
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View("Settings", await LoadEditProfileViewModel(user));
+        }
+
+        await _photoService.DeletePhotoAsync(profileId);
+
+        await _signInManager.SignOutAsync();
+
+        return RedirectToAction("Index", "Home");
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleTwoFactorAuthentication(string actionType) // actionType = "enable" or "disable"
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        if (actionType == "enable")
+        {
+            var result = await _userManager.SetTwoFactorEnabledAsync(user, true);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Two-Factor Authentication enabled.";
+
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+        }
+        else if (actionType == "disable")
+        {
+            var result = await _userManager.SetTwoFactorEnabledAsync(user, false);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Two-Factor Authentication disabled.";
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+            }
+        }
+        else
+        {
+            ModelState.AddModelError(string.Empty, "Invalid action.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View("Settings", await LoadEditProfileViewModel(user));
+        }
+
+        return RedirectToAction("Settings");
+    }
+
+
+    [HttpGet("setup2fa")]
+    public async Task<IActionResult> Setup2FA()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+        if (string.IsNullOrEmpty(unformattedKey))
+        {
+            await _userManager.ResetAuthenticatorKeyAsync(user);
+            unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+        }
+
+        var email = await _userManager.GetEmailAsync(user);
+        var sharedKey = FormatKey(unformattedKey);
+        var authenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+
+        var model = new TwoFactorSetupViewModel
+        {
+            SharedKey = sharedKey,
+            AuthenticatorUri = authenticatorUri
+        };
+
+        return View(model);
+    }
+
+    [HttpPost("setup2fa")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Setup2FA(TwoFactorSetupViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // Always re-populate these, because they're not posted from the form
+        var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+        var email = await _userManager.GetEmailAsync(user);
+        model.SharedKey = FormatKey(unformattedKey);
+        model.AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var is2FATokenValid = await _userManager.VerifyTwoFactorTokenAsync(
+            user, _userManager.Options.Tokens.AuthenticatorTokenProvider, model.VerificationCode);
+
+        if (!is2FATokenValid)
+        {
+            ModelState.AddModelError(nameof(model.VerificationCode), "Invalid verification code.");
+            return View(model);
+        }
+
+        await _userManager.SetTwoFactorEnabledAsync(user, true);
+        TempData["SuccessMessage"] = "Two-Factor Authentication has been enabled.";
+        return RedirectToAction("Settings");
+    }
+
+    private async Task<EditProfileViewModel> LoadEditProfileViewModel(ApplicationUser user)
+    {
+        return new EditProfileViewModel
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            ProfileMessage = user.ProfileMessage,
+            ProfilePictureUrl = user.ProfilePictureUrl,
+            Gender = user.Gender,
+            Birthday = user.Birthday,
+            Street = user.Address.Street,
+            City = user.Address.City,
+            Province = user.Address.Province,
+            PostalCode = user.Address.PostalCode,
+            Country = user.Address.Country,
+            XSocialLink = user.XSocialLink,
+            InstagramSocialLink = user.InstagramSocialLink,
+            FacebookSocialLink = user.FacebookSocialLink,
+            YoutubeSocialLink = user.YoutubeSocialLink,
+            TwitchSocialLink = user.TwitchSocialLink,
+            IsPublic = user.IsPublic,
+            TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user)
+        };
+    }
+
+
+    private string FormatKey(string unformattedKey)
+    {
+        return string.Join(" ", Enumerable.Range(0, unformattedKey.Length / 4)
+            .Select(i => unformattedKey.Substring(i * 4, 4)));
+    }
+
+    private string GenerateQrCodeUri(string email, string unformattedKey)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(unformattedKey))
+            return string.Empty;
+
+        return string.Format(
+            "otpauth://totp/{0}?secret={1}&issuer={2}&digits=6",
+            Uri.EscapeDataString("MyGameShelf:" + email),
+            unformattedKey,
+            Uri.EscapeDataString("MyGameShelf"));
     }
 
 }

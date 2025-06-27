@@ -1,0 +1,42 @@
+﻿@using MyGameShelf.Web.ViewModels
+@model LoginWith2faViewModel
+
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+}
+
+<div class="container mt-5" style="max-width: 400px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Two-Factor Authentication</h4>
+        </div>
+        <div class="card-body">
+            <p>Please enter the 6-digit code from your authenticator app.</p>
+
+            <form asp-action="LoginWith2fa" method="post" novalidate>
+                <div class="mb-3">
+                    <label asp-for="TwoFactorCode" class="form-label"></label>
+                    <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" autofocus />
+                    <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="RememberMachine" class="form-check-input" type="checkbox" />
+                    <label asp-for="RememberMachine" class="form-check-label">Remember this machine</label>
+                </div>
+
+                <input asp-for="RememberMe" type="hidden" />
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-action="Login" class="btn btn-secondary">Back to Login</a>
+                    <button type="submit" class="btn btn-primary">Verify</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

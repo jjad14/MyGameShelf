@@ -1,0 +1,62 @@
+﻿@using MyGameShelf.Web.ViewModels
+
+@model TwoFactorSetupViewModel
+@{
+    ViewData["Title"] = "Set Up Two-Factor Authentication";
+}
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Two-Factor Authentication Setup</h4>
+        </div>
+        <div class="card-body">
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p>@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+
+            <p>Scan the QR code below using your authenticator app (e.g., Google Authenticator or Microsoft Authenticator):</p>
+
+            @if (!string.IsNullOrEmpty(Model.AuthenticatorUri))
+            {
+                <div class="text-center mb-4">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?data=@Uri.EscapeDataString(Model.AuthenticatorUri)&size=200x200" alt="QR Code" />
+                </div>
+            }
+
+
+            <p class="text-center text-muted">
+                Or enter this code manually: <strong>@Model.SharedKey</strong>
+            </p>
+
+            <form asp-action="Setup2FA" method="post">
+                <div class="mb-3">
+                    <label asp-for="VerificationCode" class="form-label">Enter 6-digit code from your app</label>
+                    <input asp-for="VerificationCode" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="VerificationCode" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Settings" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success text-light">Enable 2FA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
