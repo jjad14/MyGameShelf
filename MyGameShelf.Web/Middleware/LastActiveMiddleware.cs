@@ -14,6 +14,7 @@ public class LastActiveMiddleware
 
     public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager)
     {
+        // if user is authenticated, update Last Active timestamp
         if (context.User.Identity?.IsAuthenticated == true)
         {
             var user = await userManager.GetUserAsync(context.User);
@@ -25,6 +26,7 @@ public class LastActiveMiddleware
             }
         }
 
+        // Return to request pipeline
         await _next(context);
     }
 }
