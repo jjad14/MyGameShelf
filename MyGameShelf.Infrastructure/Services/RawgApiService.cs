@@ -158,12 +158,12 @@ public class RawgApiService : IRawgApiService
         {
             query["ordering"] = orderBy;
         }
-        else
-        {
-            query["ordering"] = "-released";
-        }
+        //else
+        //{
+        //    query["ordering"] = "-released";
+        //}
 
-            query["page"] = page.ToString();
+        query["page"] = page.ToString();
         query["page_size"] = pageSize.ToString();
 
         string url = $"https://api.rawg.io/api/games?{query}&search_precise=true";

@@ -1,6 +1,8 @@
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Infrastructure.Data;
@@ -19,8 +21,20 @@ builder.Services.Configure<RawgSettings>(builder.Configuration.GetSection("RawgS
 builder.Services.AddHttpClient<IRawgApiService, RawgApiService>();
 
 // Cloudinary
-builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.AddSingleton<Cloudinary>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+
+    var account = new Account(
+        settings.CloudName,
+        settings.ApiKey,
+        settings.ApiSecret
+    );
+
+    return new Cloudinary(account);
+});
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 
 
 // Add DbContext to the DI container
