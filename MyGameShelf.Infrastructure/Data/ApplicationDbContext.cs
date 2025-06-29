@@ -58,6 +58,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         // Configure UserGame relationships
         modelBuilder.Entity<UserGame>()
+            .HasIndex(ug => new { ug.UserId, ug.GameId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserGame>()
             .HasOne(ug => ug.Game)
             .WithMany(g => g.UserGames)
             .HasForeignKey(ug => ug.GameId)

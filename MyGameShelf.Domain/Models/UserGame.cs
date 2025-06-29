@@ -15,15 +15,40 @@ public class UserGame
     [Key]
     public int Id { get; set; }
 
-    public string UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
     [ForeignKey("Game")]
     public int GameId { get; set; }
-    public Game Game { get; set; }
+    public Game? Game { get; set; }
 
     public GameStatus Status { get; set; }
 
-    public DateTime AddedOn { get; set; } = DateTime.UtcNow;
+    public DateTime AddedOn { get; } = DateTime.UtcNow;
 
-    public double? Difficulty { get; set; } // Global difficulty score (1-10) aggregated from user inputs
+    public double? Difficulty { get; private set; } // Global difficulty score (1-10) aggregated from user inputs
+
+    // Enforce required initial state
+    public UserGame(string userId, int gameId)
+    {
+        UserId = userId;
+        GameId = gameId;
+        Status = GameStatus.Playing; // enforced default
+        AddedOn = DateTime.UtcNow;
+    }
+
+    // Parameterless constructor for EF Core
+    private UserGame() { }
+
+    public void SetDifficulty(double? difficulty)
+    {
+        if (difficulty.HasValue)
+        {
+            if (difficulty < 1.0 || difficulty > 10.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(difficulty), "Difficulty must be between 1.0 and 10.0 inclusive.");
+            }
+        }
+
+        Difficulty = difficulty;
+    }
 }
