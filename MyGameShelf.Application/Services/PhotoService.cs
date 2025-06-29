@@ -1,7 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Interfaces;
@@ -11,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyGameShelf.Infrastructure.Services;
+namespace MyGameShelf.Application.Services;
 public class PhotoService : IPhotoService
 {
     private readonly Cloudinary _cloudinary;

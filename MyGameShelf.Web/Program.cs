@@ -7,7 +7,7 @@ using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Infrastructure.Data;
 using MyGameShelf.Infrastructure.Identity;
-using MyGameShelf.Infrastructure.Services;
+using MyGameShelf.Application.Services;
 using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.Middleware;
 

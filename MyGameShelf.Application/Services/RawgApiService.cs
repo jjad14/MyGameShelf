@@ -1,5 +1,4 @@
-﻿using Azure;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.DTOs;
@@ -13,9 +12,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-namespace MyGameShelf.Infrastructure.Services;
+namespace MyGameShelf.Application.Services;
 public class RawgApiService : IRawgApiService
 {
     private readonly HttpClient _httpClient;
