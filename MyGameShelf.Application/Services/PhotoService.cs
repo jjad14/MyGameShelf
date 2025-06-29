@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.DTOs;
+using MyGameShelf.Application.Exceptions;
 using MyGameShelf.Application.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -22,48 +23,62 @@ public class PhotoService : IPhotoService
 
     public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file)
     {
-        // Check if file exist
-        if (file == null || file.Length == 0) 
+        try
         {
-            // Return null to indicate no photo was uploaded
-            return null;
+            // Check if file exist
+            if (file == null || file.Length == 0)
+            {
+                // Return null to indicate no photo was uploaded
+                return null;
+            }
+
+            // Open a stream to read the file contents
+            using var stream = file.OpenReadStream();
+
+            // Prepare parameters for the Cloudinary image upload
+            // Apply image transformation:
+            // Limit the image size to max 500x500 pixels without cropping
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Transformation = new Transformation().Height(500).Width(500).Crop("limit").Width(500).Height(500)
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            if (uploadResult.Error != null)
+            {
+                // Optionally handle or log errors here
+                return null;
+            }
+
+            // Return the result containing the secure URL and public ID of the uploaded image
+            return new PhotoUploadResult
+            {
+                Url = uploadResult.SecureUrl.ToString(),
+                PublicId = uploadResult.PublicId
+            };
         }
-
-        // Open a stream to read the file contents
-        using var stream = file.OpenReadStream();
-
-        // Prepare parameters for the Cloudinary image upload
-        // Apply image transformation:
-        // Limit the image size to max 500x500 pixels without cropping
-        var uploadParams = new ImageUploadParams
+        catch (Exception ex)
         {
-            File = new FileDescription(file.FileName, stream),
-            Transformation = new Transformation().Height(500).Width(500).Crop("limit").Width(500).Height(500)
-        };
-
-        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-        if (uploadResult.Error != null)
-        {
-            // Optionally handle or log errors here
-            return null;
+            throw new PhotoServiceException("Failed to upload image from Cloudinary.", ex);
         }
-
-        // Return the result containing the secure URL and public ID of the uploaded image
-        return new PhotoUploadResult
-        {
-            Url = uploadResult.SecureUrl.ToString(),
-            PublicId = uploadResult.PublicId
-        };
     }
 
     public async Task<bool> DeletePhotoAsync(string publicId)
     {
-        // Delete Cloudinary Photo using public ID - Stored in Users table
-        var deletionParams = new DeletionParams(publicId);
+        try
+        {
+            // Delete Cloudinary Photo using public ID - Stored in Users table
+            var deletionParams = new DeletionParams(publicId);
 
-        var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
+            var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
 
-        return deletionResult.Result == "ok";
+            return deletionResult.Result == "ok";
+        }
+        catch (Exception ex)
+        {
+            throw new PhotoServiceException("Failed to delete image from Cloudinary.", ex);
+        }
     }
 }
