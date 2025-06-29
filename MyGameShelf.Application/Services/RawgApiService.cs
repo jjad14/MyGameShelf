@@ -4,7 +4,7 @@ using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
-using MyGameShelf.Infrastructure.External.Rawg.Responses;
+using MyGameShelf.Application.External.Rawg.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;

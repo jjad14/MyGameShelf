@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace MyGameShelf.Infrastructure.External.Rawg.Responses;
+namespace MyGameShelf.Application.External.Rawg.Responses;
 
 // Reponses from RAWG API
 
