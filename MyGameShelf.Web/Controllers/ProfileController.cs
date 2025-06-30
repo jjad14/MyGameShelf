@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
+using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.ViewModels;
 
 namespace MyGameShelf.Web.Controllers;
@@ -392,10 +393,10 @@ public class ProfileController : BaseController
         var email = await _userManager.GetEmailAsync(user);
 
         // Format Key
-        var sharedKey = FormatKey(unformattedKey);
+        var sharedKey = QrCodeHelper.FormatKey(unformattedKey);
 
         // Generate QR Code using user email and Authenticator Key
-        var authenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+        var authenticatorUri = QrCodeHelper.GenerateQrCodeUri(email, unformattedKey);
 
         // Create View Model
         var model = new TwoFactorSetupViewModel
@@ -420,8 +421,8 @@ public class ProfileController : BaseController
         // Always re-populate these, because they're not posted from the form
         var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
         var email = await _userManager.GetEmailAsync(user);
-        model.SharedKey = FormatKey(unformattedKey);
-        model.AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+        model.SharedKey = QrCodeHelper.FormatKey(unformattedKey);
+        model.AuthenticatorUri = QrCodeHelper.GenerateQrCodeUri(email, unformattedKey);
 
         if (!ModelState.IsValid)
         {
@@ -511,24 +512,24 @@ public class ProfileController : BaseController
 
 
     // Helpers
-    private string FormatKey(string unformattedKey)
-    {
-        // Format key 4 character spaced
-        return string.Join(" ", Enumerable.Range(0, unformattedKey.Length / 4)
-            .Select(i => unformattedKey.Substring(i * 4, 4)));
-    }
+    //private string FormatKey(string unformattedKey)
+    //{
+    //    // Format key 4 character spaced
+    //    return string.Join(" ", Enumerable.Range(0, unformattedKey.Length / 4)
+    //        .Select(i => unformattedKey.Substring(i * 4, 4)));
+    //}
 
-    private string GenerateQrCodeUri(string email, string unformattedKey)
-    {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(unformattedKey))
-            return string.Empty;
+    //private string GenerateQrCodeUri(string email, string unformattedKey)
+    //{
+    //    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(unformattedKey))
+    //        return string.Empty;
 
-        // Return generated QR Code
-        return string.Format(
-            "otpauth://totp/{0}?secret={1}&issuer={2}&digits=6",
-            Uri.EscapeDataString("MyGameShelf:" + email),
-            unformattedKey,
-            Uri.EscapeDataString("MyGameShelf"));
-    }
+    //    // Return generated QR Code
+    //    return string.Format(
+    //        "otpauth://totp/{0}?secret={1}&issuer={2}&digits=6",
+    //        Uri.EscapeDataString("MyGameShelf:" + email),
+    //        unformattedKey,
+    //        Uri.EscapeDataString("MyGameShelf"));
+    //}
 
 }
