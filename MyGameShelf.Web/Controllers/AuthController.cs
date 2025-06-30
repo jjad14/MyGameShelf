@@ -7,6 +7,7 @@ using MyGameShelf.Application.Exceptions;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
+using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.ViewModels;
 using System.Security.Claims;
 
@@ -356,7 +357,7 @@ public class AuthController : BaseController
 
         // Need to create a user name using the email, since email syntax is not a valid username (@symbol)
         var baseUsername = email?.Split('@')[0] ?? "user";
-        var username = await GenerateUniqueUsername(baseUsername);
+        var username = await UserHelpers.GenerateUniqueUsername(_userManager, baseUsername);
 
         // Create new ApplicationUser
         var user = new ApplicationUser
@@ -405,21 +406,6 @@ public class AuthController : BaseController
         await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
         return RedirectToAction("Index", "Home");
-    }
-
-
-    private async Task<string> GenerateUniqueUsername(string baseUsername)
-    {
-        string username = baseUsername;
-        int suffix = 1;
-
-        while (await _userManager.FindByNameAsync(username) != null)
-        {
-            username = $"{baseUsername}{suffix}";
-            suffix++;
-        }
-
-        return username;
     }
 
 }
