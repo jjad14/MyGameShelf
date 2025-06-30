@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyGameShelf.Application.Interfaces;
+using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Web.ViewModels;
 
@@ -10,13 +11,14 @@ namespace MyGameShelf.Web.Controllers;
 
 [Authorize]
 [Route("profile")]
-public class ProfileController : Controller
+public class ProfileController : BaseController
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IPhotoService _photoService;
 
-    public ProfileController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IPhotoService photoService)
+    public ProfileController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, 
+        IPhotoService photoService, ILogger<BaseController> logger) : base(logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -24,196 +26,253 @@ public class ProfileController : Controller
     }
 
     [AllowAnonymous]
-    [HttpGet("profile/{username:regex(^[[a-zA-Z0-9_-]]+$)}")]
+    [HttpGet("{username:regex(^[[a-zA-Z0-9_-]]+$)}")]
     public async Task<IActionResult> Index(string username)
     {
-        if (string.IsNullOrEmpty(username))
-        { 
-            return NotFound();
-        }
-
-        var user = await _userManager.Users
-            .Include(u => u.Address)
-            .FirstOrDefaultAsync(u => u.UserName == username);
-
-        if (user == null)
-        { 
-            return NotFound();
-        }
-
-        var model = new ProfileViewModel
+        try
         {
-            Username = user.UserName,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            ProfilePictureUrl = user.ProfilePictureUrl,
-            ProfileMessage = user.ProfileMessage,
-            Gender = user.Gender,
-            Birthday = user.Birthday,
-            Address = user.Address,
-            XSocialLink = user.XSocialLink,
-            InstagramSocialLink = user.InstagramSocialLink,
-            FacebookSocialLink = user.FacebookSocialLink,
-            YoutubeSocialLink = user.YoutubeSocialLink,
-            TwitchSocialLink = user.TwitchSocialLink,
-            CreatedAt = user.CreatedAt,
-            LastActive = user.LastActive,
-            IsPublic = user.IsPublic,
-        };
+            if (string.IsNullOrEmpty(username))
+            {
+                return NotFoundView("User not found.", Url.Action("Index", "Games"));
+            }
 
-        return View(model);
+            var user = await _userManager.Users
+                .Include(u => u.Address)
+                .FirstOrDefaultAsync(u => u.UserName == username);
+
+            if (user == null)
+            {
+                return NotFoundView("User not found.", Url.Action("Index", "Games"));
+            }
+
+            var model = new ProfileViewModel
+            {
+                Username = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                ProfileMessage = user.ProfileMessage,
+                Gender = user.Gender,
+                Birthday = user.Birthday,
+                Address = user.Address,
+                XSocialLink = user.XSocialLink,
+                InstagramSocialLink = user.InstagramSocialLink,
+                FacebookSocialLink = user.FacebookSocialLink,
+                YoutubeSocialLink = user.YoutubeSocialLink,
+                TwitchSocialLink = user.TwitchSocialLink,
+                CreatedAt = user.CreatedAt,
+                LastActive = user.LastActive,
+                IsPublic = user.IsPublic,
+            };
+
+            return View(model);
+        }
+        catch (Exception)
+        {
+            return ErrorView(
+                "Something went wrong while loading this profile.",
+                Url.Action("Index", "Home"),
+                "Back to Game List"
+            );
+        }
+
     }
 
 
     [HttpGet("settings")]
     public async Task<IActionResult> Settings() 
     {
-        var user = await _userManager.Users
-            .Include(u => u.Address)
-            .FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
-
-        if (user == null || user.Address == null)
+        try
         {
-            return NotFound();
+            var user = await _userManager.Users
+                .Include(u => u.Address)
+                .FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+
+            if (user == null || user.Address == null)
+            {
+                string username = User.Identity?.Name ?? string.Empty;
+
+                var returnUrl = Url.Action("Index", "Profile", new { username });
+
+                return NotFoundView("User not found.", returnUrl);
+            }
+
+            // Get EditProfileViewModel with all properties from user
+            var model = await LoadEditProfileViewModel(user);
+
+            return View(model);
+        }
+        catch (Exception)
+        {
+            string username = User.Identity?.Name ?? string.Empty;
+
+            var returnUrl = Url.Action("Index", "Profile", new { username }); // assumes your action is named "Index"
+            return ErrorView(
+                "Something went wrong while loading this profile's settings.",
+                returnUrl,
+                "Back to Profile"
+            );
         }
 
-        // Get EditProfileViewModel with all properties from user
-        var model = await LoadEditProfileViewModel(user);
-
-        return View(model);
     }
 
 
-    [HttpPost]
+    [HttpPost("update-profile")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProfileSettings(EditProfileViewModel editProfileViewModel)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            // Return view with validation errors
-            return View(editProfileViewModel);
-        }
-
-        // Get the current user with related Address navigation property
-        var user = await _userManager.Users
-            .Include(u => u.Address)
-            .FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        // Update profile picture if new one uploaded
-        if (editProfileViewModel.NewProfilePicture != null)
-        {
-            // Delete old picture using publicId
-            if (!string.IsNullOrEmpty(user.ProfilePicturePublicId))
+            if (!ModelState.IsValid)
             {
-                await _photoService.DeletePhotoAsync(user.ProfilePicturePublicId);
+                TempData["ErrorMessage"] = "Invalid Profile Details";
+                return View("Settings", editProfileViewModel);
             }
 
-            // Upload new photo
-            var uploadResult = await _photoService.AddPhotoAsync(editProfileViewModel.NewProfilePicture);
-            user.ProfilePictureUrl = uploadResult.Url;
-            user.ProfilePicturePublicId = uploadResult.PublicId;
-        }
+            // Get the current user with related Address navigation property
+            var user = await _userManager.Users
+                .Include(u => u.Address)
+                .FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
 
-        // Update other user fields
-        user.FirstName = editProfileViewModel.FirstName;
-        user.LastName = editProfileViewModel.LastName;
-        user.ProfileMessage = editProfileViewModel.ProfileMessage;
-        user.Gender = editProfileViewModel.Gender;
-        user.Birthday = editProfileViewModel.Birthday;
-
-        // Update Address
-        user.Address.Street = editProfileViewModel.Street;
-        user.Address.City = editProfileViewModel.City;
-        user.Address.Province = editProfileViewModel.Province;
-        user.Address.PostalCode = editProfileViewModel.PostalCode;
-        user.Address.Country = editProfileViewModel.Country;
-
-        // Update social links
-        user.XSocialLink = editProfileViewModel.XSocialLink;
-        user.InstagramSocialLink = editProfileViewModel.InstagramSocialLink;
-        user.FacebookSocialLink = editProfileViewModel.FacebookSocialLink;
-        user.YoutubeSocialLink = editProfileViewModel.YoutubeSocialLink;
-        user.TwitchSocialLink = editProfileViewModel.TwitchSocialLink;
-
-        // Update User
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        if (!updateResult.Succeeded)
-        {
-            foreach (var error in updateResult.Errors)
+            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                return NotFoundView("User not found.", Url.Action("Index", "Games"));
             }
-            return View(editProfileViewModel);
+
+            // Update profile picture if new one uploaded
+            if (editProfileViewModel.NewProfilePicture != null)
+            {
+                // Delete old picture using publicId
+                if (!string.IsNullOrEmpty(user.ProfilePicturePublicId))
+                {
+                    await _photoService.DeletePhotoAsync(user.ProfilePicturePublicId);
+                }
+
+                // Upload new photo
+                var uploadResult = await _photoService.AddPhotoAsync(editProfileViewModel.NewProfilePicture);
+                user.ProfilePictureUrl = uploadResult.Url;
+                user.ProfilePicturePublicId = uploadResult.PublicId;
+            }
+
+            // Update other user fields
+            user.FirstName = editProfileViewModel.FirstName;
+            user.LastName = editProfileViewModel.LastName;
+            user.ProfileMessage = editProfileViewModel.ProfileMessage;
+            user.Gender = editProfileViewModel.Gender;
+            user.Birthday = editProfileViewModel.Birthday;
+
+            // Update Address
+            user.Address.Street = editProfileViewModel.Street;
+            user.Address.City = editProfileViewModel.City;
+            user.Address.Province = editProfileViewModel.Province;
+            user.Address.PostalCode = editProfileViewModel.PostalCode;
+            user.Address.Country = editProfileViewModel.Country;
+
+            // Update social links
+            user.XSocialLink = editProfileViewModel.XSocialLink;
+            user.InstagramSocialLink = editProfileViewModel.InstagramSocialLink;
+            user.FacebookSocialLink = editProfileViewModel.FacebookSocialLink;
+            user.YoutubeSocialLink = editProfileViewModel.YoutubeSocialLink;
+            user.TwitchSocialLink = editProfileViewModel.TwitchSocialLink;
+
+            // Update User
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                //return View(editProfileViewModel);
+                return View("Settings", editProfileViewModel);
+            }
+
+            // Set a success message (TempData, ViewData, etc.)
+            TempData["SuccessMessage"] = "Profile updated successfully.";
+
+            // Redirect back to profile page
+            //return RedirectToAction("Index", new { username = user.UserName });
+            return RedirectToAction("Settings");
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "Profile failed to update.";
+
+            return View("Settings", editProfileViewModel);
         }
 
-        // Set a success message (TempData, ViewData, etc.)
-        TempData["SuccessMessage"] = "Profile updated successfully.";
-
-        // Redirect back to profile page
-        //return RedirectToAction("Index", new { username = user.UserName });
-        return RedirectToAction("Settings");
 
     }
 
 
-    [HttpPost]
+    [HttpPost("update-account")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateAccountSettings(EditProfileViewModel model)
     {
-        var user = await _userManager.GetUserAsync(User);
-
-        if (user == null)
+        try
         {
-            return NotFound();
-        }
-
-        // Update profile visibility
-        user.IsPublic = model.IsPublic;
-
-        // Change password if provided
-        if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
-        {
-            var changePassResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-
-            if (!changePassResult.Succeeded)
+            if (!ModelState.IsValid)
             {
-                foreach (var error in changePassResult.Errors)
+                TempData["ErrorMessage"] = "Invalid Account Details";
+                return View("Settings", model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return NotFoundView("User not found.", Url.Action("Index", "Games"));
+            }
+
+            // Update profile visibility
+            user.IsPublic = model.IsPublic;
+
+            // Change password if provided
+            if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
+            {
+                var changePassResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+                if (!changePassResult.Succeeded)
+                {
+                    foreach (var error in changePassResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    return View("Settings", model);
+                }
+            }
+
+            // Update User
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            // Check if update succeded
+            if (!updateResult.Succeeded)
+            {
+                // Return Model State errors
+                foreach (var error in updateResult.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
 
                 return View("Settings", model);
             }
+
+            TempData["SuccessMessage"] = "Account settings updated successfully.";
+
+            return RedirectToAction("Settings");
         }
-
-        // Update User
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        // Check if update succeded
-        if (!updateResult.Succeeded)
+        catch (Exception)
         {
-            // Return Model State errors
-            foreach (var error in updateResult.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+            TempData["ErrorMessage"] = "Account failed to update.";
 
             return View("Settings", model);
         }
-
-        TempData["SuccessMessage"] = "Account settings updated successfully.";
-
-        return RedirectToAction("Settings");
     }
 
 
-    [HttpPost]
+    [HttpPost("delete-account")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteAccount()
     {
@@ -221,7 +280,7 @@ public class ProfileController : Controller
 
         if (user == null)
         {
-            return NotFound();
+            return NotFoundView("User not found.", Url.Action("Index", "Games"));
         }
 
         // Save profile picture ID
@@ -252,7 +311,7 @@ public class ProfileController : Controller
     }
 
 
-    [HttpPost]
+    [HttpPost("toggle-two-factor")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleTwoFactorAuthentication(string actionType) // actionType = "enable" or "disable"
     {
@@ -412,6 +471,8 @@ public class ProfileController : Controller
     }
 
 
+
+    // Helpers
     private string FormatKey(string unformattedKey)
     {
         // Format key 4 character spaced

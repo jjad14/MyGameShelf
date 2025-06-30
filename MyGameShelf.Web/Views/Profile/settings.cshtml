@@ -20,11 +20,6 @@
                 </div>
             }
 
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-            }
-
             <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
@@ -41,7 +36,7 @@
             </ul>
             <div class="tab-content pt-4" id="settingsTabsContent">
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                    <form asp-action="UpdateProfileSettings" method="post" enctype="multipart/form-data">
+                    <form asp-controller="Profile" asp-action="update-profile" method="post" enctype="multipart/form-data">
                         @* Validation summary *@
                         @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
                         {
@@ -51,6 +46,16 @@
                                     <p>@error.ErrorMessage</p>
                                 }
                             </div>
+                        }
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
                         }
 
                         <div class="row g-3">
@@ -171,7 +176,7 @@
                 <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab">
 
                     @* Main form for password & profile visibility *@
-                    <form asp-action="UpdateAccountSettings" method="post" class="mx-auto" style="max-width: 800px;">
+                    <form asp-controller="Profile" asp-action="update-account" method="post" class="mx-auto" style="max-width: 800px;">
                         <h4 class="mb-4 border-bottom pb-2">Account Settings</h4>
 
                         @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
@@ -187,6 +192,11 @@
                         @if (TempData["SuccessMessage"] != null)
                         {
                             <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
                         }
 
                         @if (Model.HasPassword)
@@ -240,7 +250,7 @@
                     @if (!Model.IsExternalLogin)
                     {
                         @* Separate form for Two-Factor Authentication *@
-                        <form asp-action="ToggleTwoFactorAuthentication" method="post" class="mx-auto" style="max-width: 800px;">
+                        <form asp-controller="Profile" asp-action="toggle-two-factor" method="post" class="mx-auto" style="max-width: 800px;">
                             <h5>Two-Factor Authentication</h5>
     
                             @if (Model.TwoFactorEnabled)
@@ -265,7 +275,7 @@
                     }
 
                     @* Separate form for Delete Account *@
-                    <form asp-action="DeleteAccount" method="post" class="mx-auto" style="max-width: 800px;">
+                    <form asp-controller="Profile" asp-action="delete-account" method="post" class="mx-auto" style="max-width: 800px;">
                         <h5 class="text-danger">Delete Account</h5>
                         <p class="text-muted">This action is irreversible. All your data will be permanently deleted.</p>
                         <button type="submit" class="btn btn-danger"

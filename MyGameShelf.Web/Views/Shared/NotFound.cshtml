@@ -1,15 +1,15 @@
 ﻿@{
-    ViewData["Title"] = "Error";
-    string errorMessage = ViewBag.ErrorMessage as string ?? "An unexpected error occurred. Please try again later.";
+    ViewData["Title"] = "Page Not Found";
+    string message = ViewBag.Message as string ?? "Sorry, the page you are looking for could not be found.";
     string redirectUrl = ViewBag.RedirectUrl as string ?? Url.Action("Index", "Home");
-    string redirectText = ViewBag.RedirectText as string ?? "Go Back";
+    string redirectText = ViewBag.RedirectText as string ?? "Return Home";
 }
 
 <div class="container d-flex justify-content-center mt-5 px-3">
     <div class="card w-100 shadow-lg" style="max-width: 900px;">
         <div class="card-body text-center p-5">
-            <h2 class="card-title text-danger mb-4">Oops! Something went wrong</h2>
-            <p class="card-text fs-5 mb-4">@errorMessage</p>
+            <h2 class="card-title text-danger mb-4">404 - Not Found</h2>
+            <p class="card-text fs-5 mb-4">@message</p>
             <a class="btn btn-lg btn-primary" href="@redirectUrl">@redirectText</a>
         </div>
     </div>

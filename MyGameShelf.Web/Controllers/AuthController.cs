@@ -9,7 +9,7 @@ using MyGameShelf.Web.ViewModels;
 using System.Security.Claims;
 
 namespace MyGameShelf.Web.Controllers;
-public class AuthController : Controller
+public class AuthController : BaseController
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
@@ -19,7 +19,7 @@ public class AuthController : Controller
     public AuthController(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
-            IPhotoService photoService)
+            IPhotoService photoService, ILogger<BaseController> logger) : base(logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -337,8 +337,6 @@ public class AuthController : Controller
 
         return RedirectToLocal(returnUrl);
     }
-
-
 
     [Authorize]
     [HttpGet]

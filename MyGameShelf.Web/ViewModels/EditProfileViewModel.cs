@@ -72,16 +72,16 @@ public class EditProfileViewModel
 
     [DataType(DataType.Password)]
     [DisplayName("Current Password")]
-    public string CurrentPassword { get; set; }
+    public string? CurrentPassword { get; set; }
 
     [DataType(DataType.Password)]
     [DisplayName("New Password")]
-    public string NewPassword { get; set; }
+    public string? NewPassword { get; set; }
 
     [DataType(DataType.Password)]
     [DisplayName("Confirm New Password")]
     [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
-    public string ConfirmNewPassword { get; set; }
+    public string? ConfirmNewPassword { get; set; }
 
 
     // Props to check if user was signed in locally or google auth

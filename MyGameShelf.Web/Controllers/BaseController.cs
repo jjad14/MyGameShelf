@@ -38,6 +38,25 @@ public abstract class BaseController : Controller
         }
     }
 
+    protected IActionResult NotFoundView(string message = "Resource not found", string? redirectUrl = null)
+    {
+        return ErrorView(
+            message,
+            redirectUrl ?? Url.Action("Index", "Home"),
+            "Return Back"
+        );
+    }
+
+    // Handle Error views
+    protected IActionResult ErrorView(string errorMessage, string redirectUrl, string redirectText)
+    {
+        ViewBag.ErrorMessage = errorMessage;
+        ViewBag.RedirectUrl = redirectUrl;
+        ViewBag.RedirectText = redirectText;
+
+        return View("Error"); // assumes Error.cshtml is in Shared or current controller's Views folder
+    }
+
     // Set a flash message to display after redirect:
     protected void SetTempDataMessage(string message, string type = "info")
     {

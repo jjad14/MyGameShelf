@@ -139,6 +139,15 @@ app.UseMiddleware<LastActiveMiddleware>();
 
 app.UseAuthorization();
 
+// Catch all unhandled 404s:
+app.UseStatusCodePages(async context =>
+{
+    if (context.HttpContext.Response.StatusCode == 404)
+    {
+        context.HttpContext.Response.Redirect("/Error/NotFound");
+    }
+});
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
