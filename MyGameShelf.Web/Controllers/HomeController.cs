@@ -4,11 +4,11 @@ using MyGameShelf.Web.Models;
 
 namespace MyGameShelf.Web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<BaseController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<BaseController> logger) : base(logger)
         {
             _logger = logger;
         }
