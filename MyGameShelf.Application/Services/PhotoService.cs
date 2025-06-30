@@ -61,7 +61,7 @@ public class PhotoService : IPhotoService
         }
         catch (Exception ex)
         {
-            throw new PhotoServiceException("Failed to upload image from Cloudinary.", ex);
+            throw new PhotoServiceException("Failed to upload image.", ex);
         }
     }
 
@@ -78,7 +78,7 @@ public class PhotoService : IPhotoService
         }
         catch (Exception ex)
         {
-            throw new PhotoServiceException("Failed to delete image from Cloudinary.", ex);
+            throw new PhotoServiceException("Failed to delete image.", ex);
         }
     }
 }
