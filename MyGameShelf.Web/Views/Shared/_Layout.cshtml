@@ -47,9 +47,17 @@
                                             My Profile
                                         </a>
                                     </li>
-                                    <li class="nav-item pl-2">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Logout</a>
+
+                                    <li class="nav-item">
+                                        <form method="post" asp-controller="Auth" asp-action="Logout" class="d-inline">
+                                            <button type="submit"
+                                                    class="nav-link btn btn-link p-0 my-0 py-2 mx-2 shadow-none"
+                                                    style="cursor:pointer; border:none; background:none; text-transform:none; font-size:inherit; font-family:inherit; line-height:inherit; box-shadow:none !important;">
+                                                Logout
+                                            </button>
+                                        </form>
                                     </li>
+
                                 </ul>
                             </li>
                         }

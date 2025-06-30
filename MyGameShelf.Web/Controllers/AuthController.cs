@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MyGameShelf.Application.DTOs;
@@ -339,11 +340,14 @@ public class AuthController : BaseController
     }
 
     [Authorize]
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> Logout()
     {
         // log user out and redirect to Home
         await _signInManager.SignOutAsync();
+
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+
         return RedirectToAction("Index", "Home");
     }
 
