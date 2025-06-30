@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -119,16 +120,10 @@ public class ProfileController : BaseController
 
     [HttpPost("update-profile")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateProfileSettings(EditProfileViewModel editProfileViewModel)
+    public async Task<IActionResult> UpdateProfileSettings(SettingsPageViewModel model)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Invalid Profile Details";
-                return View("Settings", editProfileViewModel);
-            }
-
             // Get the current user with related Address navigation property
             var user = await _userManager.Users
                 .Include(u => u.Address)
@@ -139,8 +134,18 @@ public class ProfileController : BaseController
                 return NotFoundView("User not found.", Url.Action("Index", "Games"));
             }
 
+            ModelState.Remove("Account");
+            ModelState.Remove("SettingsCheck");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Invalid Profile Details";
+
+                return View("Settings", await LoadEditProfileViewModel(user));
+            }
+
             // Update profile picture if new one uploaded
-            if (editProfileViewModel.NewProfilePicture != null)
+            if (model.Profile.NewProfilePicture != null)
             {
                 // Delete old picture using publicId
                 if (!string.IsNullOrEmpty(user.ProfilePicturePublicId))
@@ -149,31 +154,31 @@ public class ProfileController : BaseController
                 }
 
                 // Upload new photo
-                var uploadResult = await _photoService.AddPhotoAsync(editProfileViewModel.NewProfilePicture);
+                var uploadResult = await _photoService.AddPhotoAsync(model.Profile.NewProfilePicture);
                 user.ProfilePictureUrl = uploadResult.Url;
                 user.ProfilePicturePublicId = uploadResult.PublicId;
             }
 
             // Update other user fields
-            user.FirstName = editProfileViewModel.FirstName;
-            user.LastName = editProfileViewModel.LastName;
-            user.ProfileMessage = editProfileViewModel.ProfileMessage;
-            user.Gender = editProfileViewModel.Gender;
-            user.Birthday = editProfileViewModel.Birthday;
+            user.FirstName = model.Profile.FirstName;
+            user.LastName = model.Profile.LastName;
+            user.ProfileMessage = model.Profile.ProfileMessage;
+            user.Gender = model.Profile.Gender;
+            user.Birthday = model.Profile.Birthday;
 
             // Update Address
-            user.Address.Street = editProfileViewModel.Street;
-            user.Address.City = editProfileViewModel.City;
-            user.Address.Province = editProfileViewModel.Province;
-            user.Address.PostalCode = editProfileViewModel.PostalCode;
-            user.Address.Country = editProfileViewModel.Country;
+            user.Address.Street = model.Profile.Street;
+            user.Address.City = model.Profile.City;
+            user.Address.Province = model.Profile.Province;
+            user.Address.PostalCode = model.Profile.PostalCode;
+            user.Address.Country = model.Profile.Country;
 
             // Update social links
-            user.XSocialLink = editProfileViewModel.XSocialLink;
-            user.InstagramSocialLink = editProfileViewModel.InstagramSocialLink;
-            user.FacebookSocialLink = editProfileViewModel.FacebookSocialLink;
-            user.YoutubeSocialLink = editProfileViewModel.YoutubeSocialLink;
-            user.TwitchSocialLink = editProfileViewModel.TwitchSocialLink;
+            user.XSocialLink = model.Profile.XSocialLink;
+            user.InstagramSocialLink = model.Profile.InstagramSocialLink;
+            user.FacebookSocialLink = model.Profile.FacebookSocialLink;
+            user.YoutubeSocialLink = model.Profile.YoutubeSocialLink;
+            user.TwitchSocialLink = model.Profile.TwitchSocialLink;
 
             // Update User
             var updateResult = await _userManager.UpdateAsync(user);
@@ -185,7 +190,7 @@ public class ProfileController : BaseController
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
                 //return View(editProfileViewModel);
-                return View("Settings", editProfileViewModel);
+                return View("Settings", await LoadEditProfileViewModel(user));
             }
 
             // Set a success message (TempData, ViewData, etc.)
@@ -199,25 +204,17 @@ public class ProfileController : BaseController
         {
             TempData["ErrorMessage"] = "Profile failed to update.";
 
-            return View("Settings", editProfileViewModel);
+            return View("Settings", model);
         }
-
-
     }
 
 
     [HttpPost("update-account")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateAccountSettings(EditProfileViewModel model)
+    public async Task<IActionResult> UpdateAccountSettings(SettingsPageViewModel model)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Invalid Account Details";
-                return View("Settings", model);
-            }
-
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
@@ -225,13 +222,22 @@ public class ProfileController : BaseController
                 return NotFoundView("User not found.", Url.Action("Index", "Games"));
             }
 
+            ModelState.Remove("Profile");
+            ModelState.Remove("SettingsCheck");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Invalid Account Details";
+                return View("Settings", await LoadEditProfileViewModel(user));
+            }
+
             // Update profile visibility
-            user.IsPublic = model.IsPublic;
+            user.IsPublic = model.Account.IsPublic;
 
             // Change password if provided
-            if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
+            if (!string.IsNullOrEmpty(model.Account.CurrentPassword) && !string.IsNullOrEmpty(model.Account.NewPassword))
             {
-                var changePassResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+                var changePassResult = await _userManager.ChangePasswordAsync(user, model.Account.CurrentPassword, model.Account.NewPassword);
 
                 if (!changePassResult.Succeeded)
                 {
@@ -240,7 +246,7 @@ public class ProfileController : BaseController
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
 
-                    return View("Settings", model);
+                    return View("Settings", await LoadEditProfileViewModel(user));
                 }
             }
 
@@ -256,7 +262,7 @@ public class ProfileController : BaseController
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                return View("Settings", model);
+                return View("Settings", await LoadEditProfileViewModel(user));
             }
 
             TempData["SuccessMessage"] = "Account settings updated successfully.";
@@ -440,34 +446,66 @@ public class ProfileController : BaseController
         return RedirectToAction("Settings");
     }
 
-    private async Task<EditProfileViewModel> LoadEditProfileViewModel(ApplicationUser user)
+    private async Task<SettingsPageViewModel> LoadEditProfileViewModel(ApplicationUser user)
     {
         var logins = await _userManager.GetLoginsAsync(user);
 
-        // Using User, create a Profile View Model
-        return new EditProfileViewModel
+        return new SettingsPageViewModel
         {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            ProfileMessage = user.ProfileMessage,
-            ProfilePictureUrl = user.ProfilePictureUrl,
-            Gender = user.Gender,
-            Birthday = user.Birthday,
-            Street = user.Address.Street,
-            City = user.Address.City,
-            Province = user.Address.Province,
-            PostalCode = user.Address.PostalCode,
-            Country = user.Address.Country,
-            XSocialLink = user.XSocialLink,
-            InstagramSocialLink = user.InstagramSocialLink,
-            FacebookSocialLink = user.FacebookSocialLink,
-            YoutubeSocialLink = user.YoutubeSocialLink,
-            TwitchSocialLink = user.TwitchSocialLink,
-            IsPublic = user.IsPublic,
-            TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
-            HasPassword = await _userManager.HasPasswordAsync(user),
-            IsExternalLogin = logins.Any(l => l.LoginProvider != "Local")
+            Profile = new UpdateProfileViewModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ProfileMessage = user.ProfileMessage,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                Gender = user.Gender,
+                Birthday = user.Birthday,
+                Street = user.Address.Street,
+                City = user.Address.City,
+                Province = user.Address.Province,
+                PostalCode = user.Address.PostalCode,
+                Country = user.Address.Country,
+                XSocialLink = user.XSocialLink,
+                InstagramSocialLink = user.InstagramSocialLink,
+                FacebookSocialLink = user.FacebookSocialLink,
+                YoutubeSocialLink = user.YoutubeSocialLink,
+                TwitchSocialLink = user.TwitchSocialLink,
+            },
+            Account = new UpdateAccountViewModel(),
+            SettingsCheck = new SettingsCheck
+            {
+                IsPublic = user.IsPublic,
+                TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
+                HasPassword = await _userManager.HasPasswordAsync(user),
+                IsExternalLogin = logins.Any(l => l.LoginProvider != "Local")
+            }
         };
+
+
+        // Using User, create a Profile View Model
+        //return new EditProfileViewModel
+        //{
+        //    FirstName = user.FirstName,
+        //    LastName = user.LastName,
+        //    ProfileMessage = user.ProfileMessage,
+        //    ProfilePictureUrl = user.ProfilePictureUrl,
+        //    Gender = user.Gender,
+        //    Birthday = user.Birthday,
+        //    Street = user.Address.Street,
+        //    City = user.Address.City,
+        //    Province = user.Address.Province,
+        //    PostalCode = user.Address.PostalCode,
+        //    Country = user.Address.Country,
+        //    XSocialLink = user.XSocialLink,
+        //    InstagramSocialLink = user.InstagramSocialLink,
+        //    FacebookSocialLink = user.FacebookSocialLink,
+        //    YoutubeSocialLink = user.YoutubeSocialLink,
+        //    TwitchSocialLink = user.TwitchSocialLink,
+        //    IsPublic = user.IsPublic,
+        //    TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
+        //    HasPassword = await _userManager.HasPasswordAsync(user),
+        //    IsExternalLogin = logins.Any(l => l.LoginProvider != "Local")
+        //};
     }
 
 

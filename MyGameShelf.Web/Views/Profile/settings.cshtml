@@ -1,5 +1,5 @@
 ﻿@using MyGameShelf.Web.ViewModels
-@model EditProfileViewModel
+@model SettingsPageViewModel
 
 @* <a asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name" class="btn btn-secondary mb-3">
     &larr; Back to Profile
@@ -10,16 +10,6 @@
             <i class="fa-solid fa-gear"></i> Settings
         </div>
         <div class="card-body">
-            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
-            {
-                <div class="alert alert-danger" role="alert">
-                    @foreach (var error in ViewData.ModelState[string.Empty].Errors)
-                    {
-                        <p>@error.ErrorMessage</p>
-                    }
-                </div>
-            }
-
             <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
@@ -35,6 +25,8 @@
                 </li>
             </ul>
             <div class="tab-content pt-4" id="settingsTabsContent">
+
+
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <form asp-controller="Profile" asp-action="update-profile" method="post" enctype="multipart/form-data">
                         @* Validation summary *@
@@ -60,110 +52,110 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label asp-for="FirstName" class="form-label"></label>
-                                <input asp-for="FirstName" class="form-control" />
-                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                                <label asp-for="Profile.FirstName" class="form-label"></label>
+                                <input asp-for="Profile.FirstName" class="form-control" />
+                                <span asp-validation-for="Profile.FirstName" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="LastName" class="form-label"></label>
-                                <input asp-for="LastName" class="form-control" />
-                                <span asp-validation-for="LastName" class="text-danger"></span>
+                                <label asp-for="Profile.LastName" class="form-label"></label>
+                                <input asp-for="Profile.LastName" class="form-control" />
+                                <span asp-validation-for="Profile.LastName" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-12">
-                                <label asp-for="ProfileMessage" class="form-label"></label>
-                                <textarea asp-for="ProfileMessage" class="form-control" rows="3"></textarea>
-                                <span asp-validation-for="ProfileMessage" class="text-danger"></span>
+                                <label asp-for="Profile.ProfileMessage" class="form-label"></label>
+                                <textarea asp-for="Profile.ProfileMessage" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Profile.ProfileMessage" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-12">
                                 <label class="form-label">Current Profile Picture</label><br />
-                                @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                                @if (!string.IsNullOrEmpty(Model.Profile.ProfilePictureUrl))
                                 {
-                                    <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="img-thumbnail mb-2" style="max-width: 150px; max-height: 150px;" />
+                                    <img src="Profile.ProfilePictureUrl" alt="Profile Picture" class="img-thumbnail mb-2" style="max-width: 150px; max-height: 150px;" />
                                 }
                                 else
                                 {
                                     <p>No profile picture uploaded.</p>
                                 }
 
-                                <label asp-for="NewProfilePicture" class="form-label mt-3">Upload New Profile Picture</label>
-                                <input asp-for="NewProfilePicture" type="file" class="form-control" />
-                                <span asp-validation-for="NewProfilePicture" class="text-danger"></span>
+                                <label asp-for="Profile.NewProfilePicture" class="form-label mt-3">Upload New Profile Picture</label>
+                                <input asp-for="Profile.NewProfilePicture" type="file" class="form-control" />
+                                <span asp-validation-for="Profile.NewProfilePicture" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Gender" class="form-label"></label>
-                                <select asp-for="Gender" class="form-select">
+                                <label asp-for="Profile.Gender" class="form-label"></label>
+                                <select asp-for="Profile.Gender" class="form-select">
                                     <option value="">-- Select --</option>
                                     <option>Male</option>
                                     <option>Female</option>
                                     <option>Other</option>
                                     <option>Prefer not to say</option>
                                 </select>
-                                <span asp-validation-for="Gender" class="text-danger"></span>
+                                <span asp-validation-for="Profile.Gender" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Birthday" class="form-label"></label>
-                                <input asp-for="Birthday" type="date" class="form-control" />
-                                <span asp-validation-for="Birthday" class="text-danger"></span>
+                                <label asp-for="Profile.Birthday" class="form-label"></label>
+                                <input asp-for="Profile.Birthday" type="date" class="form-control" />
+                                <span asp-validation-for="Profile.Birthday" class="text-danger"></span>
                             </div>
 
                             <hr class="my-3" />
 
                             <div class="col-md-12">
-                                <label asp-for="Street" class="form-label"></label>
-                                <input asp-for="Street" class="form-control" />
-                                <span asp-validation-for="Street" class="text-danger"></span>
+                                <label asp-for="Profile.Street" class="form-label"></label>
+                                <input asp-for="Profile.Street" class="form-control" />
+                                <span asp-validation-for="Profile.Street" class="text-danger"></span>
                             </div>
                             <div class="col-md-4">
-                                <label asp-for="City" class="form-label"></label>
-                                <input asp-for="City" class="form-control" />
-                                <span asp-validation-for="City" class="text-danger"></span>
+                                <label asp-for="Profile.City" class="form-label"></label>
+                                <input asp-for="Profile.City" class="form-control" />
+                                <span asp-validation-for="Profile.City" class="text-danger"></span>
                             </div>
                             <div class="col-md-4">
-                                <label asp-for="Province" class="form-label"></label>
-                                <input asp-for="Province" class="form-control" />
-                                <span asp-validation-for="Province" class="text-danger"></span>
+                                <label asp-for="Profile.Province" class="form-label"></label>
+                                <input asp-for="Profile.Province" class="form-control" />
+                                <span asp-validation-for="Profile.Province" class="text-danger"></span>
                             </div>
                             <div class="col-md-4">
-                                <label asp-for="PostalCode" class="form-label"></label>
-                                <input asp-for="PostalCode" class="form-control" />
-                                <span asp-validation-for="PostalCode" class="text-danger"></span>
+                                <label asp-for="Profile.PostalCode" class="form-label"></label>
+                                <input asp-for="Profile.PostalCode" class="form-control" />
+                                <span asp-validation-for="Profile.PostalCode" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="Country" class="form-label"></label>
-                                <input asp-for="Country" class="form-control" />
-                                <span asp-validation-for="Country" class="text-danger"></span>
+                                <label asp-for="Profile.Country" class="form-label"></label>
+                                <input asp-for="Profile.Country" class="form-control" />
+                                <span asp-validation-for="Profile.Country" class="text-danger"></span>
                             </div>
 
                             <hr class="my-3" />
 
                             <div class="col-md-6">
-                                <label asp-for="XSocialLink" class="form-label"></label>
-                                <input asp-for="XSocialLink" class="form-control" />
-                                <span asp-validation-for="XSocialLink" class="text-danger"></span>
+                                <label asp-for="Profile.XSocialLink" class="form-label"></label>
+                                <input asp-for="Profile.XSocialLink" class="form-control" />
+                                <span asp-validation-for="Profile.XSocialLink" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="InstagramSocialLink" class="form-label"></label>
-                                <input asp-for="InstagramSocialLink" class="form-control" />
-                                <span asp-validation-for="InstagramSocialLink" class="text-danger"></span>
+                                <label asp-for="Profile.InstagramSocialLink" class="form-label"></label>
+                                <input asp-for="Profile.InstagramSocialLink" class="form-control" />
+                                <span asp-validation-for="Profile.InstagramSocialLink" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="FacebookSocialLink" class="form-label"></label>
-                                <input asp-for="FacebookSocialLink" class="form-control" />
-                                <span asp-validation-for="FacebookSocialLink" class="text-danger"></span>
+                                <label asp-for="Profile.FacebookSocialLink" class="form-label"></label>
+                                <input asp-for="Profile.FacebookSocialLink" class="form-control" />
+                                <span asp-validation-for="Profile.FacebookSocialLink" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="YoutubeSocialLink" class="form-label"></label>
-                                <input asp-for="YoutubeSocialLink" class="form-control" />
-                                <span asp-validation-for="YoutubeSocialLink" class="text-danger"></span>
+                                <label asp-for="Profile.YoutubeSocialLink" class="form-label"></label>
+                                <input asp-for="Profile.YoutubeSocialLink" class="form-control" />
+                                <span asp-validation-for="Profile.YoutubeSocialLink" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="TwitchSocialLink" class="form-label"></label>
-                                <input asp-for="TwitchSocialLink" class="form-control" />
-                                <span asp-validation-for="TwitchSocialLink" class="text-danger"></span>
+                                <label asp-for="Profile.TwitchSocialLink" class="form-label"></label>
+                                <input asp-for="Profile.TwitchSocialLink" class="form-control" />
+                                <span asp-validation-for="Profile.TwitchSocialLink" class="text-danger"></span>
                             </div>
                         </div>
 
@@ -172,6 +164,8 @@
                         </div>
                     </form>
                 </div>
+
+
 
                 <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab">
 
@@ -199,29 +193,29 @@
                             <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
                         }
 
-                        @if (Model.HasPassword)
+                        @if (Model.SettingsCheck.HasPassword)
                         {
                             <div class="mb-4">
                                 <h5>Password Reset</h5>
                                 <div class="row g-3">
 
                                     <div class="col-md-6">
-                                        <label asp-for="CurrentPassword" class="form-label">Current Password</label>
-                                        <input asp-for="CurrentPassword" class="form-control" type="password" />
-                                        <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                                        <label asp-for="Account.CurrentPassword" class="form-label">Current Password</label>
+                                        <input asp-for="Account.CurrentPassword" class="form-control" type="password" />
+                                        <span asp-validation-for="Account.CurrentPassword" class="text-danger"></span>
                                     </div>
                                     <div class="col-md-6"></div>
 
                                     <div class="col-md-6">
-                                        <label asp-for="NewPassword" class="form-label">New Password</label>
-                                        <input asp-for="NewPassword" class="form-control" type="password" />
-                                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                                        <label asp-for="Account.NewPassword" class="form-label">New Password</label>
+                                        <input asp-for="Account.NewPassword" class="form-control" type="password" />
+                                        <span asp-validation-for="Account.NewPassword" class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label asp-for="ConfirmNewPassword" class="form-label">Confirm New Password</label>
-                                        <input asp-for="ConfirmNewPassword" class="form-control" type="password" />
-                                        <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                                        <label asp-for="Account.ConfirmNewPassword" class="form-label">Confirm New Password</label>
+                                        <input asp-for="Account.ConfirmNewPassword" class="form-control" type="password" />
+                                        <span asp-validation-for="Account.ConfirmNewPassword" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -232,12 +226,12 @@
                         <div class="mb-4">
                             <h5>Profile Visibility</h5>
                             <div class="form-check form-switch">
-                                <input asp-for="IsPublic" class="form-check-input" type="checkbox" role="switch" />
-                                <label asp-for="IsPublic" class="form-check-label">
+                                <input asp-for="Account.IsPublic" class="form-check-input" type="checkbox" role="switch" />
+                                <label asp-for="Account.IsPublic" class="form-check-label">
                                     Make my profile public
                                 </label>
                             </div>
-                            <span asp-validation-for="IsPublic" class="text-danger"></span>
+                            <span asp-validation-for="Account.IsPublic" class="text-danger"></span>
                         </div>
 
                         <div class="text-end">
@@ -247,13 +241,13 @@
 
                     <hr />
 
-                    @if (!Model.IsExternalLogin)
+                    @if (!Model.SettingsCheck.IsExternalLogin)
                     {
                         @* Separate form for Two-Factor Authentication *@
                         <form asp-controller="Profile" asp-action="toggle-two-factor" method="post" class="mx-auto" style="max-width: 800px;">
                             <h5>Two-Factor Authentication</h5>
     
-                            @if (Model.TwoFactorEnabled)
+                            @if (Model.SettingsCheck.TwoFactorEnabled)
                             {
                                 <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
 
@@ -285,8 +279,6 @@
                     </form>
 
                 </div>
-
-
 
 
             </div>

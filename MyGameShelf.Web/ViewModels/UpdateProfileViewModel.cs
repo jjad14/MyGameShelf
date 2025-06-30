@@ -1,11 +1,10 @@
-﻿using CloudinaryDotNet;
-using MyGameShelf.Application.Validation.Attributes;
+﻿using MyGameShelf.Application.Validation.Attributes;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace MyGameShelf.Web.ViewModels;
 
-public class EditProfileViewModel
+public class UpdateProfileViewModel
 {
     [Required]
     [MaxLength(50)]
@@ -62,29 +61,4 @@ public class EditProfileViewModel
 
     [Url]
     public string? TwitchSocialLink { get; set; }
-
-    // Account Settings
-
-    public bool IsPublic { get; set; }
-
-    public bool TwoFactorEnabled { get; set; }
-
-
-    [DataType(DataType.Password)]
-    [DisplayName("Current Password")]
-    public string? CurrentPassword { get; set; }
-
-    [DataType(DataType.Password)]
-    [DisplayName("New Password")]
-    public string? NewPassword { get; set; }
-
-    [DataType(DataType.Password)]
-    [DisplayName("Confirm New Password")]
-    [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
-    public string? ConfirmNewPassword { get; set; }
-
-
-    // Props to check if user was signed in locally or google auth
-    public bool HasPassword { get; set; }
-    public bool IsExternalLogin { get; set; }
 }
