@@ -21,7 +21,6 @@ public class Game
     public double? Rating { get; set; }
     public int? RatingsCount { get; set; }
 
-    public int? Added { get; set; }
     public int? SuggestionsCount { get; set; }
     public int? Metacritic { get; set; }
     public int? Playtime { get; set; }

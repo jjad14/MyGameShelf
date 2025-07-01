@@ -82,6 +82,7 @@ public class RawgApiService : IRawgApiService
             {
                 Id = result.Id,
                 Name = result.Name,
+                Slug = result.Slug,
                 Description = result.DescriptionRaw,
                 Metacritic = result.Metacritic,
                 Released = result.Released,

@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MyGameShelf.Application.Configurations;
 using MyGameShelf.Application.Interfaces;
+using MyGameShelf.Application.Services;
 using MyGameShelf.Infrastructure.Data;
 using MyGameShelf.Infrastructure.Identity;
-using MyGameShelf.Application.Services;
+using MyGameShelf.Infrastructure.Repositories;
+using MyGameShelf.Infrastructure.Services;
 using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.Middleware;
 
@@ -15,6 +17,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add DbContext to the DI container
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IGameService, GameService>();
 
 // Rawg API Key
 builder.Services.Configure<RawgSettings>(builder.Configuration.GetSection("RawgSettings"));
@@ -35,11 +44,6 @@ builder.Services.AddSingleton<Cloudinary>(sp =>
     return new Cloudinary(account);
 });
 builder.Services.AddScoped<IPhotoService, PhotoService>();
-
-
-// Add DbContext to the DI container
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add Identity
 // Add Identity with default UI and token providers

@@ -27,6 +27,8 @@ public class UserGame
 
     public double? Difficulty { get; private set; } // Global difficulty score (1-10) aggregated from user inputs
 
+    public double? Rating { get; private set; } // Global difficulty score (1-10) aggregated from user inputs
+
     // Enforce required initial state
     public UserGame(string userId, int gameId)
     {
@@ -38,6 +40,19 @@ public class UserGame
 
     // Parameterless constructor for EF Core
     private UserGame() { }
+
+    public void SetRating(double? rating)
+    {
+        if (rating.HasValue)
+        {
+            if (rating < 1.0 || rating > 10.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rating), "Rating must be between 1.0 and 10.0 inclusive.");
+            }
+        }
+
+        Rating = rating;
+    }
 
     public void SetDifficulty(double? difficulty)
     {

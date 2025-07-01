@@ -32,35 +32,26 @@ public class Review
         }
     }
 
-    private double _rating;
-    public double Rating
-    {
-        get => _rating;
-        set
-        {
-            if (value < 1.0 || value > 10.0)
-                throw new ArgumentOutOfRangeException(nameof(Rating), "Rating must be between 1.0 and 10.0 inclusive.");
-            _rating = value;
-        }
-    }
+    public bool? IsRecommended { get; set; }
+
     public DateTime CreatedAt { get; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
     private Review() { }
 
-    public Review(string userId, int gameId, string content, double rating)
+    public Review(string userId, int gameId, string content, bool recommended)
     {
         UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         GameId = gameId;
-        Content = content;  
-        Rating = rating;    
+        Content = content;
+        IsRecommended = recommended;    
     }
 
-    public void UpdateReview(string newContent, double newRating)
+    public void UpdateReview(string newContent, bool newRecommended)
     {
         // Use property setters to validate inputs
         Content = newContent;
-        Rating = newRating;
+        IsRecommended = newRecommended;
 
         UpdatedAt = DateTime.UtcNow;
     }
