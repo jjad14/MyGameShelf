@@ -12,16 +12,16 @@ public class ReviewTests
     public void UpdateReview_ValidInput_UpdatesPropertiesAndSetsUpdatedAt()
     {
         // Arrange
-        var review = new Review("user1", 1, "Initial content", 7.5);
+        var review = new Review("user1", 1, "Initial content", false);
         var newContent = "Updated content";
-        var newRating = 9.0;
+        var newRating = true;
 
         // Act
         review.UpdateReview(newContent, newRating);
 
         // Assert
         Assert.Equal(newContent, review.Content);
-        Assert.Equal(newRating, review.Rating);
+        Assert.Equal(newRating, review.IsRecommended);
         Assert.NotNull(review.UpdatedAt);
         Assert.True(review.UpdatedAt > review.CreatedAt);
     }
@@ -33,24 +33,10 @@ public class ReviewTests
     public void UpdateReview_InvalidContent_ThrowsArgumentException(string invalidContent)
     {
         // Arrange
-        var review = new Review("user1", 1, "Initial content", 7.5);
+        var review = new Review("user1", 1, "Initial content", true);
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentException>(() => review.UpdateReview(invalidContent!, 5.0));
+        var ex = Assert.Throws<ArgumentException>(() => review.UpdateReview(invalidContent!, false));
         Assert.Contains("Review content cannot be empty", ex.Message);
-    }
-
-    [Theory]
-    [InlineData(0.9)]
-    [InlineData(10.1)]
-    [InlineData(-1)]
-    public void UpdateReview_InvalidRating_ThrowsArgumentOutOfRangeException(double invalidRating)
-    {
-        // Arrange
-        var review = new Review("user1", 1, "Initial content", 7.5);
-
-        // Act & Assert
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => review.UpdateReview("Valid content", invalidRating));
-        Assert.Contains("Rating must be between 1.0 and 10.0", ex.Message);
     }
 }
