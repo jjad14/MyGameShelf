@@ -133,6 +133,9 @@ public class AuthController : BaseController
             // Sign-in user
             await _signInManager.SignInAsync(user, isPersistent: false);
 
+
+            TempData["success"] = "Registration successful! Welcome to GameShelf";
+
             return RedirectToAction("Index", "Games");
         }
         catch (HttpRequestException ex)
@@ -231,6 +234,9 @@ public class AuthController : BaseController
             {
                 return Redirect(returnUrl);
             }
+
+            TempData["success"] = "Login successful! Great to see you again";
+
 
             return RedirectToAction("Index", "Games");
 
