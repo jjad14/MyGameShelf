@@ -86,6 +86,7 @@ public class RawgApiService : IRawgApiService
                 Description = result.DescriptionRaw,
                 Metacritic = result.Metacritic,
                 Released = result.Released,
+                Rating = result.Rating,
                 BackgroundImage = string.IsNullOrEmpty(result.BackgroundImage)
                         ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
                         : result.BackgroundImage,

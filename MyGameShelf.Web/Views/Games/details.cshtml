@@ -26,62 +26,9 @@
 
             <hr />
 
-            <form method="post" asp-controller="GameList" asp-action="Add" class="">
-                <input type="hidden" name="GameId" value="@Model.Game.Id" />
-
-                <div class="mb-3">
-                    <label for="GameStatus" class="form-label">Game Status</label>
-                    <select id="GameStatus" name="GameStatus" class="form-select" required>
-                        <option value="">Select status...</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Dropped">Dropped</option>
-                        <option value="Wishlist">Wishlist</option>
-                        <option value="On Hold">On Hold</option>
-                        <option value="Plan to Play">Plan to Play</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="Rating" class="form-label">Rating</label>
-                    <select id="Rating" name="Rating" class="form-select" required>
-                        <option value="">Select rating...</option>
-                        <option value="10">10 - Perfect</option>
-                        <option value="9">9 - Great</option>
-                        <option value="8">8 - Very Good</option>
-                        <option value="7">7 - Good</option>
-                        <option value="6">6 - Above Average</option>
-                        <option value="5">5 - Average</option>
-                        <option value="4">4 - Below Average</option>
-                        <option value="3">3 - Poor</option>
-                        <option value="2">2 - Very Poor</option>
-                        <option value="1">1 - Unacceptable</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="Difficulty" class="form-label">Difficulty</label>
-                    <select id="Difficulty" name="Difficulty" class="form-select" required>
-                        <option value="">Select difficulty...</option>
-                        <option value="10">10 - Extremely Hard</option>
-                        <option value="9">9 - Very Hard</option>
-                        <option value="8">8 - Hard</option>
-                        <option value="7">7 - Challenging</option>
-                        <option value="6">6 - Moderately Hard</option>
-                        <option value="5">5 - Medium</option>
-                        <option value="4">4 - Fairly Easy</option>
-                        <option value="3">3 - Easy</option>
-                        <option value="2">2 - Very Easy</option>
-                        <option value="1">1 - Extremely Easy</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="Review" class="form-label">Your Review</label>
-                    <textarea id="Review" name="Review" class="form-control" rows="4" placeholder="Write your review here..."></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100 btn-sm">Add to My Games</button>
-            </form>
+            @await Html.PartialAsync("_AddGameForm", new AddGameToListViewModel {
+                GameId = Model.Game.Id
+            })
 
         </div>
 

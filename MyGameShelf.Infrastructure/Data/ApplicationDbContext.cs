@@ -52,6 +52,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<GameTag>().HasKey(x => new { x.GameId, x.TagId });
 
         // Unique constraint for Review: one review per user per game
+        modelBuilder.Entity<Game>()
+            .HasIndex(g => g.RawgId)
+            .IsUnique();
+
         modelBuilder.Entity<Review>()
             .HasIndex(r => new { r.UserId, r.GameId })
             .IsUnique();

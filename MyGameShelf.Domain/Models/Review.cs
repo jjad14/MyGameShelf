@@ -39,7 +39,7 @@ public class Review
 
     private Review() { }
 
-    public Review(string userId, int gameId, string content, bool recommended)
+    public Review(string userId, int gameId, string content, bool? recommended)
     {
         UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         GameId = gameId;

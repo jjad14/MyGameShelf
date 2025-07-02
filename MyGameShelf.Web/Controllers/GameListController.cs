@@ -6,6 +6,7 @@ using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Enums;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
+using MyGameShelf.Web.ViewModels;
 
 namespace MyGameShelf.Web.Controllers;
 
@@ -26,7 +27,7 @@ public class GameListController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add(AddGameDto model)
+    public async Task<IActionResult> Add(AddGameToListViewModel model)
     {
         var user = await _userManager.GetUserAsync(User);
 
@@ -48,8 +49,8 @@ public class GameListController : BaseController
             Slug = response.Slug,
             Released = response.Released,
             BackgroundImage = response.BackgroundImage,
-            Rating = model.Rating,
             Metacritic = response.Metacritic,
+            Rating = response.Rating,
             EsrbRating = response.EsrbRating,
             Platforms = response.Platforms
                 .Select(p => new GamePlatform { Platform = new Platform { Name = p } })
@@ -79,7 +80,8 @@ public class GameListController : BaseController
             status,
             model.Difficulty,
             model.Review,
-            model.Rating
+            model.Rating, 
+            model.IsRecommended
         );
 
 
@@ -87,7 +89,44 @@ public class GameListController : BaseController
             ? "Game successfully added to your list!"
             : "This game is already in your list.";
 
-        return RedirectToAction("Details", "Games", new { id = model.GameId });
+        //if (!added)
+        //{
+        //    // Build the publisher ID string
+        //    var publisherIds = response.Publishers?
+        //        .Where(p => p != null)
+        //        .Select(p => p.Id.ToString());
+
+        //    // Join Publisher ids into a comma separated string
+        //    string publisherIdString = string.Join(",", publisherIds ?? Enumerable.Empty<string>());
+
+        //    bool hasOtherGames = false;
+
+        //    // Check if Game Publisher(s) has other games
+        //    if (!string.IsNullOrWhiteSpace(publisherIdString))
+        //    {
+        //        hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, game.Id);
+        //    }
+
+        //    // Check if Game has additions (DLCs) or Prequels/Sequels
+        //    bool hasAdditions = await _rawgApiService.HasGameDLCs(game.Id);
+        //    bool hasSequels = await _rawgApiService.HasGameSequels(game.Id);
+
+        //    var gameDetailsVM = new GameDetailsViewModel
+        //    {
+        //        Game = response,
+        //        PublisherIdsString = publisherIdString,
+        //        HasRelatedGames = hasOtherGames,
+        //        HasAdditions = hasAdditions,
+        //        HasSequels = hasSequels
+        //    };
+
+        //    return View("~/Views/Games/Details.cshtml", gameDetailsVM);
+
+        //}
+
+
+        //return RedirectToAction("Details", "Games", new { id = model.GameId });
+        return RedirectToAction("Index", "Games");
     }
 
 }

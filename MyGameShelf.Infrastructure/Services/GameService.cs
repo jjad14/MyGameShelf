@@ -24,6 +24,13 @@ public class GameService : IGameService
 
     public async Task<Game> AddGameMetadataAsync(Game incomingGame)
     {
+        // Check if game with same RawgId already exists
+        var existingGame = await _gameRepository.GetByRawgIdAsync(incomingGame.RawgId);
+        if (existingGame != null)
+        {
+            return existingGame; // Don't add a duplicate
+        }
+
         // Attach existing Platforms by matching name (case-insensitive)
         foreach (var gamePlatform in incomingGame.Platforms)
         {
@@ -76,7 +83,7 @@ public class GameService : IGameService
         return incomingGame;
     }
 
-    public async Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, int? difficulty, string? review, int? rating)
+    public async Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, int? difficulty, string? review, int? rating, bool? recommended)
     {
         var exists = await _context.UserGames
             .AnyAsync(ug => ug.UserId == userId && ug.GameId == gameId);
@@ -92,12 +99,41 @@ public class GameService : IGameService
         };
 
         userGame.SetDifficulty(difficulty);
-        // TODO: Set rating and review if applicable
+        userGame.SetRating(rating);
 
         _context.UserGames.Add(userGame);
-        await _context.SaveChangesAsync();
 
-        return true;
+        // Add review if provided
+        if (!string.IsNullOrWhiteSpace(review))
+        {
+
+            if (!recommended.HasValue)
+            {
+                // Throw an error because recommendation is missing but review exists
+                throw new InvalidOperationException("Recommendation must be specified when submitting a review.");
+            }
+
+            var reviewEntity = new Review(userId, gameId, review, recommended.Value);
+            _context.Reviews.Add(reviewEntity);
+        }
+
+        // Exception to catch duplicate Games in User Games
+        try
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException?.Message.Contains("IX_UserGames_UserId_GameId") == true)
+            {
+                // Unlikely due to the pre-check, but safely handle the race condition
+                return false;
+            }
+
+            // Rethrow if it's a different DB error
+            throw;
+        }
     }
 
 
