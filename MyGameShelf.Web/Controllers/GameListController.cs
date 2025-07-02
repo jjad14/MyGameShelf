@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MyGameShelf.Application.DTOs;
@@ -27,7 +28,7 @@ public class GameListController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add(AddGameToListViewModel model)
+    public async Task<IActionResult> Add(GameDetailsViewModel model)
     {
         var user = await _userManager.GetUserAsync(User);
 
@@ -35,7 +36,7 @@ public class GameListController : BaseController
         
 
         // Get Game by Id
-        var response = await _rawgApiService.GetGameDetailsAsync(model.GameId);
+        var response = await _rawgApiService.GetGameDetailsAsync(model.AddToList.GameId);
 
         // No Game Found Case
         if (response == null) return NotFound();
@@ -44,7 +45,7 @@ public class GameListController : BaseController
         // Map Game data to your Game entity
         var game = await _gameService.AddGameMetadataAsync(new Game
         {
-            RawgId = model.GameId,
+            RawgId = model.AddToList.GameId,
             Name = response.Name,
             Slug = response.Slug,
             Released = response.Released,
@@ -69,7 +70,7 @@ public class GameListController : BaseController
                 .ToList()
         });
 
-        if (!Enum.TryParse<GameStatus>(model.GameStatus, true, out var status))
+        if (!Enum.TryParse<GameStatus>(model.AddToList.GameStatus, true, out var status))
         {
             status = GameStatus.Playing;
         }
@@ -78,55 +79,118 @@ public class GameListController : BaseController
             user.Id,
             game.Id,
             status,
-            model.Difficulty,
-            model.Review,
-            model.Rating, 
-            model.IsRecommended
+            model.AddToList.Difficulty,
+            model.AddToList.Review,
+            model.AddToList.Rating, 
+            model.AddToList.IsRecommended
         );
-
 
         TempData[added ? "success" : "error"] = added
             ? "Game successfully added to your list!"
             : "This game is already in your list.";
 
-        //if (!added)
-        //{
-        //    // Build the publisher ID string
-        //    var publisherIds = response.Publishers?
-        //        .Where(p => p != null)
-        //        .Select(p => p.Id.ToString());
+        // Build the publisher ID string
+        var publisherIds = response.Publishers?
+            .Where(p => p != null)
+            .Select(p => p.Id.ToString());
 
-        //    // Join Publisher ids into a comma separated string
-        //    string publisherIdString = string.Join(",", publisherIds ?? Enumerable.Empty<string>());
+        // Join Publisher ids into a comma separated string
+        string publisherIdString = string.Join(",", publisherIds ?? Enumerable.Empty<string>());
 
-        //    bool hasOtherGames = false;
+        bool hasOtherGames = false;
 
-        //    // Check if Game Publisher(s) has other games
-        //    if (!string.IsNullOrWhiteSpace(publisherIdString))
-        //    {
-        //        hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, game.Id);
-        //    }
+        // Check if Game Publisher(s) has other games
+        if (!string.IsNullOrWhiteSpace(publisherIdString))
+        {
+            hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, game.Id);
+        }
 
-        //    // Check if Game has additions (DLCs) or Prequels/Sequels
-        //    bool hasAdditions = await _rawgApiService.HasGameDLCs(game.Id);
-        //    bool hasSequels = await _rawgApiService.HasGameSequels(game.Id);
+        // Check if Game has additions (DLCs) or Prequels/Sequels
+        bool hasAdditions = await _rawgApiService.HasGameDLCs(game.Id);
+        bool hasSequels = await _rawgApiService.HasGameSequels(game.Id);
 
-        //    var gameDetailsVM = new GameDetailsViewModel
-        //    {
-        //        Game = response,
-        //        PublisherIdsString = publisherIdString,
-        //        HasRelatedGames = hasOtherGames,
-        //        HasAdditions = hasAdditions,
-        //        HasSequels = hasSequels
-        //    };
+        var gameDetailsVM = new GameDetailsViewModel
+        {
+            Game = response,
+            PublisherIdsString = publisherIdString,
+            HasRelatedGames = hasOtherGames,
+            HasAdditions = hasAdditions,
+            HasSequels = hasSequels,
+            AddToList = model.AddToList
+        };
 
-        //    return View("~/Views/Games/Details.cshtml", gameDetailsVM);
-
-        //}
+        return View("~/Views/Games/Details.cshtml", gameDetailsVM);
 
 
-        //return RedirectToAction("Details", "Games", new { id = model.GameId });
-        return RedirectToAction("Index", "Games");
+        // return RedirectToAction("Details", "Games", new { id = model.GameId });
+        // return RedirectToAction("Index", "Games");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(GameDetailsViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        var userGame = await _gameService.GetUserGameWithReviewAsync(user.Id, model.AddToList.GameId);
+        if (userGame == null)
+        {
+            TempData["error"] = "Game not found in your list.";
+            return RedirectToAction("Details", "Games", new { id = model.AddToList.GameId });
+        }
+
+        if (!Enum.TryParse<GameStatus>(model.AddToList.GameStatus, true, out var status))
+        {
+            status = GameStatus.Playing;
+        }
+
+        // Update UserGame properties
+        userGame.UserGame.SetDifficulty(model.AddToList.Difficulty);
+        userGame.UserGame.SetRating(model.AddToList.Rating);
+        userGame.UserGame.Status = status;
+
+        // (string userId, int gameId, string? reviewContent, bool isRecommended)
+        var updatedResult = await _gameService.UpdateOrAddReviewAsync(user.Id, userGame.UserGame.GameId, model.AddToList.Review, model.AddToList.IsRecommended);
+
+
+        TempData[updatedResult ? "success" : "error"] = updatedResult
+            ? "Game entry updated successfully."
+            : "Game entry failed to update.";
+
+        var response = await _rawgApiService.GetGameDetailsAsync(model.AddToList.GameId);
+
+        // Build the publisher ID string
+        var publisherIds = response.Publishers?
+            .Where(p => p != null)
+            .Select(p => p.Id.ToString());
+
+        // Join Publisher ids into a comma separated string
+        string publisherIdString = string.Join(",", publisherIds ?? Enumerable.Empty<string>());
+
+        bool hasOtherGames = false;
+
+        // Check if Game Publisher(s) has other games
+        if (!string.IsNullOrWhiteSpace(publisherIdString))
+        {
+            hasOtherGames = await _rawgApiService.HasOtherGamesByPublisher(publisherIdString, response.Id);
+        }
+
+        // Check if Game has additions (DLCs) or Prequels/Sequels
+        bool hasAdditions = await _rawgApiService.HasGameDLCs(response.Id);
+        bool hasSequels = await _rawgApiService.HasGameSequels(response.Id);
+
+        var gameDetailsVM = new GameDetailsViewModel
+        {
+            Game = response,
+            PublisherIdsString = publisherIdString,
+            HasRelatedGames = hasOtherGames,
+            HasAdditions = hasAdditions,
+            HasSequels = hasSequels,
+            AddToList = model.AddToList
+        };
+
+        return View("~/Views/Games/Details.cshtml", gameDetailsVM);
     }
 
 }

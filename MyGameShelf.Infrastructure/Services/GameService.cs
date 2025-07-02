@@ -83,15 +83,15 @@ public class GameService : IGameService
         return incomingGame;
     }
 
-    public async Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, int? difficulty, string? review, int? rating, bool? recommended)
+    public async Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, double? difficulty, string? review, double? rating, bool? recommended)
     {
-        var exists = await _context.UserGames
-            .AnyAsync(ug => ug.UserId == userId && ug.GameId == gameId);
+        //var exists = await _context.UserGames
+        //    .AnyAsync(ug => ug.UserId == userId && ug.GameId == gameId);
 
-        if (exists)
-        {
-            return false;
-        }
+        //if (exists)
+        //{
+        //    return false;
+        //}
 
         var userGame = new UserGame(userId, gameId)
         {
@@ -136,7 +136,6 @@ public class GameService : IGameService
         }
     }
 
-
     public async Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId)
     {
         var userGames = await _gameRepository.GetUserGamesAsync(userId);
@@ -149,7 +148,6 @@ public class GameService : IGameService
             Status = ug.Status,
             Difficulty = ug.Difficulty,
             AddedOn = ug.AddedOn,
-
             Genres = ug.Game.GameGenres.Select(gg => gg.Genre.Name).ToList(),
             Platforms = ug.Game.Platforms.Select(gp => gp.Platform.Name).ToList(),
             Tags = ug.Game.GameTags.Select(gt => gt.Tag.Name).ToList()
@@ -160,32 +158,93 @@ public class GameService : IGameService
             .ToDictionary(g => g.Key, g => g.ToList());
     }
 
-    public async Task<Game> UpdateGameToUserAsync(Game incomingGame)
+    public async Task<bool> UserHasGameAsync(string userId, int rawgId)
     {
-        var existingGame = await _gameRepository.GetByRawgIdAsync(incomingGame.RawgId);
-        if (existingGame == null)
-            throw new InvalidOperationException("Cannot update a game that doesn't exist.");
+        return await _context.UserGames
+            .Include(ug => ug.Game)
+            .AnyAsync(ug => ug.UserId == userId && ug.Game.RawgId == rawgId);
+    }
 
-        // Example: add missing genres
-        foreach (var gameGenre in incomingGame.GameGenres)
+    public async Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId)
+    {
+        // Get the UserGame along with the Game (to check RawgId)
+        var userGame = await _context.UserGames
+            .Include(ug => ug.Game)
+            .FirstOrDefaultAsync(ug =>
+                ug.UserId == userId &&
+                ug.Game.RawgId == rawgId);
+
+        if (userGame == null)
+            return null;
+
+        // Now separately query the Review
+        var review = await _context.Reviews
+            .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == userGame.GameId);
+
+        return new UserGameDetailsDto
         {
-            if (!existingGame.GameGenres.Any(g => g.Genre.Name.Equals(gameGenre.Genre.Name, StringComparison.OrdinalIgnoreCase)))
+            Status = userGame.Status,
+            Rating = userGame.Rating,
+            Difficulty = userGame.Difficulty,
+            ReviewContent = review?.Content,
+            IsRecommended = review?.IsRecommended,
+            ReviewUpdatedAt = review?.UpdatedAt
+        };
+    }
+
+    public async Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId)
+    {
+        var userGame = await _context.UserGames
+            .Include(ug => ug.Game)
+            .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.Game.RawgId == rawgId);
+
+        if (userGame == null) return null;
+
+        var review = await _context.Reviews
+            .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == userGame.GameId);
+
+        return new UserGameWithReviewDto
+        {
+            UserGame = userGame,
+            Review = review
+        };
+    }
+
+    public async Task<bool> UpdateOrAddReviewAsync(string userId, int gameId, string? reviewContent, bool isRecommended)
+    {
+        try
+        {
+            var existingReview = await _context.Reviews
+                .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == gameId);
+
+            if (string.IsNullOrWhiteSpace(reviewContent))
             {
-                var existingGenre = await _context.Genres
-                    .FirstOrDefaultAsync(g => g.Name.ToLower() == gameGenre.Genre.Name.ToLower());
-
-                existingGame.GameGenres.Add(new GameGenre
+                if (existingReview != null)
                 {
-                    GameId = existingGame.Id,
-                    Genre = existingGenre ?? gameGenre.Genre
-                });
+                    _context.Reviews.Remove(existingReview);
+                    await _context.SaveChangesAsync();
+                }
+                return true; // No review to add/update, but operation is successful
             }
+
+            if (existingReview != null)
+            {
+                existingReview.UpdateReview(reviewContent, isRecommended);
+            }
+            else
+            {
+                var newReview = new Review(userId, gameId, reviewContent, isRecommended);
+                await _context.Reviews.AddAsync(newReview);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
-
-        // Repeat for Platforms, Tags, Developers, Publishers as needed
-
-        await _gameRepository.SaveChangesAsync();
-        return existingGame;
+        catch (Exception)
+        {
+            // Log exception if you have logging
+            return false;
+        }
     }
 
 }

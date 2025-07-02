@@ -12,6 +12,9 @@ public interface IGameService
 {
     Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId);
     Task<Game> AddGameMetadataAsync(Game incomingGame);
-    Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, int? difficulty, string? review, int? rating, bool? recommended);
-    Task<Game> UpdateGameToUserAsync(Game game);
+    Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, double? difficulty, string? review, double? rating, bool? recommended);
+    Task<bool> UserHasGameAsync(string userId, int rawgId);
+    Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId);
+    Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId);
+    Task<bool> UpdateOrAddReviewAsync(string userId, int gameId, string? reviewContent, bool isRecommended);
 }

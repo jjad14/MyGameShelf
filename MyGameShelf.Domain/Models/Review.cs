@@ -34,7 +34,7 @@ public class Review
 
     public bool? IsRecommended { get; set; }
 
-    public DateTime CreatedAt { get; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
     private Review() { }
@@ -44,7 +44,9 @@ public class Review
         UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         GameId = gameId;
         Content = content;
-        IsRecommended = recommended;    
+        IsRecommended = recommended;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void UpdateReview(string newContent, bool newRecommended)

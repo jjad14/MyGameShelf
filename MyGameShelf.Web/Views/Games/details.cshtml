@@ -26,9 +26,57 @@
 
             <hr />
 
-            @await Html.PartialAsync("_AddGameForm", new AddGameToListViewModel {
-                GameId = Model.Game.Id
-            })
+            <form method="post" asp-controller="GameList" asp-action="@(Model.AddToList != null ? "Update" : "Add")" class="">
+                <input type="hidden" name="AddToList.GameId" value="@Model.Game.Id" />
+
+                <div class="mb-3">
+                    <label for="GameStatus" class="form-label">Game Status</label>
+                    <select asp-for="AddToList.GameStatus" asp-items="Model.GameStatusOptions" class="form-select">
+                        <option value="">Select status...</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <div class="mb-3">
+                        <label asp-for="AddToList.Rating" class="form-label"></label>
+                        <select asp-for="AddToList.Rating" asp-items="Model.RatingOptions" class="form-select">
+                            <option value="">Select rating...</option>
+                        </select>
+                        <span asp-validation-for="AddToList.Rating" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="mb-3">
+                        <label asp-for="AddToList.Difficulty" class="form-label"></label>
+                        <select asp-for="AddToList.Difficulty" asp-items="Model.DifficultyOptions" class="form-select">
+                            <option value="">Select difficulty...</option>
+                        </select>
+                        <span asp-validation-for="AddToList.Difficulty" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <input type="hidden" asp-for="AddToList.IsRecommendedSpecified" value="true" />
+
+                <div class="form-check mb-3">
+                    <input asp-for="AddToList.IsRecommended" class="form-check-input" type="checkbox" id="IsRecommended" />
+                    <label class="form-check-label" for="IsRecommended">
+                        I recommend this game
+                    </label>
+                    <span asp-validation-for="AddToList.IsRecommended" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AddToList.Review" class="form-label"></label>
+                    <textarea asp-for="AddToList.Review" class="form-control" rows="4" placeholder="Write your review here..."></textarea>
+                    <span asp-validation-for="AddToList.Review" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 btn-sm">
+                    @(Model.AddToList != null ? "Update Game Entry" : "Add to My Games")
+                </button>
+            </form>
+
 
         </div>
 

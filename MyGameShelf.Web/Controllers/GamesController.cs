@@ -4,6 +4,8 @@ using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Exceptions;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
+using MyGameShelf.Infrastructure.Services;
+using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.ViewModels;
 
 namespace MyGameShelf.Web.Controllers;
@@ -12,10 +14,12 @@ namespace MyGameShelf.Web.Controllers;
 public class GamesController : BaseController
 {
     private readonly IRawgApiService _rawgApiService;
+    private readonly IGameService _gameService;
 
-    public GamesController(IRawgApiService rawgApiService, ILogger<BaseController> logger) : base(logger)
+    public GamesController(IRawgApiService rawgApiService, IGameService gameService, ILogger<BaseController> logger) : base(logger)
     {
         _rawgApiService = rawgApiService;
+        _gameService = gameService;
     }
 
     [HttpGet("")]
@@ -115,6 +119,14 @@ public class GamesController : BaseController
             bool hasAdditions = await _rawgApiService.HasGameDLCs(id);
             bool hasSequels = await _rawgApiService.HasGameSequels(id);
 
+            var userId = GetCurrentUserId();
+            UserGameDetailsDto? userGameDetails = null;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                userGameDetails = await _gameService.GetUserGameDetailsAsync(userId, id);
+            }
+            bool isInUserList = userGameDetails != null;
+
             // Map result to View Model
             var gameDetailsVM = new GameDetailsViewModel
             {
@@ -122,8 +134,20 @@ public class GamesController : BaseController
                 PublisherIdsString = publisherIdString,
                 HasRelatedGames = hasOtherGames,
                 HasAdditions = hasAdditions,
-                HasSequels = hasSequels
+                HasSequels = hasSequels,
+                AddToList = isInUserList ? new AddGameToListViewModel
+                {
+                    GameId = id,
+                    GameStatus = EnumHelpers.GetGameStatusDisplay(userGameDetails.Status),
+                    Rating = userGameDetails.Rating,
+                    Difficulty = userGameDetails.Difficulty,
+                    Review = userGameDetails.ReviewContent,
+                    IsRecommended = userGameDetails.IsRecommended ?? false,
+                    IsRecommendedSpecified = true
+
+                } : null
             };
+
 
             return View(gameDetailsVM);
         }

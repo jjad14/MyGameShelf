@@ -10,10 +10,10 @@ public class AddGameToListViewModel : IValidatableObject
     public string GameStatus { get; set; }
 
     [Range(1, 10, ErrorMessage = "Rating must be between 1 and 10.")]
-    public int? Rating { get; set; }
+    public double? Rating { get; set; }
 
     [Range(1, 10, ErrorMessage = "Difficulty must be between 1 and 10.")]
-    public int? Difficulty { get; set; }
+    public double? Difficulty { get; set; }
 
     [MaxLength(500, ErrorMessage = "Review cannot exceed 500 characters.")]
     public string? Review { get; set; }
