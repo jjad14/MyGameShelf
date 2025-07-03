@@ -10,7 +10,7 @@ public interface IGameRepository
 {
     Task<List<UserGame>> GetUserGamesAsync(string userId);
     Task<Game?> GetByRawgIdAsync(int rawgId);
-    Task<bool> AddGameAsync(Game game);
-    Task<bool> RemoveGameAsync(Game game);
+    Task AddGameAsync(Game game);
+    Task RemoveGameAsync(Game game);
     Task<bool> SaveChangesAsync();
 }

@@ -31,6 +31,7 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<ITagsRepository, TagRepository>();
 
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Rawg API Key
 builder.Services.Configure<RawgSettings>(builder.Configuration.GetSection("RawgSettings"));
@@ -79,7 +80,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Auth/Login"; // Path for login page
     options.LogoutPath = "/Auth/Logout";
-    //options.AccessDeniedPath = "/Auth/AccessDenied";
     options.Cookie.Name = "MyGameShelfAuthCookie";
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(14);

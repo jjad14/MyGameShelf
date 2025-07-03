@@ -24,7 +24,10 @@ public class GameService : IGameService
     private readonly IGenreRepository _genreRepository;
     private readonly ITagsRepository _tagsRepository;
 
-    public GameService(IUserGameRepository userGameRepository,
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GameService(IUnitOfWork unitOfWork,
+        IUserGameRepository userGameRepository,
         IGameRepository gameRepository, 
         IPlatformRepository platformRepository,
         IReviewRepository reviewRepository,
@@ -33,6 +36,7 @@ public class GameService : IGameService
         IGenreRepository genreRepository,
         ITagsRepository tagsRepository)
     {
+        _unitOfWork = unitOfWork;
         _userGameRepository = userGameRepository;
         _gameRepository = gameRepository;
         _platformRepository = platformRepository;  
@@ -48,13 +52,14 @@ public class GameService : IGameService
         try
         {
             // Check if game with same RawgId already exists
-            var existingGame = await _gameRepository.GetByRawgIdAsync(incomingGame.RawgId);
+            var existingGame = await _unitOfWork.Games.GetByRawgIdAsync(incomingGame.RawgId);
+
             if (existingGame != null)
             {
                 return existingGame; // Don't add a duplicate
             }
 
-            var platforms = await _platformRepository.GetAllAsync();
+            var platforms = await _unitOfWork.Platforms.GetAllAsync();
 
             // Attach existing Platforms by matching name (case-insensitive)
             foreach (var gamePlatform in incomingGame.Platforms)
@@ -64,7 +69,7 @@ public class GameService : IGameService
                 gamePlatform.Platform = existingPlatform ?? gamePlatform.Platform;
             }
 
-            var genres = await _genreRepository.GetAllAsync();
+            var genres = await _unitOfWork.Genres.GetAllAsync();
 
             // Attach existing Genres
             foreach (var gameGenre in incomingGame.GameGenres)
@@ -74,7 +79,7 @@ public class GameService : IGameService
                 gameGenre.Genre = existingGenre ?? gameGenre.Genre;
             }
 
-            var tags = await _tagsRepository.GetAllAsync();
+            var tags = await _unitOfWork.Tags.GetAllAsync();
 
             // Attach existing Tags
             foreach (var gameTag in incomingGame.GameTags)
@@ -84,7 +89,7 @@ public class GameService : IGameService
                 gameTag.Tag = existingTag ?? gameTag.Tag;
             }
 
-            var developers = await _developerRepository.GetAllAsync();
+            var developers = await _unitOfWork.Developers.GetAllAsync();
 
             // Attach existing Developers
             foreach (var gameDev in incomingGame.GameDevelopers)
@@ -94,7 +99,7 @@ public class GameService : IGameService
                 gameDev.Developer = existingDev ?? gameDev.Developer;
             }
 
-            var publishers = await _publisherRepository.GetAllAsync();
+            var publishers = await _unitOfWork.Publishers.GetAllAsync();
 
             // Attach existing Publishers
             foreach (var gamePub in incomingGame.GamePublishers)
@@ -105,13 +110,16 @@ public class GameService : IGameService
             }
 
             // Add the new game entity with all its relations (attached or new)
-            var result = await _gameRepository.AddGameAsync(incomingGame);
+            await _unitOfWork.Games.AddGameAsync(incomingGame);
+
+            var result = await _unitOfWork.SaveChangesAsync();
 
             if (!result)
             {
-                throw new Exception("Failed to add game");
+                return null;
             }
-            
+
+
             return incomingGame;
         }
         catch (Exception ex)
@@ -119,8 +127,6 @@ public class GameService : IGameService
             //throw new Exception("Failed to add game", ex);
             return null;
         }
-
-
     }
 
     public async Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, double? difficulty, string? review, double? rating, bool? recommended)
@@ -135,7 +141,7 @@ public class GameService : IGameService
             userGame.SetDifficulty(difficulty);
             userGame.SetRating(rating);
 
-            await _userGameRepository.AddUserGame(userGame);
+            await _unitOfWork.UserGames.AddUserGame(userGame);
 
             // Add review if provided
             if (!string.IsNullOrWhiteSpace(review))
@@ -148,10 +154,10 @@ public class GameService : IGameService
                 }
 
                 var reviewEntity = new Review(userId, gameId, review, recommended.Value);
-                await _reviewRepository.AddReview(reviewEntity);
+                await _unitOfWork.Reviews.AddReview(reviewEntity);
             }
 
-            return await _reviewRepository.SaveChangesAsync();
+            return await _unitOfWork.SaveChangesAsync();
         }
         catch (DbUpdateException ex) // Exception to catch duplicate Games in User Games
         {
@@ -172,7 +178,7 @@ public class GameService : IGameService
 
     public async Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId)
     {
-        var userGames = await _gameRepository.GetUserGamesAsync(userId);
+        var userGames = await _unitOfWork.Games.GetUserGamesAsync(userId);
 
         var dtos = userGames.Select(ug => new UserGameDto
         {
@@ -194,14 +200,13 @@ public class GameService : IGameService
 
     public async Task<bool> UserHasGameAsync(string userId, int rawgId)
     {
-
-        return await _userGameRepository.CheckUserGameExists(userId, rawgId);
+        return await _unitOfWork.UserGames.CheckUserGameExists(userId, rawgId);
     }
 
     public async Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId)
     {
         // Get the UserGame along with the Game (to check RawgId)
-        var userGame = await _userGameRepository.GetUserGameAsync(userId, rawgId);
+        var userGame = await _unitOfWork.UserGames.GetUserGameAsync(userId, rawgId);
 
         if (userGame == null)
         { 
@@ -209,7 +214,7 @@ public class GameService : IGameService
         }
 
         // Now separately query the Review
-        var review = await _reviewRepository.GetReviewAsync(userId, userGame.GameId);
+        var review = await _unitOfWork.Reviews.GetReviewAsync(userId, userGame.GameId);
 
         return new UserGameDetailsDto
         {
@@ -224,14 +229,16 @@ public class GameService : IGameService
 
     public async Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId)
     {
-        var userGame = await _userGameRepository.GetUserGameAsync(userId, rawgId);
+        // Get the UserGame along with the Game (to check RawgId)
+        var userGame = await _unitOfWork.UserGames.GetUserGameAsync(userId, rawgId);
 
         if (userGame == null)
         { 
             return null;
-        } 
+        }
 
-        var review = await _reviewRepository.GetReviewAsync(userId, userGame.GameId);
+        // Now separately query the Review
+        var review = await _unitOfWork.Reviews.GetReviewAsync(userId, userGame.GameId);
 
         return new UserGameWithReviewDto
         {
@@ -245,7 +252,7 @@ public class GameService : IGameService
         try
         {
             // Check if user already has a review for game
-            var existingReview = await _reviewRepository.GetReviewAsync(userId, gameId);
+            var existingReview = await _unitOfWork.Reviews.GetReviewAsync(userId, gameId);
 
             // If Review content is empty - consider it a delete
             if (string.IsNullOrWhiteSpace(reviewContent))
@@ -253,8 +260,8 @@ public class GameService : IGameService
                 // Review Exists - delete it
                 if (existingReview != null)
                 {
-                    await _reviewRepository.DeleteReview(existingReview);
-                    return await _reviewRepository.SaveChangesAsync();
+                    await _unitOfWork.Reviews.DeleteReview(existingReview);
+                    return await _unitOfWork.SaveChangesAsync();
                 }
 
                 // Nothing to delete - consider success
@@ -271,10 +278,10 @@ public class GameService : IGameService
             {
                 // Create new Review
                 var newReview = new Review(userId, gameId, reviewContent, isRecommended);
-                await _reviewRepository.AddReview(newReview);
+                await _unitOfWork.Reviews.AddReview(newReview);
             }
 
-            return await _reviewRepository.SaveChangesAsync();
+            return await _unitOfWork.SaveChangesAsync();
         }
         catch (Exception)
         {
