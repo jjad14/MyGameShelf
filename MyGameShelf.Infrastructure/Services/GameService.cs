@@ -4,6 +4,7 @@ using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Enums;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Data;
+using MyGameShelf.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,117 +14,146 @@ using System.Threading.Tasks;
 namespace MyGameShelf.Infrastructure.Services;
 public class GameService : IGameService
 {
-    private readonly IGameRepository _gameRepository;
-    private readonly ApplicationDbContext _context;
 
-    public GameService(IGameRepository gameRepository, ApplicationDbContext context)
+    private readonly IUserGameRepository _userGameRepository;
+    private readonly IGameRepository _gameRepository;
+    private readonly IPlatformRepository _platformRepository;
+    private readonly IReviewRepository _reviewRepository;
+    private readonly IPublisherRepository _publisherRepository;
+    private readonly IDeveloperRepository _developerRepository;
+    private readonly IGenreRepository _genreRepository;
+    private readonly ITagsRepository _tagsRepository;
+
+    public GameService(IUserGameRepository userGameRepository,
+        IGameRepository gameRepository, 
+        IPlatformRepository platformRepository,
+        IReviewRepository reviewRepository,
+        IPublisherRepository publisherRepository,
+        IDeveloperRepository developerRepository,
+        IGenreRepository genreRepository,
+        ITagsRepository tagsRepository)
     {
+        _userGameRepository = userGameRepository;
         _gameRepository = gameRepository;
-        _context = context;
+        _platformRepository = platformRepository;  
+        _reviewRepository = reviewRepository;
+        _publisherRepository = publisherRepository;
+        _developerRepository = developerRepository;
+        _genreRepository = genreRepository;
+        _tagsRepository = tagsRepository;
     }
 
-    public async Task<Game> AddGameMetadataAsync(Game incomingGame)
+    public async Task<Game?> AddGameMetadataAsync(Game incomingGame)
     {
-        // Check if game with same RawgId already exists
-        var existingGame = await _gameRepository.GetByRawgIdAsync(incomingGame.RawgId);
-        if (existingGame != null)
+        try
         {
-            return existingGame; // Don't add a duplicate
+            // Check if game with same RawgId already exists
+            var existingGame = await _gameRepository.GetByRawgIdAsync(incomingGame.RawgId);
+            if (existingGame != null)
+            {
+                return existingGame; // Don't add a duplicate
+            }
+
+            var platforms = await _platformRepository.GetAllAsync();
+
+            // Attach existing Platforms by matching name (case-insensitive)
+            foreach (var gamePlatform in incomingGame.Platforms)
+            {
+                var existingPlatform = platforms.FirstOrDefault(p => p.Name.ToLower() == gamePlatform.Platform.Name.ToLower());
+
+                gamePlatform.Platform = existingPlatform ?? gamePlatform.Platform;
+            }
+
+            var genres = await _genreRepository.GetAllAsync();
+
+            // Attach existing Genres
+            foreach (var gameGenre in incomingGame.GameGenres)
+            {
+                var existingGenre = genres.FirstOrDefault(g => g.Name.ToLower() == gameGenre.Genre.Name.ToLower());
+
+                gameGenre.Genre = existingGenre ?? gameGenre.Genre;
+            }
+
+            var tags = await _tagsRepository.GetAllAsync();
+
+            // Attach existing Tags
+            foreach (var gameTag in incomingGame.GameTags)
+            {
+                var existingTag = tags.FirstOrDefault(t => t.Name.ToLower() == gameTag.Tag.Name.ToLower());
+
+                gameTag.Tag = existingTag ?? gameTag.Tag;
+            }
+
+            var developers = await _developerRepository.GetAllAsync();
+
+            // Attach existing Developers
+            foreach (var gameDev in incomingGame.GameDevelopers)
+            {
+                var existingDev = developers.FirstOrDefault(d => d.Name.ToLower() == gameDev.Developer.Name.ToLower());
+
+                gameDev.Developer = existingDev ?? gameDev.Developer;
+            }
+
+            var publishers = await _publisherRepository.GetAllAsync();
+
+            // Attach existing Publishers
+            foreach (var gamePub in incomingGame.GamePublishers)
+            {
+                var existingPub = publishers.FirstOrDefault(p => p.Name.ToLower() == gamePub.Publisher.Name.ToLower());
+
+                gamePub.Publisher = existingPub ?? gamePub.Publisher;
+            }
+
+            // Add the new game entity with all its relations (attached or new)
+            var result = await _gameRepository.AddGameAsync(incomingGame);
+
+            if (!result)
+            {
+                throw new Exception("Failed to add game");
+            }
+            
+            return incomingGame;
+        }
+        catch (Exception ex)
+        {
+            //throw new Exception("Failed to add game", ex);
+            return null;
         }
 
-        // Attach existing Platforms by matching name (case-insensitive)
-        foreach (var gamePlatform in incomingGame.Platforms)
-        {
-            var existingPlatform = await _context.Platforms
-                .FirstOrDefaultAsync(p => p.Name.ToLower() == gamePlatform.Platform.Name.ToLower());
 
-            gamePlatform.Platform = existingPlatform ?? gamePlatform.Platform;
-        }
-
-        // Attach existing Genres
-        foreach (var gameGenre in incomingGame.GameGenres)
-        {
-            var existingGenre = await _context.Genres
-                .FirstOrDefaultAsync(g => g.Name.ToLower() == gameGenre.Genre.Name.ToLower());
-
-            gameGenre.Genre = existingGenre ?? gameGenre.Genre;
-        }
-
-        // Attach existing Tags
-        foreach (var gameTag in incomingGame.GameTags)
-        {
-            var existingTag = await _context.Tags
-                .FirstOrDefaultAsync(t => t.Name.ToLower() == gameTag.Tag.Name.ToLower());
-
-            gameTag.Tag = existingTag ?? gameTag.Tag;
-        }
-
-        // Attach existing Developers
-        foreach (var gameDev in incomingGame.GameDevelopers)
-        {
-            var existingDev = await _context.Developers
-                .FirstOrDefaultAsync(d => d.Name.ToLower() == gameDev.Developer.Name.ToLower());
-
-            gameDev.Developer = existingDev ?? gameDev.Developer;
-        }
-
-        // Attach existing Publishers
-        foreach (var gamePub in incomingGame.GamePublishers)
-        {
-            var existingPub = await _context.Publishers
-                .FirstOrDefaultAsync(p => p.Name.ToLower() == gamePub.Publisher.Name.ToLower());
-
-            gamePub.Publisher = existingPub ?? gamePub.Publisher;
-        }
-
-        // Add the new game entity with all its relations (attached or new)
-        await _gameRepository.AddGameAsync(incomingGame);
-        await _gameRepository.SaveChangesAsync();
-
-        return incomingGame;
     }
 
     public async Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, double? difficulty, string? review, double? rating, bool? recommended)
     {
-        //var exists = await _context.UserGames
-        //    .AnyAsync(ug => ug.UserId == userId && ug.GameId == gameId);
-
-        //if (exists)
-        //{
-        //    return false;
-        //}
-
-        var userGame = new UserGame(userId, gameId)
-        {
-            Status = status,
-        };
-
-        userGame.SetDifficulty(difficulty);
-        userGame.SetRating(rating);
-
-        _context.UserGames.Add(userGame);
-
-        // Add review if provided
-        if (!string.IsNullOrWhiteSpace(review))
-        {
-
-            if (!recommended.HasValue)
-            {
-                // Throw an error because recommendation is missing but review exists
-                throw new InvalidOperationException("Recommendation must be specified when submitting a review.");
-            }
-
-            var reviewEntity = new Review(userId, gameId, review, recommended.Value);
-            _context.Reviews.Add(reviewEntity);
-        }
-
-        // Exception to catch duplicate Games in User Games
         try
         {
-            await _context.SaveChangesAsync();
-            return true;
+            var userGame = new UserGame(userId, gameId)
+            {
+                Status = status,
+            };
+
+            userGame.SetDifficulty(difficulty);
+            userGame.SetRating(rating);
+
+            await _userGameRepository.AddUserGame(userGame);
+
+            // Add review if provided
+            if (!string.IsNullOrWhiteSpace(review))
+            {
+
+                if (!recommended.HasValue)
+                {
+                    // Throw an error because recommendation is missing but review exists
+                    throw new InvalidOperationException("Recommendation must be specified when submitting a review.");
+                }
+
+                var reviewEntity = new Review(userId, gameId, review, recommended.Value);
+                await _reviewRepository.AddReview(reviewEntity);
+            }
+
+            return await _reviewRepository.SaveChangesAsync();
         }
-        catch (DbUpdateException ex)
+        catch (DbUpdateException ex) // Exception to catch duplicate Games in User Games
         {
             if (ex.InnerException?.Message.Contains("IX_UserGames_UserId_GameId") == true)
             {
@@ -133,6 +163,10 @@ public class GameService : IGameService
 
             // Rethrow if it's a different DB error
             throw;
+        }
+        catch (Exception)
+        { 
+            return false; 
         }
     }
 
@@ -160,26 +194,22 @@ public class GameService : IGameService
 
     public async Task<bool> UserHasGameAsync(string userId, int rawgId)
     {
-        return await _context.UserGames
-            .Include(ug => ug.Game)
-            .AnyAsync(ug => ug.UserId == userId && ug.Game.RawgId == rawgId);
+
+        return await _userGameRepository.CheckUserGameExists(userId, rawgId);
     }
 
     public async Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId)
     {
         // Get the UserGame along with the Game (to check RawgId)
-        var userGame = await _context.UserGames
-            .Include(ug => ug.Game)
-            .FirstOrDefaultAsync(ug =>
-                ug.UserId == userId &&
-                ug.Game.RawgId == rawgId);
+        var userGame = await _userGameRepository.GetUserGameAsync(userId, rawgId);
 
         if (userGame == null)
+        { 
             return null;
+        }
 
         // Now separately query the Review
-        var review = await _context.Reviews
-            .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == userGame.GameId);
+        var review = await _reviewRepository.GetReviewAsync(userId, userGame.GameId);
 
         return new UserGameDetailsDto
         {
@@ -194,14 +224,14 @@ public class GameService : IGameService
 
     public async Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId)
     {
-        var userGame = await _context.UserGames
-            .Include(ug => ug.Game)
-            .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.Game.RawgId == rawgId);
+        var userGame = await _userGameRepository.GetUserGameAsync(userId, rawgId);
 
-        if (userGame == null) return null;
+        if (userGame == null)
+        { 
+            return null;
+        } 
 
-        var review = await _context.Reviews
-            .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == userGame.GameId);
+        var review = await _reviewRepository.GetReviewAsync(userId, userGame.GameId);
 
         return new UserGameWithReviewDto
         {
@@ -214,31 +244,37 @@ public class GameService : IGameService
     {
         try
         {
-            var existingReview = await _context.Reviews
-                .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == gameId);
+            // Check if user already has a review for game
+            var existingReview = await _reviewRepository.GetReviewAsync(userId, gameId);
 
+            // If Review content is empty - consider it a delete
             if (string.IsNullOrWhiteSpace(reviewContent))
             {
+                // Review Exists - delete it
                 if (existingReview != null)
                 {
-                    _context.Reviews.Remove(existingReview);
-                    await _context.SaveChangesAsync();
+                    await _reviewRepository.DeleteReview(existingReview);
+                    return await _reviewRepository.SaveChangesAsync();
                 }
-                return true; // No review to add/update, but operation is successful
+
+                // Nothing to delete - consider success
+                return true; 
             }
 
+            // Review Exists
             if (existingReview != null)
             {
+                // update review
                 existingReview.UpdateReview(reviewContent, isRecommended);
             }
             else
             {
+                // Create new Review
                 var newReview = new Review(userId, gameId, reviewContent, isRecommended);
-                await _context.Reviews.AddAsync(newReview);
+                await _reviewRepository.AddReview(newReview);
             }
 
-            await _context.SaveChangesAsync();
-            return true;
+            return await _reviewRepository.SaveChangesAsync();
         }
         catch (Exception)
         {
