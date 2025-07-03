@@ -29,20 +29,23 @@ public class GameRepository : IGameRepository
             .FirstOrDefaultAsync(g => g.RawgId == rawgId);
     }
 
-    public async Task AddGameAsync(Game game)
+    public async Task<bool> AddGameAsync(Game game)
     {
         await _context.Games.AddAsync(game);
+
+        return await SaveChangesAsync();
     }
 
-    public async Task RemoveGameAsync(Game game)
+    public async Task<bool> RemoveGameAsync(Game game)
     {
         _context.Games.Remove(game);
-        await Task.CompletedTask;
+
+        return await SaveChangesAsync();
     }
 
-    public async Task SaveChangesAsync()
+    public async Task<bool> SaveChangesAsync()
     {
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
     public async Task<List<UserGame>> GetUserGamesAsync(string userId)
