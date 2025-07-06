@@ -20,7 +20,7 @@ public class GameListController : BaseController
     private readonly UserManager<ApplicationUser> _userManager;
 
     public GameListController(IGameService gameService, IRawgApiService rawgApiService, UserManager<ApplicationUser> userManager, 
-        ILogger<BaseController> logger) : base(logger)
+        ILogger<BaseController> logger) : base(userManager, logger)
     {
         _gameService = gameService;
         _userManager = userManager;
@@ -205,8 +205,7 @@ public class GameListController : BaseController
         var totalCount = await _gameService.CountGamesByStatusAsync(userId, status);
         var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-        var currentUserId = _userManager.GetUserId(User);
-        var isOwner = userId == currentUserId;
+        var isOwner = IsCurrentUser(userId);
 
         var viewModel = new UserGamesTabViewModel
         {
@@ -225,8 +224,7 @@ public class GameListController : BaseController
     [HttpGet]
     public async Task<IActionResult> UserReviews(string userId)
     {
-        var currentUserId = _userManager.GetUserId(User);
-        var isOwner = userId == currentUserId;
+        var isOwner = IsCurrentUser(userId);
 
         var reviews = await _gameService.GetUserReviewsAsync(userId);
 

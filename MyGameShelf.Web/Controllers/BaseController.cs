@@ -1,17 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using MyGameShelf.Infrastructure.Identity;
 using System;
 using System.Security.Claims;
 
 namespace MyGameShelf.Web.Controllers;
 public abstract class BaseController : Controller
 {
+    protected readonly UserManager<ApplicationUser> _userManager;
+
     protected readonly ILogger<BaseController> Logger;
 
-    protected BaseController(ILogger<BaseController> logger)
+    protected BaseController(UserManager<ApplicationUser> userManager, ILogger<BaseController> logger)
     {
         Logger = logger;
+        _userManager = userManager;
+    }
+
+    protected bool IsCurrentUser(string userId)
+    {
+        var currentUserId = _userManager.GetUserId(User);
+        return string.Equals(currentUserId, userId, StringComparison.OrdinalIgnoreCase);
     }
 
     protected string GetCurrentUserId()
