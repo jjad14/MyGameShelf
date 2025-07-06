@@ -184,7 +184,8 @@
                     <div>
                         <ul class="nav nav-tabs mb-3 bg-light-subtle rounded" id="profileTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="games-tab" data-bs-toggle="tab" data-bs-target="#games" type="button" role="tab" aria-controls="games" aria-selected="true">
+                                <button class="nav-link active" id="games-tab" data-bs-toggle="tab" data-bs-target="#games"
+                                        type="button" role="tab" aria-controls="games" aria-selected="true">
                                     Game List
                                 </button>
                             </li>
@@ -213,22 +214,40 @@
                         <div class="tab-content" id="profileTabContent">
                             <!-- Game List Tab -->
                             <div class="tab-pane fade show active" id="games" role="tabpanel" aria-labelledby="games-tab">
-                                <div class="card mb-2">
-                                    <div class="card-body">
-                                        <strong>The Witcher 3</strong> <span class="text-muted">(Completed)</span>
+                                <!-- Filters -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <label class="form-label me-2">Filter by Status:</label>
+                                        <select id="statusFilter" class="form-select d-inline-block w-auto">
+                                            <option value="">All</option>
+                                            @foreach (var status in Enum.GetNames(typeof(MyGameShelf.Domain.Enums.GameStatus)))
+                                            {
+                                                <option value="@status">@status</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label me-2">Sort By:</label>
+                                        <select id="sortFilter" class="form-select d-inline-block w-auto">
+                                            <option value="added">Recently Added</option>
+                                            <option value="name">Name</option>
+                                            <option value="rating">Rating</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div class="card mb-2">
-                                    <div class="card-body">
-                                        <strong>Hades</strong> <span class="text-muted">(Playing)</span>
-                                    </div>
+
+                                <!-- Loader -->
+                                <div id="gameStatusLoading" class="text-center my-4" style="display:none;">
+                                    <div class="spinner-border text-primary" role="status"></div>
                                 </div>
-                                <div class="card mb-2">
-                                    <div class="card-body">
-                                        <strong>Stardew Valley</strong> <span class="text-muted">(Backlog)</span>
-                                    </div>
+
+                                <!-- AJAX-loaded game list -->
+                                <div id="gameStatusResult">
+                                    <!-- _UserGamesTab.cshtml will be injected here -->
                                 </div>
                             </div>
+
 
                             <!-- Favorites Tab -->
                             <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
@@ -264,3 +283,46 @@
 
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function loadGames(page = 1) {
+        const userId = '@Model.UserId';
+        const status = $('#statusFilter').val();
+        const sort = $('#sortFilter').val();
+
+        $('#gameStatusLoading').show();
+        $('#gameStatusResult').hide();
+
+        $.get('/GameList/UserGamesByFilter', {
+            userId,
+            status,
+            sort,
+            page
+        }).done(function (html) {
+            $('#gameStatusResult').html(html);
+        }).always(function () {
+            $('#gameStatusLoading').hide();
+            $('#gameStatusResult').show();
+        });
+    }
+
+    $(document).ready(function () {
+        // Initial load
+        loadGames();
+
+        // Filters changed
+        $('#statusFilter, #sortFilter').on('change', function () {
+            loadGames();
+        });
+
+        // Pagination clicks (if you add them)
+        $(document).on('click', '.pagination a', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            loadGames(page);
+        });
+    });
+</script>
+}
+                          

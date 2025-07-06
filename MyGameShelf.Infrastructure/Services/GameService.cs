@@ -14,37 +14,21 @@ using System.Threading.Tasks;
 namespace MyGameShelf.Infrastructure.Services;
 public class GameService : IGameService
 {
-
-    private readonly IUserGameRepository _userGameRepository;
-    private readonly IGameRepository _gameRepository;
-    private readonly IPlatformRepository _platformRepository;
-    private readonly IReviewRepository _reviewRepository;
-    private readonly IPublisherRepository _publisherRepository;
-    private readonly IDeveloperRepository _developerRepository;
-    private readonly IGenreRepository _genreRepository;
-    private readonly ITagsRepository _tagsRepository;
-
     private readonly IUnitOfWork _unitOfWork;
 
-    public GameService(IUnitOfWork unitOfWork,
-        IUserGameRepository userGameRepository,
-        IGameRepository gameRepository, 
-        IPlatformRepository platformRepository,
-        IReviewRepository reviewRepository,
-        IPublisherRepository publisherRepository,
-        IDeveloperRepository developerRepository,
-        IGenreRepository genreRepository,
-        ITagsRepository tagsRepository)
+    public GameService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _userGameRepository = userGameRepository;
-        _gameRepository = gameRepository;
-        _platformRepository = platformRepository;  
-        _reviewRepository = reviewRepository;
-        _publisherRepository = publisherRepository;
-        _developerRepository = developerRepository;
-        _genreRepository = genreRepository;
-        _tagsRepository = tagsRepository;
+    }
+
+    public async Task<IEnumerable<UserGame>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
+    {
+        return await _unitOfWork.UserGames.GetUserGamesAsync(userId, status, sort, page, pageSize);
+    }
+
+    public async Task<int> CountGamesByStatusAsync(string userId, string status)
+    {
+        return await _unitOfWork.UserGames.CountByStatusAsync(userId, status);
     }
 
     public async Task<Game?> AddGameMetadataAsync(Game incomingGame)
@@ -289,5 +273,6 @@ public class GameService : IGameService
             return false;
         }
     }
+
 
 }

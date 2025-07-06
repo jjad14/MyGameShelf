@@ -23,7 +23,8 @@ public class UserGame
 
     public GameStatus Status { get; set; }
 
-    public DateTime AddedOn { get; } = DateTime.UtcNow;
+    public DateTime AddedOn { get; set; } = DateTime.UtcNow;
+
 
     public double? Difficulty { get; private set; } // Global difficulty score (1-10) aggregated from user inputs
 

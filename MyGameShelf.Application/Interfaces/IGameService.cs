@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 namespace MyGameShelf.Application.Interfaces;
 public interface IGameService
 {
+    Task<IEnumerable<UserGame>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10);
+    Task<int> CountGamesByStatusAsync(string userId, string status);
     Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId);
     Task<Game?> AddGameMetadataAsync(Game incomingGame);
     Task<bool> AddGameToUserAsync(string userId, int gameId, GameStatus status, double? difficulty, string? review, double? rating, bool? recommended);

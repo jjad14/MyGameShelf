@@ -7,6 +7,7 @@ using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Enums;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
+using MyGameShelf.Infrastructure.Repositories;
 using MyGameShelf.Web.ViewModels;
 
 namespace MyGameShelf.Web.Controllers;
@@ -192,5 +193,28 @@ public class GameListController : BaseController
 
         return View("~/Views/Games/Details.cshtml", gameDetailsVM);
     }
+
+    public async Task<IActionResult> UserGamesByFilter(string userId, string? status, string? sort, int page = 1)
+    {
+        const int pageSize = 10;
+
+        var games = await _gameService.GetUserGamesAsync(userId, status, sort, page, pageSize);
+
+        var totalCount = await _gameService.CountGamesByStatusAsync(userId, status);
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        var viewModel = new UserGamesTabViewModel
+        {
+            Games = games,
+            CurrentStatus = status ?? "All",
+            CurrentPage = page,
+            TotalPages = totalPages,
+            UserId = userId
+        };
+
+        return PartialView("_UserGamesTab", viewModel);
+    }
+
+
 
 }
