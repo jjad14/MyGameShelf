@@ -194,6 +194,8 @@ public class GameListController : BaseController
         return View("~/Views/Games/Details.cshtml", gameDetailsVM);
     }
 
+    [AllowAnonymous]
+    [HttpGet]
     public async Task<IActionResult> UserGamesByFilter(string userId, string? status, string? sort, int page = 1)
     {
         const int pageSize = 10;
@@ -203,18 +205,52 @@ public class GameListController : BaseController
         var totalCount = await _gameService.CountGamesByStatusAsync(userId, status);
         var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
+        var currentUserId = _userManager.GetUserId(User);
+        var isOwner = userId == currentUserId;
+
         var viewModel = new UserGamesTabViewModel
         {
             Games = games,
             CurrentStatus = status ?? "All",
             CurrentPage = page,
             TotalPages = totalPages,
-            UserId = userId
+            UserId = userId,
+            IsOwner = isOwner
         };
 
         return PartialView("_UserGamesTab", viewModel);
     }
 
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> UserReviews(string userId)
+    {
+        var currentUserId = _userManager.GetUserId(User);
+        var isOwner = userId == currentUserId;
+
+        var reviews = await _gameService.GetUserReviewsAsync(userId);
+
+        // Map domain Review -> UserReviewViewModel
+        var result = reviews.Select(r => new UserReviewViewModel
+        {
+            ReviewId = r.Id,
+            GameId = r.Game.RawgId,
+            GameTitle = r.Game.Name,
+            GameImageUrl = r.Game.BackgroundImage ?? "",
+            Content = r.Content,
+            IsRecommended = r.IsRecommended,
+            CreatedAt = r.CreatedAt
+        }).ToList();
+
+        var viewModel = new UserReviewsTabViewModel
+        {
+            UserId = userId,           
+            IsOwner = isOwner,         
+            Reviews = result       
+        };
+
+        return PartialView("_UserReviewsTab", viewModel);
+    }
 
 
 }

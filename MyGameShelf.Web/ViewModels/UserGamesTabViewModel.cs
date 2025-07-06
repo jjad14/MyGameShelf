@@ -13,4 +13,6 @@ public class UserGamesTabViewModel
     public int TotalPages { get; set; } = 1;
 
     public string UserId { get; set; } = string.Empty;
+
+    public bool IsOwner { get; set; }
 }

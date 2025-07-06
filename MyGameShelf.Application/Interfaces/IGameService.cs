@@ -19,4 +19,5 @@ public interface IGameService
     Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId);
     Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId);
     Task<bool> UpdateOrAddReviewAsync(string userId, int gameId, string? reviewContent, bool isRecommended);
+    Task<IEnumerable<Review>> GetUserReviewsAsync(string userId);
 }
