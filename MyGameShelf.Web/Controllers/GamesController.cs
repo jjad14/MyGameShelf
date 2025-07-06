@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Exceptions;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
+using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Infrastructure.Services;
 using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.ViewModels;
@@ -13,11 +15,14 @@ namespace MyGameShelf.Web.Controllers;
 [Route("games")]
 public class GamesController : BaseController
 {
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IRawgApiService _rawgApiService;
     private readonly IGameService _gameService;
 
-    public GamesController(IRawgApiService rawgApiService, IGameService gameService, ILogger<BaseController> logger) : base(logger)
+    public GamesController(IRawgApiService rawgApiService, IGameService gameService, UserManager<ApplicationUser> userManager,
+        ILogger<BaseController> logger) : base(userManager, logger)
     {
+        _userManager = userManager;
         _rawgApiService = rawgApiService;
         _gameService = gameService;
     }

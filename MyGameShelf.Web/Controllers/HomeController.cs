@@ -1,6 +1,8 @@
-using System.Diagnostics;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MyGameShelf.Infrastructure.Identity;
 using MyGameShelf.Web.Models;
+using System.Diagnostics;
 
 namespace MyGameShelf.Web.Controllers
 {
@@ -8,7 +10,7 @@ namespace MyGameShelf.Web.Controllers
     {
         private readonly ILogger<BaseController> _logger;
 
-        public HomeController(ILogger<BaseController> logger) : base(logger)
+        public HomeController(UserManager<ApplicationUser> userManager, ILogger<BaseController> logger) : base(userManager, logger)
         {
             _logger = logger;
         }

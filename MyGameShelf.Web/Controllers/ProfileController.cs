@@ -20,7 +20,7 @@ public class ProfileController : BaseController
     private readonly IPhotoService _photoService;
 
     public ProfileController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, 
-        IPhotoService photoService, ILogger<BaseController> logger) : base(logger)
+        IPhotoService photoService, ILogger<BaseController> logger) : base(userManager,logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;

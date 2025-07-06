@@ -22,7 +22,7 @@ public class AuthController : BaseController
     public AuthController(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
-            IPhotoService photoService, ILogger<BaseController> logger) : base(logger)
+            IPhotoService photoService, ILogger<BaseController> logger) : base(userManager, logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
