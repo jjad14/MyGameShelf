@@ -274,5 +274,8 @@ public class GameService : IGameService
         }
     }
 
-
+    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId)
+    {
+        return await _unitOfWork.Reviews.GetUserReviewsAsync(userId);
+    }
 }

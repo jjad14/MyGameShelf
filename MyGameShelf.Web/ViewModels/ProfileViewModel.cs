@@ -21,7 +21,7 @@ public class ProfileViewModel
     public DateTime LastActive { get; set; }
 
     public bool IsPublic { get; set; }
-    public string UserId { get; set; }
+    public string UserId { get; set; } = null!;
 }
 
 

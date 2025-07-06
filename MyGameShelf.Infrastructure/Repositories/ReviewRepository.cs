@@ -23,6 +23,22 @@ public class ReviewRepository : IReviewRepository
         return await _context.Reviews.AnyAsync(r => r.UserId == userId && r.GameId == gameId);
     }
 
+    public async Task<Review?> GetReviewAsync(string userId, int gameId)
+    {
+        var result = await _context.Reviews.FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == gameId);
+
+        return result;
+    }
+
+    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId)
+    {
+        return await _context.Reviews
+            .Where(r => r.UserId == userId)
+            .Include(r => r.Game)
+            .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
+            .ToListAsync();
+    }
+
     public Task AddReview(Review review)
     {
         _context.Reviews.Add(review);
@@ -37,11 +53,9 @@ public class ReviewRepository : IReviewRepository
         return Task.CompletedTask;
     }
 
-    public async Task<Review?> GetReviewAsync(string userId, int gameId)
+    public Task UpdateReview(string userId, int gameId, string content, bool isRecommended)
     {
-        var result = await _context.Reviews.FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == gameId);
-
-        return result;
+        throw new NotImplementedException();
     }
 
     public async Task<bool> SaveChangesAsync()
@@ -49,8 +63,5 @@ public class ReviewRepository : IReviewRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public Task UpdateReview(string userId, int gameId, string content, bool isRecommended)
-    {
-        throw new NotImplementedException();
-    }
+
 }

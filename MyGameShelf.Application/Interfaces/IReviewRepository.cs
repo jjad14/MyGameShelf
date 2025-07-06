@@ -10,9 +10,10 @@ public interface IReviewRepository
 {
     Task<bool> CheckUserReviewExists(string userId, int gameId);
     Task<Review?> GetReviewAsync(string userId, int gameId);
+    Task<IEnumerable<Review>> GetUserReviewsAsync(string userId);
     Task AddReview(Review review);
-    Task UpdateReview(string userId, int gameId, string content, bool isRecommended);
     Task DeleteReview(Review review);
+    Task UpdateReview(string userId, int gameId, string content, bool isRecommended);
     Task<bool> SaveChangesAsync();
 
 }
