@@ -274,14 +274,14 @@ public class GameService : IGameService
         }
     }
 
-    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId)
+    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
     {
-        return await _unitOfWork.Reviews.GetUserReviewsAsync(userId);
+        return await _unitOfWork.Reviews.GetUserReviewsAsync(userId, status, sort, page = 1, pageSize);
     }
 
-    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId)
-    { 
-        return await _unitOfWork.Favorites.GetUserFavoritesAsync(userId);
+    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
+    {
+        return await _unitOfWork.Favorites.GetUserFavoritesAsync(userId, status, sort, page, pageSize);
     }
 
     public async Task ToggleFavoriteGameAsync(string userId, int gameId)

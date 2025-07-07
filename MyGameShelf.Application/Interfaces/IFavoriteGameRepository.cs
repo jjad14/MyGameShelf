@@ -10,7 +10,7 @@ public interface IFavoriteGameRepository
 {
     Task<Favorite?> GetByUserAndGameAsync(string userId, int gameId);
     Task<bool> FavoriteExistsAsync(string userId, int gameId);
-    Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, int page = 1, int pageSize = 10);
+    Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10);
     Task AddFavorite(Favorite favorite);
     Task DeleteFavorite(Favorite favorite);
     Task<bool> SaveChangesAsync();

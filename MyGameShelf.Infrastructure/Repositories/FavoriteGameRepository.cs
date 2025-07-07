@@ -18,7 +18,14 @@ public class FavoriteGameRepository : IFavoriteGameRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, int page = 1, int pageSize = 10)
+    public async Task<Favorite?> GetByUserAndGameAsync(string userId, int gameId)
+    {
+        return await _context.Favorites
+            .FirstOrDefaultAsync(f => f.UserId == userId && f.GameId == gameId);
+    }
+
+
+    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
     {
         return await _context.Favorites
             .Where(f => f.UserId == userId)
@@ -41,12 +48,6 @@ public class FavoriteGameRepository : IFavoriteGameRepository
         _context.Favorites.Remove(favorite);
 
         return Task.CompletedTask;
-    }
-
-    public async Task<Favorite?> GetByUserAndGameAsync(string userId, int gameId)
-    {
-        return await _context.Favorites
-            .FirstOrDefaultAsync(f => f.UserId == userId && f.GameId == gameId);
     }
 
     public async Task<bool> FavoriteExistsAsync(string userId, int gameId)

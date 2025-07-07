@@ -211,36 +211,6 @@ public class GameListController : BaseController
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UserFavorites(string userId, string? status, string? sort, int page = 1)
-    {
-        var isOwner = IsCurrentUser(userId);
-
-        var favorites = await _gameService.GetUserFavoritesAsync(userId);
-
-        // Map domain Review -> UserReviewViewModel
-        var result = favorites.Select(r => new UserFavoritesViewModel
-        {
-            FavoriteId = r.Id,
-            GameId = r.Game.RawgId,
-            GameTitle = r.Game.Name,
-            GameImageUrl = r.Game.BackgroundImage ?? "",
-            Metacritic = r.Game.Metacritic,
-            EsrbRating = r.Game.EsrbRating,
-            CreatedAt = r.CreatedAt
-        }).ToList();
-
-        var viewModel = new UserFavoritesTabViewModel
-        {
-            UserId = userId,
-            IsOwner = isOwner,
-            Favorites = result
-        };
-
-        return PartialView("_UserFavoritesTab", viewModel);
-    }
-
-    [AllowAnonymous]
-    [HttpGet]
     public async Task<IActionResult> UserGamesByFilter(string userId, string? status, string? sort, int page = 1)
     {
         const int pageSize = 10;
@@ -267,11 +237,43 @@ public class GameListController : BaseController
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UserReviews(string userId)
+    public async Task<IActionResult> UserFavorites(string userId, string? status, string? sort, int page = 1)
     {
         var isOwner = IsCurrentUser(userId);
+        const int pageSize = 10;
 
-        var reviews = await _gameService.GetUserReviewsAsync(userId);
+        var favorites = await _gameService.GetUserFavoritesAsync(userId, status, sort, page, pageSize);
+
+        // Map domain Review -> UserReviewViewModel
+        var result = favorites.Select(r => new UserFavoritesViewModel
+        {
+            FavoriteId = r.Id,
+            GameId = r.Game.RawgId,
+            GameTitle = r.Game.Name,
+            GameImageUrl = r.Game.BackgroundImage ?? "",
+            Metacritic = r.Game.Metacritic,
+            EsrbRating = r.Game.EsrbRating,
+            CreatedAt = r.CreatedAt
+        }).ToList();
+
+        var viewModel = new UserFavoritesTabViewModel
+        {
+            UserId = userId,
+            IsOwner = isOwner,
+            Favorites = result
+        };
+
+        return PartialView("_UserFavoritesTab", viewModel);
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> UserReviews(string userId, string? status, string? sort, int page = 1)
+    {
+        var isOwner = IsCurrentUser(userId);
+        const int pageSize = 10;
+
+        var reviews = await _gameService.GetUserReviewsAsync(userId, status, sort, page, pageSize);
 
         // Map domain Review -> UserReviewViewModel
         var result = reviews.Select(r => new UserReviewViewModel
