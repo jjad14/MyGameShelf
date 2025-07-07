@@ -26,7 +26,7 @@ public class GameService : IGameService
         return await _unitOfWork.UserGames.GetUserGamesAsync(userId, status, sort, page, pageSize);
     }
 
-    public async Task<int> CountGamesByStatusAsync(string userId, string status)
+    public async Task<int> CountGamesByStatusAsync(string userId, string? status)
     {
         return await _unitOfWork.UserGames.CountByStatusAsync(userId, status);
     }
@@ -211,6 +211,8 @@ public class GameService : IGameService
         };
     }
 
+
+
     public async Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId)
     {
         // Get the UserGame along with the Game (to check RawgId)
@@ -283,6 +285,9 @@ public class GameService : IGameService
     {
         return await _unitOfWork.Reviews.CountUserReviewsAsync(userId);
     }
+
+
+
 
     public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? sort, int page = 1, int pageSize = 10)
     {

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Models;
 using MyGameShelf.Infrastructure.Identity;
+using MyGameShelf.Infrastructure.Services;
 using MyGameShelf.Web.Helpers;
 using MyGameShelf.Web.ViewModels;
 
@@ -15,16 +16,18 @@ namespace MyGameShelf.Web.Controllers;
 [Route("profile")]
 public class ProfileController : BaseController
 {
+    private readonly IGameService _gameService;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IPhotoService _photoService;
 
-    public ProfileController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, 
-        IPhotoService photoService, ILogger<BaseController> logger) : base(userManager,logger)
+    public ProfileController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+        IGameService gameService, IPhotoService photoService, ILogger<BaseController> logger) : base(userManager,logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _photoService = photoService;
+        _gameService = gameService;
     }
 
     [AllowAnonymous]
@@ -47,6 +50,15 @@ public class ProfileController : BaseController
                 return NotFoundView("User not found.", Url.Action("Index", "Games"));
             }
 
+            var gamesTracked = await _gameService.CountGamesByStatusAsync(user.Id, null);
+            var gamesCompleted = await _gameService.CountGamesByStatusAsync(user.Id, "Completed");
+            var gamesPlaying = await _gameService.CountGamesByStatusAsync(user.Id, "Playing");
+            var gamesOnHold = await _gameService.CountGamesByStatusAsync(user.Id, "OnHold");
+            var gamesDropped = await _gameService.CountGamesByStatusAsync(user.Id, "Dropped");
+            var gamesPlanned = await _gameService.CountGamesByStatusAsync(user.Id, "Planned");
+            var gamesWishList = await _gameService.CountGamesByStatusAsync(user.Id, "Wishlist");
+            var gameReviewsCount = await _gameService.CountUserReviewsAsync(user.Id);
+
             var model = new ProfileViewModel
             {
                 Username = user.UserName,
@@ -65,7 +77,17 @@ public class ProfileController : BaseController
                 CreatedAt = user.CreatedAt,
                 LastActive = user.LastActive,
                 IsPublic = user.IsPublic,
-                UserId = user.Id
+                UserId = user.Id,
+                GamesTracked = gamesTracked,
+                GamesCompleted = gamesCompleted,
+                GamesPlaying = gamesPlaying,
+                GamesOnHold = gamesOnHold,
+                GamesDropped = gamesDropped,
+                GamesPlanned = gamesPlanned,
+                GamesWishList = gamesWishList,
+                GameReviewsCount = gameReviewsCount,
+                FollowersCount = 0,
+                FollowingCount = 0
             };
 
             return View(model);

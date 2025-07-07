@@ -61,8 +61,17 @@ public class UserGameRepository : IUserGameRepository
 
     public async Task<int> CountByStatusAsync(string userId, string status)
     {
+        if (String.IsNullOrEmpty(status))
+        {
+            return await _context.UserGames
+                .Where(ug => ug.UserId == userId)
+                .CountAsync();
+        }
+
         if (!Enum.TryParse<GameStatus>(status, true, out var statusEnum))
+        {
             return 0;
+        }
 
         return await _context.UserGames
             .Where(ug => ug.UserId == userId && ug.Status == statusEnum)
