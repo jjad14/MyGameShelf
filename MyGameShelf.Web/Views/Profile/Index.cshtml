@@ -130,38 +130,37 @@
                     <h4 class="text-center text-md-start col-12 mb-3 ">Statistics</h4>
                     <dl class="row px-4 px-md-0">
                         <dt class="col-8 responsive-font">Games Tracked</dt>
-                        <dd class="col-4 responsive-font">42</dd>
+                        <dd class="col-4 responsive-font">@Model.GamesTracked</dd>
 
                         <dt class="col-8 responsive-font">Completed</dt>
-                        <dd class="col-4 responsive-font">28</dd>
+                        <dd class="col-4 responsive-font">@Model.GamesCompleted</dd>
 
                         <dt class="col-8 responsive-font">Playing</dt>
-                        <dd class="col-4 responsive-font">4</dd>
+                        <dd class="col-4 responsive-font">@Model.GamesPlaying</dd>
 
                         <dt class="col-8 responsive-font">On Hold</dt>
-                        <dd class="col-4 responsive-font">8</dd>
+                        <dd class="col-4 responsive-font">@Model.GamesOnHold</dd>
 
                         <dt class="col-8 responsive-font">Dropped</dt>
-                        <dd class="col-4 responsive-font">2</dd>
+                        <dd class="col-4 responsive-font">@Model.GamesDropped</dd>
 
                         <dt class="col-8 responsive-font">Planned</dt>
-                        <dd class="col-4 responsive-font">15</dd>
+                        <dd class="col-4 responsive-font">@Model.GamesPlanned</dd>
 
-                        <dt class="col-8 responsive-font">Want</dt>
-                        <dd class="col-4 responsive-font">31</dd>
+                        <dt class="col-8 responsive-font">Wishlist</dt>
+                        <dd class="col-4 responsive-font">@Model.GamesWishList</dd>
 
                         <dt class="col-8 responsive-font">Reviews</dt>
-                        <dd class="col-4 responsive-font">15</dd>
+                        <dd class="col-4 responsive-font">@Model.GameReviewsCount</dd>
 
                         <dt class="col-8 responsive-font">Followers</dt>
-                        <dd class="col-4 responsive-font">48</dd>
+                        <dd class="col-4 responsive-font">@Model.FollowersCount</dd>
 
                         <dt class="col-8 responsive-font">Following</dt>
-                        <dd class="col-4 responsive-font">120</dd>
+                        <dd class="col-4 responsive-font">@Model.FollowingCount</dd>
                     </dl>
                 }
             </div>
-
 
         </div>
 
@@ -218,7 +217,7 @@
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div>
                                         <label class="form-label me-2">Filter by Status:</label>
-                                        <select id="statusFilter" class="form-select d-inline-block w-auto">
+                                        <select id="gameStatusFilter" class="form-select d-inline-block w-auto">
                                             <option value="">All</option>
                                             @foreach (var status in Enum.GetNames(typeof(MyGameShelf.Domain.Enums.GameStatus)))
                                             {
@@ -229,7 +228,7 @@
 
                                     <div>
                                         <label class="form-label me-2">Sort By:</label>
-                                        <select id="sortFilter" class="form-select d-inline-block w-auto">
+                                        <select id="gameSortFilter" class="form-select d-inline-block w-auto">
                                             <option value="added">Recently Added</option>
                                             <option value="name">Name</option>
                                             <option value="rating">Rating</option>
@@ -248,14 +247,13 @@
                                 </div>
                             </div>
 
-
                             <!-- Favorites Tab -->
                             <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
-                                <!-- Filters -->
-                                <div class="d-flex justify-content-between align-items-center mb-3">
+                               <!-- Filters -->
+                                <div class="d-flex justify-content-end align-items-center mb-3">      
                                     <div>
                                         <label class="form-label me-2">Sort By:</label>
-                                        <select id="sortFilter" class="form-select d-inline-block w-auto">
+                                        <select id="favoriteSortFilter" class="form-select d-inline-block w-auto">
                                             <option value="added">Recently Added</option>
                                             <option value="name">Name</option>
                                             <option value="rating">Rating</option>
@@ -276,8 +274,26 @@
 
                             <!-- Reviews Tab -->
                             <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                                <div id="reviews-tab-content">
-                                    <!-- _UserReviewsTab.cshtml will be injected here -->
+                                <!-- Filters -->
+                                <div class="d-flex justify-content-end align-items-center mb-3">
+                                    <div>
+                                        <label class="form-label me-2">Sort By:</label>
+                                        <select id="reviewSortFilter" class="form-select d-inline-block w-auto">
+                                            <option value="added">Recently Added</option>
+                                            <option value="name">Name</option>
+                                            <option value="rating">Rating</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Loader -->
+                                <div id="reviewsLoading" class="text-center my-4" style="display:none;">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+
+                                <!-- AJAX-loaded game list -->
+                                <div id="reviewsResult">
+                                    <!-- _ReviewTab.cshtml will be injected here -->
                                 </div>
                             </div>
 
@@ -309,8 +325,8 @@
     <script>
         function loadGames(page = 1) {
             const userId = '@Model.UserId';
-            const status = $('#statusFilter').val();
-            const sort = $('#sortFilter').val();
+            const status = $('#gameStatusFilter').val();
+            const sort = $('#gameSortFilter').val();
 
             $('#gameStatusLoading').show();
             $('#gameStatusResult').hide();
@@ -335,32 +351,41 @@
             loadGamesByStatus(page);
         });
 
-        function loadReviews() {
+        function loadReviews(page = 1) {
             const userId = '@Model.UserId';
+            const sort = $('#reviewSortFilter').val();
 
-            $('#reviews-tab-content').html('<p>Loading reviews...</p>');
+            $('#reviewsResult').html('<p>Loading reviews...</p>');
 
-            $.get('/GameList/UserReviews', { userId })
+            $.get('/GameList/UserReviews', { userId, sort, page })
                 .done(function (html) {
-                    $('#reviews-tab-content').html(html);
+                    $('#reviewsResult').html(html);
                 })
                 .fail(function () {
-                    $('#reviews-tab-content').html('<p class="text-danger">Failed to load reviews.</p>');
+                    $('#reviewsResult').html('<p class="text-danger">Failed to load reviews.</p>');
                 });
         }
+
+        $(document).on('click', '.user-reviews-page', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            loadReviews(page);
+
+            $('html, body').animate({
+                scrollTop: $('#reviewStatusResult').offset().top - 100
+            }, 300);
+        });
 
         function loadFavoriteGames(page = 1)
         {
             const userId = '@Model.UserId';
-            const status = $('#statusFilter').val();
-            const sort = $('#sortFilter').val();
+            const sort = $('#favoriteSortFilter').val();
 
             $('#favoriteGameStatusLoading').show();
             $('#favoriteGameStatusResult').hide();
 
             $.get('/GameList/UserFavorites', {
                 userId,
-                status,
                 sort,
                 page
             }).done(function (html) {
@@ -375,8 +400,17 @@
         $(document).ready(function () {
             loadGames(); // Load games by default
 
+            // refetch games when filters changed
             $('#statusFilter, #sortFilter').on('change', function () {
                 loadGames();
+            });
+
+            $('#reviewSortFilter').on('change', function () {
+                loadReviews();
+            });
+
+            $('#favoriteSortFilter').on('change', function () {
+                loadFavoriteGames();
             });
 
             $(document).on('click', '.pagination a', function (e) {
@@ -435,7 +469,7 @@
                         $btn.css("color", isFavorited ? "#FFD700" : "white");
                     }
                 });
-                });
+            });
 
 
         });

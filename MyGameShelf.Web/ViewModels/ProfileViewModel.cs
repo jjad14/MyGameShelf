@@ -22,6 +22,19 @@ public class ProfileViewModel
 
     public bool IsPublic { get; set; }
     public string UserId { get; set; } = null!;
+
+    public int GamesTracked { get; set; }
+    public int GamesCompleted { get; set; }
+    public int GamesPlaying { get; set; }
+    public int GamesOnHold { get; set; }
+    public int GamesDropped { get; set; }
+    public int GamesPlanned { get; set; }
+    public int GamesWishList { get; set; }
+    public int GameReviewsCount { get; set; }
+    public int FollowersCount { get; set; }
+    public int FollowingCount { get; set; }
+
+
 }
 
 

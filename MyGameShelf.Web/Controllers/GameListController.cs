@@ -237,12 +237,15 @@ public class GameListController : BaseController
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UserFavorites(string userId, string? status, string? sort, int page = 1)
+    public async Task<IActionResult> UserFavorites(string userId, string? sort, int page = 1)
     {
         var isOwner = IsCurrentUser(userId);
         const int pageSize = 10;
 
-        var favorites = await _gameService.GetUserFavoritesAsync(userId, status, sort, page, pageSize);
+        var favorites = await _gameService.GetUserFavoritesAsync(userId, sort, page, pageSize);
+
+        var totalCount = await _gameService.CountUserFavoritesAsync(userId);
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
         // Map domain Review -> UserReviewViewModel
         var result = favorites.Select(r => new UserFavoritesViewModel
@@ -260,7 +263,9 @@ public class GameListController : BaseController
         {
             UserId = userId,
             IsOwner = isOwner,
-            Favorites = result
+            Favorites = result,
+            CurrentPage = page,
+            TotalPages = totalPages
         };
 
         return PartialView("_UserFavoritesTab", viewModel);
@@ -268,12 +273,15 @@ public class GameListController : BaseController
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> UserReviews(string userId, string? status, string? sort, int page = 1)
+    public async Task<IActionResult> UserReviews(string userId, string? sort, int page = 1)
     {
         var isOwner = IsCurrentUser(userId);
         const int pageSize = 10;
 
-        var reviews = await _gameService.GetUserReviewsAsync(userId, status, sort, page, pageSize);
+        var reviews = await _gameService.GetUserReviewsAsync(userId, sort, page, pageSize);
+
+        var totalCount = await _gameService.CountUserReviewsAsync(userId);
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
         // Map domain Review -> UserReviewViewModel
         var result = reviews.Select(r => new UserReviewViewModel
@@ -291,7 +299,9 @@ public class GameListController : BaseController
         {
             UserId = userId,           
             IsOwner = isOwner,         
-            Reviews = result       
+            Reviews = result,
+            CurrentPage = page,
+            TotalPages = totalPages
         };
 
         return PartialView("_UserReviewsTab", viewModel);

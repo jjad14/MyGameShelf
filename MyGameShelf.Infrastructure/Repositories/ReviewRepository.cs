@@ -23,6 +23,13 @@ public class ReviewRepository : IReviewRepository
         return await _context.Reviews.AnyAsync(r => r.UserId == userId && r.GameId == gameId);
     }
 
+    public async Task<int> CountUserReviewsAsync(string userId)
+    {
+        return await _context.Reviews
+            .Where(r => r.UserId == userId)
+            .CountAsync();
+    }
+
     public async Task<Review?> GetReviewAsync(string userId, int gameId)
     {
         var result = await _context.Reviews.FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == gameId);
@@ -30,12 +37,18 @@ public class ReviewRepository : IReviewRepository
         return result;
     }
 
-    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId, string? sort, int page = 1, int pageSize = 10)
     {
-        var query = _context.Reviews
+        IQueryable<Review> query = _context.Reviews
             .Where(r => r.UserId == userId)
-            .Include(r => r.Game)
-            .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt);
+            .Include(r => r.Game);
+
+        query = sort switch
+        {
+            "name" => query.OrderBy(r => r.Game.Name),
+            "rating" => query.OrderByDescending(r => r.IsRecommended),
+            _ => query.OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
+        };
 
         return await query
             .Skip((page - 1) * pageSize)

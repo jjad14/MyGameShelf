@@ -24,16 +24,30 @@ public class FavoriteGameRepository : IFavoriteGameRepository
             .FirstOrDefaultAsync(f => f.UserId == userId && f.GameId == gameId);
     }
 
-
-    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? sort, int page = 1, int pageSize = 10)
     {
-        return await _context.Favorites
+        IQueryable<Favorite> query = _context.Favorites
             .Where(f => f.UserId == userId)
-            .Include(r => r.Game)
-            .OrderByDescending(f => f.CreatedAt)
+            .Include(f => f.Game);
+
+        query = sort switch
+        {
+            "name" => query.OrderBy(f => f.Game.Name),
+            "created" => query.OrderByDescending(f => f.CreatedAt),
+            _ => query.OrderByDescending(f => f.CreatedAt)
+        };
+
+        return await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+    }
+
+    public async Task<int> CountUserFavoritesAsync(string userId)
+    {
+        return await _context.Favorites
+            .Where(r => r.UserId == userId)
+            .CountAsync();
     }
 
     public Task AddFavorite(Favorite favorite)
