@@ -30,12 +30,16 @@ public class ReviewRepository : IReviewRepository
         return result;
     }
 
-    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId)
+    public async Task<IEnumerable<Review>> GetUserReviewsAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
     {
-        return await _context.Reviews
+        var query = _context.Reviews
             .Where(r => r.UserId == userId)
             .Include(r => r.Game)
-            .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
+            .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt);
+
+        return await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
     }
 

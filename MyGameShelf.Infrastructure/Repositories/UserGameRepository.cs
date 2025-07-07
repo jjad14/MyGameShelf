@@ -69,7 +69,6 @@ public class UserGameRepository : IUserGameRepository
             .CountAsync();
     }
 
-
     public async Task<UserGame?> GetUserGameAsync(string userId, int gameId)
     {
         var userGame = await _context.UserGames
