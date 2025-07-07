@@ -251,7 +251,27 @@
 
                             <!-- Favorites Tab -->
                             <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
-                                <p>No favorites yet.</p>
+                                <!-- Filters -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <label class="form-label me-2">Sort By:</label>
+                                        <select id="sortFilter" class="form-select d-inline-block w-auto">
+                                            <option value="added">Recently Added</option>
+                                            <option value="name">Name</option>
+                                            <option value="rating">Rating</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Loader -->
+                                <div id="favoriteGameStatusLoading" class="text-center my-4" style="display:none;">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+
+                                <!-- AJAX-loaded game list -->
+                                <div id="favoriteGameStatusResult">
+                                    <!-- _UserFavoritesTab.cshtml will be injected here -->
+                                </div>
                             </div>
 
                             <!-- Reviews Tab -->
@@ -271,7 +291,6 @@
                                 <p>No followers yet.</p>
                             </div>
                         </div>
-
 
                     </div>
             }
@@ -323,6 +342,28 @@
                 });
         }
 
+        function loadFavoriteGames(page = 1)
+        {
+            const userId = '@Model.UserId';
+            const status = $('#statusFilter').val();
+            const sort = $('#sortFilter').val();
+
+            $('#favoriteGameStatusLoading').show();
+            $('#favoriteGameStatusResult').hide();
+
+            $.get('/GameList/UserFavorites', {
+                userId,
+                status,
+                sort,
+                page
+            }).done(function (html) {
+                $('#favoriteGameStatusResult').html(html);
+            }).always(function () {
+                $('#favoriteGameStatusLoading').hide();
+                $('#favoriteGameStatusResult').show();
+            });
+
+        }
 
         $(document).ready(function () {
             loadGames(); // Load games by default
@@ -342,20 +383,51 @@
                 loadReviews();
             });
 
+            // When the user clicks the Favorites tab, load reviews
+            $('button[data-bs-target="#favorites"]').on('shown.bs.tab', function () {
+                loadFavoriteGames(1);
+            });
+
             $(document).on("click", ".favorite-toggle", function () {
                 var $btn = $(this);
-                var $icon = $btn.find("i");
-                var isFavorited = $btn.data("favorited") || false;
+                var gameId = $btn.attr("data-game-id");
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                var isFavorited = $btn.attr("data-favorited") === "true";
                 isFavorited = !isFavorited;
-                $btn.data("favorited", isFavorited);
+                $btn.attr("data-favorited", isFavorited.toString());
 
                 if (isFavorited) {
-                  $icon.removeClass("fa-regular").addClass("fa-solid");
-                  $btn.css("color", "#FFD700");
+                    $btn.html('<i class="fa-solid fa-star"></i>');
+                    $btn.css("color", "#FFD700");
                 } else {
-                  $icon.removeClass("fa-solid").addClass("fa-regular");
-                  $btn.css("color", "white");
+                    $btn.html('<i class="fa-regular fa-star"></i>');
+                    $btn.css("color", "white");
                 }
+
+                // Send the toggle request to server
+                $.ajax({
+                    type: "POST",
+                    url: "/GameList/ToggleFavoriteGame",
+                    data: { gameId: gameId },
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    success: function (response) {
+                        console.log("ToggleFavoriteGame response:", response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error toggling favorite:", error);
+
+                        // Revert on error
+                        isFavorited = !isFavorited;
+                        $btn.attr("data-favorited", isFavorited.toString());
+                        $btn.html(isFavorited
+                            ? '<i class="fa-solid fa-star"></i>'
+                            : '<i class="fa-regular fa-star"></i>');
+                        $btn.css("color", isFavorited ? "#FFD700" : "white");
+                    }
+                });
             });
 
 

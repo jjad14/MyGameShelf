@@ -194,6 +194,51 @@ public class GameListController : BaseController
         return View("~/Views/Games/Details.cshtml", gameDetailsVM);
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleFavoriteGame(int gameId)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        await _gameService.ToggleFavoriteGameAsync(user.Id, gameId);
+
+        return Ok(new { success = true });
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> UserFavorites(string userId, string? status, string? sort, int page = 1)
+    {
+        var isOwner = IsCurrentUser(userId);
+
+        var favorites = await _gameService.GetUserFavoritesAsync(userId);
+
+        // Map domain Review -> UserReviewViewModel
+        var result = favorites.Select(r => new UserFavoritesViewModel
+        {
+            FavoriteId = r.Id,
+            GameId = r.Game.RawgId,
+            GameTitle = r.Game.Name,
+            GameImageUrl = r.Game.BackgroundImage ?? "",
+            Metacritic = r.Game.Metacritic,
+            EsrbRating = r.Game.EsrbRating,
+            CreatedAt = r.CreatedAt
+        }).ToList();
+
+        var viewModel = new UserFavoritesTabViewModel
+        {
+            UserId = userId,
+            IsOwner = isOwner,
+            Favorites = result
+        };
+
+        return PartialView("_UserFavoritesTab", viewModel);
+    }
+
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> UserGamesByFilter(string userId, string? status, string? sort, int page = 1)
@@ -209,7 +254,7 @@ public class GameListController : BaseController
 
         var viewModel = new UserGamesTabViewModel
         {
-            Games = games,
+            GamesWithFavorites = games,
             CurrentStatus = status ?? "All",
             CurrentPage = page,
             TotalPages = totalPages,

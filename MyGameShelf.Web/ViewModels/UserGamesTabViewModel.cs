@@ -1,10 +1,11 @@
-﻿using MyGameShelf.Domain.Models;
+﻿using MyGameShelf.Application.DTOs;
+using MyGameShelf.Domain.Models;
 
 namespace MyGameShelf.Web.ViewModels;
 
 public class UserGamesTabViewModel
 {
-    public IEnumerable<UserGame> Games { get; set; } = new List<UserGame>();
+    public IEnumerable<UserGameWithFavoriteStatus> GamesWithFavorites { get; set; }
 
     public string CurrentStatus { get; set; } = string.Empty;
 

@@ -21,7 +21,7 @@ public class GameService : IGameService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<UserGame>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<UserGameWithFavoriteStatus>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
     {
         return await _unitOfWork.UserGames.GetUserGamesAsync(userId, status, sort, page, pageSize);
     }
@@ -278,4 +278,37 @@ public class GameService : IGameService
     {
         return await _unitOfWork.Reviews.GetUserReviewsAsync(userId);
     }
+
+    public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId)
+    { 
+        return await _unitOfWork.Favorites.GetUserFavoritesAsync(userId);
+    }
+
+    public async Task ToggleFavoriteGameAsync(string userId, int gameId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentNullException(nameof(userId));
+
+        var existingFavorite = await _unitOfWork.Favorites.GetByUserAndGameAsync(userId, gameId);
+
+        // Optional cooldown (e.g., 1 second between toggles)
+        if (existingFavorite != null)
+        {
+            var now = DateTime.UtcNow;
+            var timeSinceLastToggle = now - existingFavorite.FavoritedOn;
+
+            if (timeSinceLastToggle.TotalSeconds < 1)
+                return; // Or throw, or just silently ignore
+
+            await _unitOfWork.Favorites.DeleteFavorite(existingFavorite);
+        }
+        else
+        {
+            var favorite = new Favorite(userId, gameId);
+            await _unitOfWork.Favorites.AddFavorite(favorite);
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+
 }

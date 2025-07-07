@@ -23,6 +23,7 @@ public class UnitOfWork : IUnitOfWork
         Developers = new DeveloperRepository(_context);
         Genres = new GenreRepository(_context);
         Tags = new TagRepository(_context);
+        Favorites = new FavoriteGameRepository(_context);
 
     }
 
@@ -39,4 +40,5 @@ public class UnitOfWork : IUnitOfWork
     public IDeveloperRepository Developers { get; }
     public IGenreRepository Genres { get; }
     public ITagsRepository Tags { get; }
+    public IFavoriteGameRepository Favorites { get; }
 }

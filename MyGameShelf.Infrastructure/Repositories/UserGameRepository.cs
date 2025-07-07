@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MyGameShelf.Application.DTOs;
 using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Domain.Enums;
 using MyGameShelf.Domain.Models;
@@ -19,7 +20,7 @@ public class UserGameRepository : IUserGameRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<UserGame>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<UserGameWithFavoriteStatus>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10)
     {
         var query = _context.UserGames
             .Include(ug => ug.Game)
@@ -37,10 +38,25 @@ public class UserGameRepository : IUserGameRepository
             _ => query.OrderByDescending(ug => ug.AddedOn) // default to Recently Added
         };
 
-        return await query
+        var userGames =  await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        // Get favorite game IDs for this user and page games
+        var gameIds = userGames.Select(ug => ug.GameId).ToList();
+
+        // projection to include favorite status
+        var favoritedGameIds = await _context.Favorites
+            .Where(f => f.UserId == userId && gameIds.Contains(f.GameId))
+            .Select(f => f.GameId)
+            .ToListAsync();
+
+        return userGames.Select(ug => new UserGameWithFavoriteStatus
+        {
+            UserGame = ug,
+            IsFavorited = favoritedGameIds.Contains(ug.GameId)
+        });
     }
 
     public async Task<int> CountByStatusAsync(string userId, string status)

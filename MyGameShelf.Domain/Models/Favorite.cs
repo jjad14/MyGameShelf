@@ -16,7 +16,17 @@ public class Favorite
 
     [ForeignKey("Game")]
     public int GameId { get; set; }
-    public Game Game { get; set; } 
+    public Game Game { get; set; }
 
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public DateTime FavoritedOn { get; set; } = DateTime.UtcNow;
+
+    public Favorite(string userId, int gameId)
+    {
+        UserId = userId ?? throw new ArgumentNullException(nameof(userId));
+        GameId = gameId;
+        CreatedAt = DateTime.UtcNow;
+        FavoritedOn = DateTime.UtcNow;
+    }
+
 }

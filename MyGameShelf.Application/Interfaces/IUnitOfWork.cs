@@ -15,6 +15,7 @@ public interface IUnitOfWork
     IDeveloperRepository Developers { get; }
     IGenreRepository Genres { get; }
     ITagsRepository Tags { get; }
+    IFavoriteGameRepository Favorites { get; }
 
     Task<bool> SaveChangesAsync();
 }

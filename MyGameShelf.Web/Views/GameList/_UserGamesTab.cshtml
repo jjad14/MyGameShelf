@@ -1,19 +1,19 @@
 ﻿@using MyGameShelf.Web.ViewModels
 @model UserGamesTabViewModel
 
-@if (!Model.Games.Any())
+@if (!Model.GamesWithFavorites.Any())
 {
     <p class="text-muted">No games in this category.</p>
 }
 else
 {
     <div class="row">
-        @foreach (var userGame in Model.Games)
+        @foreach (var userGame in Model.GamesWithFavorites)
         {
             <div class="col-md-4 mb-3">
                 <div class="card h-100">
                     <div class="position-relative">
-                        <img src="@userGame.Game!.BackgroundImage" class="card-img-top" alt="@userGame.Game.Name">
+                        <img src="@userGame.UserGame.Game!.BackgroundImage" class="card-img-top" alt="@userGame.UserGame.Game.Name">
 
                         @if (Model.IsOwner)
                         {
@@ -21,10 +21,11 @@ else
                             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column align-items-end gap-2">
                                 <button type="button"
                                         class="btn btn-link p-0 favorite-toggle"
-                                        data-game-id="@userGame.Game.RawgId"
+                                        data-game-id="@userGame.UserGame.Game.Id"
+                                        data-favorited="@userGame.IsFavorited.ToString().ToLower()"
                                         title="Favorite"
-                                        style="color: white; font-size: 1.5rem;">
-                                    <i class="fa-regular fa-star"></i>
+                                        style="color: @(userGame.IsFavorited ? "#FFD700" : "white"); font-size: 1.5rem;">
+                                    <i class="@(userGame.IsFavorited ? "fa-solid" : "fa-regular") fa-star"></i>
                                 </button>
 
                                 <button type="button" class="btn btn-link p-0" title="Remove"
@@ -35,14 +36,14 @@ else
                         }
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">@userGame.Game.Name</h5>
-                        <p>Status: @userGame.Status</p>
-                        <p>Rating: @userGame.Rating</p>
-                        <p>Difficulty: @userGame.Difficulty</p>
-                        <p>Added On: @userGame.AddedOn.ToString("MMM dd, yyyy")</p>
+                        <h5 class="card-title">@userGame.UserGame.Game.Name</h5>
+                        <p>Status: @userGame.UserGame.Status</p>
+                        <p>Rating: @userGame.UserGame.Rating</p>
+                        <p>Difficulty: @userGame.UserGame.Difficulty</p>
+                        <p>Added On: @userGame.UserGame.AddedOn.ToString("MMM dd, yyyy")</p>
                     </div>
                     <div class="card-footer bg-transparent border-top-0">
-                        <a href="@Url.Action("Details", "Games", new { id = userGame.Game.RawgId })" class="btn btn-sm btn-primary w-100">
+                        <a href="@Url.Action("Details", "Games", new { id = userGame.UserGame.Game.RawgId })" class="btn btn-sm btn-primary w-100">
                             View Game
                         </a>
                     </div>

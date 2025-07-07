@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MyGameShelf.Application.Interfaces;
 public interface IGameService
 {
-    Task<IEnumerable<UserGame>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10);
+    Task<IEnumerable<UserGameWithFavoriteStatus>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10);
     Task<int> CountGamesByStatusAsync(string userId, string status);
     Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId);
     Task<Game?> AddGameMetadataAsync(Game incomingGame);
@@ -20,4 +20,7 @@ public interface IGameService
     Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId);
     Task<bool> UpdateOrAddReviewAsync(string userId, int gameId, string? reviewContent, bool isRecommended);
     Task<IEnumerable<Review>> GetUserReviewsAsync(string userId);
+    Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId);
+
+    Task ToggleFavoriteGameAsync(string userId, int gameId);
 }
