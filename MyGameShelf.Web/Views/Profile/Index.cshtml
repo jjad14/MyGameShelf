@@ -328,6 +328,13 @@
             });
         }
 
+        // Handle pagination link clicks
+        $(document).on('click', '.user-games-page', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            loadGamesByStatus(page);
+        });
+
         function loadReviews() {
             const userId = '@Model.UserId';
 
@@ -428,7 +435,7 @@
                         $btn.css("color", isFavorited ? "#FFD700" : "white");
                     }
                 });
-            });
+                });
 
 
         });
