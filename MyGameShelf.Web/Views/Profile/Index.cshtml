@@ -370,10 +370,6 @@
             e.preventDefault();
             const page = $(this).data('page');
             loadReviews(page);
-
-            $('html, body').animate({
-                scrollTop: $('#reviewStatusResult').offset().top - 100
-            }, 300);
         });
 
         function loadFavoriteGames(page = 1)
@@ -394,8 +390,13 @@
                 $('#favoriteGameStatusLoading').hide();
                 $('#favoriteGameStatusResult').show();
             });
-
         }
+
+        $(document).on('click', '.user-favorites-page', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            loadReviews(page);
+        });
 
         $(document).ready(function () {
             loadGames(); // Load games by default
@@ -413,10 +414,22 @@
                 loadFavoriteGames();
             });
 
-            $(document).on('click', '.pagination a', function (e) {
+            $(document).on('click', '.game-pagination a', function (e) {
                 e.preventDefault();
                 const page = $(this).data('page');
                 loadGames(page);
+            });
+
+            $(document).on('click', '.review-pagination a', function (e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                loadReviews(page);
+            });
+
+            $(document).on('click', '.favorite-pagination a', function (e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                loadFavoriteGames(page);
             });
 
             // When the user clicks the Reviews tab, load reviews
@@ -426,7 +439,7 @@
 
             // When the user clicks the Favorites tab, load reviews
             $('button[data-bs-target="#favorites"]').on('shown.bs.tab', function () {
-                loadFavoriteGames(1);
+                loadFavoriteGames();
             });
 
             $(document).on("click", ".favorite-toggle", function () {

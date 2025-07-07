@@ -1,89 +1,94 @@
 ﻿@using MyGameShelf.Web.ViewModels
 @model UserReviewsTabViewModel
 
-<script>
-    const userId = '@Model.UserId';
-</script>
+@if (!Model.Reviews.Any())
+{
+    <p class="text-muted">No reviews in this category.</p>
+}
+else
+{
+    <script>
+        const userId = '@Model.UserId';
+    </script>
 
-<div class="container">
-    @foreach (var review in Model.Reviews)
-    {
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="row g-0">
-                        <!-- Left Column: Game Image -->
-                        <div class="col-3">
-                            <img src="@review.GameImageUrl"
-                                 class="img-fluid rounded-start h-100 w-100"
-                                 style="object-fit: cover;"
-                                 alt="@review.GameTitle" />
-                        </div>
-
-                        <!-- Right Column: Details -->
-                        <div class="col-9 d-flex flex-column p-3">
-                            <!-- First Row: Game Title and Recommend icon -->
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="mb-0">@review.GameTitle</h5>
-                                @if (review.IsRecommended.HasValue)
-                                {
-                                    <span class="badge @(review.IsRecommended.Value ? "bg-success" : "bg-danger")">
-                                        @(review.IsRecommended.Value ? "Recommends 👍" : "Not Recommended 👎")
-                                    </span>
-                                }
+    <div class="container">
+        @foreach (var review in Model.Reviews)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="row g-0">
+                            <!-- Left Column: Game Image -->
+                            <div class="col-3">
+                                <img src="@review.GameImageUrl"
+                                     class="img-fluid rounded-start h-100 w-100"
+                                     style="object-fit: cover;"
+                                     alt="@review.GameTitle" />
                             </div>
 
-                            <!-- Second Row: Review Content -->
-                            <div class="mb-3">
-                                <p class="mb-0">@review.Content</p>
-                            </div>
+                            <!-- Right Column: Details -->
+                            <div class="col-9 d-flex flex-column p-3">
+                                <!-- First Row: Game Title and Recommend icon -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">@review.GameTitle</h5>
+                                    @if (review.IsRecommended.HasValue)
+                                    {
+                                        <span class="badge @(review.IsRecommended.Value ? "bg-success" : "bg-danger")">
+                                            @(review.IsRecommended.Value ? "Recommends 👍" : "Not Recommended 👎")
+                                        </span>
+                                    }
+                                </div>
 
-                            <!-- Third Row: Edit Button -->
-                            <div class="d-flex justify-content-end gap-1">
-                                <a href="@Url.Action("Details", "Games", new { id = review.GameId })" class="btn btn-sm btn-primary">
-                                    View Details
-                                </a>
+                                <!-- Second Row: Review Content -->
+                                <div class="mb-3">
+                                    <p class="mb-0">@review.Content</p>
+                                </div>
 
-                                @if (Model.IsOwner)
-                                {
-                                    <form asp-action="DeleteReview" asp-controller="Reviews" method="post" onsubmit="return confirm('Are you sure you want to delete this review?');">
-                                        <input type="hidden" name="id" value="@review.ReviewId" />
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                    </form>
-                                }
+                                <!-- Third Row: Edit Button -->
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="@Url.Action("Details", "Games", new { id = review.GameId })" class="btn btn-sm btn-primary">
+                                        View Details
+                                    </a>
 
-                            </div>
+                                    @if (Model.IsOwner)
+                                    {
+                                        <form asp-action="DeleteReview" asp-controller="Reviews" method="post" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                            <input type="hidden" name="id" value="@review.ReviewId" />
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    }
+
+                                </div>
 
                             
 
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
 
-@if (Model.TotalPages > 1)
-{
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                <a class="page-link user-reviews-page" href="#" data-page="@(Model.CurrentPage - 1)">Previous</a>
-            </li>
-
-            @for (int i = 1; i <= Model.TotalPages; i++)
-            {
-                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
-                    <a class="page-link user-reviews-page" href="#" data-page="@i">@i</a>
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination review-pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link user-reviews-page" href="#" data-page="@(Model.CurrentPage - 1)">Previous</a>
                 </li>
-            }
 
-            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                <a class="page-link user-reviews-page" href="#" data-page="@(Model.CurrentPage + 1)">Next</a>
-            </li>
-        </ul>
-    </nav>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                        <a class="page-link user-reviews-page" href="#" data-page="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link user-reviews-page" href="#" data-page="@(Model.CurrentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
 }
-
-

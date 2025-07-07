@@ -44,5 +44,27 @@ else
         }
     </div>
 
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination favorite-pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link user-favorites-page" href="#" data-page="@(Model.CurrentPage - 1)">Previous</a>
+                </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                        <a class="page-link user-favorites-page" href="#" data-page="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link user-favorites-page" href="#" data-page="@(Model.CurrentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+
 }
 

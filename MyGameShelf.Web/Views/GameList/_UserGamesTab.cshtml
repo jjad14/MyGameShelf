@@ -55,7 +55,7 @@ else
     @if (Model.TotalPages > 1)
     {
         <nav class="mt-4">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination game-pagination justify-content-center">
                 <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                     <a class="page-link user-games-page" href="#" data-page="@(Model.CurrentPage - 1)">Previous</a>
                 </li>
