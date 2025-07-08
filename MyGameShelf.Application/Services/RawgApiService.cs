@@ -78,7 +78,7 @@ public class RawgApiService : IRawgApiService
             var json = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<RawgGameDetailResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            return new GameDetailDto
+            var gameDto =  new GameDetailDto
             {
                 Id = result.Id,
                 Name = result.Name,
@@ -87,10 +87,8 @@ public class RawgApiService : IRawgApiService
                 Metacritic = result.Metacritic,
                 Released = result.Released,
                 Rating = result.Rating,
-                BackgroundImage = string.IsNullOrEmpty(result.BackgroundImage)
-                        ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
-                        : result.BackgroundImage,
-                EsrbRating = result.EsrbRating.Name ?? "Not Rated",
+                BackgroundImage = result.BackgroundImageOrDefault,
+                EsrbRating = result.EsrbRatingName,
                 Genres = result.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                 Tags = result.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
                 Platforms = result.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
@@ -112,6 +110,8 @@ public class RawgApiService : IRawgApiService
                         RecommendedRequirements = p.Requirements?.Recommended
                     }) ?? Enumerable.Empty<PlatformRequirementsDto>(),
             };
+
+            return gameDto;
         }
         catch (Exception ex)
         {
@@ -196,9 +196,7 @@ public class RawgApiService : IRawgApiService
                     Id = r.Id,
                     Name = r.Name,
                     Released = r.Released,
-                    BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
-                        ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
-                        : r.BackgroundImage,
+                    BackgroundImage = r.BackgroundImageOrDefault,
                     Metacritic = r.Metacritic,
                     Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                     Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
@@ -258,7 +256,7 @@ public class RawgApiService : IRawgApiService
                 Id = r.Id,
                 Name = r.Name,
                 GamesCount = r.GamesCount,
-                ImageBackground = r.ImageBackground
+                ImageBackground = r.ImageBackgroundOrDefault
             });
         }
         catch (Exception ex)
@@ -289,7 +287,7 @@ public class RawgApiService : IRawgApiService
                 Id = r.Id,
                 Name = r.Name,
                 GamesCount = r.GamesCount,
-                ImageBackground = r.ImageBackground
+                ImageBackground = r.ImageBackgroundOrDefault
             });
         }
         catch (Exception ex)
@@ -325,9 +323,7 @@ public class RawgApiService : IRawgApiService
                     Id = r.Id,
                     Name = r.Name,
                     Released = r.Released,
-                    BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
-                        ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
-                        : r.BackgroundImage,
+                    BackgroundImage = r.BackgroundImageOrDefault,
                     Metacritic = r.Metacritic,
                     Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                     Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
@@ -390,9 +386,7 @@ public class RawgApiService : IRawgApiService
                     Id = r.Id,
                     Name = r.Name,
                     Released = r.Released,
-                    BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
-                            ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
-                            : r.BackgroundImage,
+                    BackgroundImage = r.BackgroundImageOrDefault,
                     Metacritic = r.Metacritic,
                     Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                     Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
@@ -455,9 +449,7 @@ public class RawgApiService : IRawgApiService
                     Id = r.Id,
                     Name = r.Name,
                     Released = r.Released,
-                    BackgroundImage = string.IsNullOrEmpty(r.BackgroundImage)
-                            ? "/assets/img/game_portrait_default.jpg"  // your default relative path in wwwroot
-                            : r.BackgroundImage,
+                    BackgroundImage = r.BackgroundImageOrDefault,
                     Metacritic = r.Metacritic,
                     Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                     Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
