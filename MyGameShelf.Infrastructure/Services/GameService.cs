@@ -290,7 +290,11 @@ public class GameService : IGameService
         return await _unitOfWork.Reviews.CountUserReviewsAsync(userId);
     }
 
-
+    public async Task<bool> DeleteReviewAsync(string userId, int reviewId)
+    {
+        await _unitOfWork.Reviews.DeleteReviewAsync(userId, reviewId);
+        return await _unitOfWork.SaveChangesAsync();
+    }
 
 
     public async Task<IEnumerable<Favorite>> GetUserFavoritesAsync(string userId, string? sort, int page = 1, int pageSize = 10)

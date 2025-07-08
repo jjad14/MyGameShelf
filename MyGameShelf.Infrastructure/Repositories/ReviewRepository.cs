@@ -70,6 +70,14 @@ public class ReviewRepository : IReviewRepository
         return Task.CompletedTask;
     }
 
+    public async Task DeleteReviewAsync(string userId, int reviewId)
+    {
+        var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId && r.UserId == userId);
+        if (review == null) return; // or throw if you prefer
+
+        _context.Reviews.Remove(review);
+    }
+
     public Task UpdateReview(string userId, int gameId, string content, bool isRecommended)
     {
         throw new NotImplementedException();

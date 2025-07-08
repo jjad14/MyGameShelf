@@ -13,6 +13,7 @@ public interface IReviewRepository
     Task<int> CountUserReviewsAsync(string userId);
     Task<IEnumerable<Review>> GetUserReviewsAsync(string userId, string? sort, int page = 1, int pageSize = 10);
     Task AddReview(Review review);
+    Task DeleteReviewAsync(string userId, int reviewId);
     Task DeleteReview(Review review);
     Task UpdateReview(string userId, int gameId, string content, bool isRecommended);
     Task<bool> SaveChangesAsync();

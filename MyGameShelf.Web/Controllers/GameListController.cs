@@ -238,31 +238,33 @@ public class GameListController : BaseController
         }
     }
 
-    //[HttpPost]
-    //[ValidateAntiForgeryToken]
-    //public async Task<IActionResult> RemoveReview(int reviewId)
-    //{
-    //    try
-    //    {
-    //        var user = await _userManager.GetUserAsync(User);
-    //        if (user == null)
-    //        {
-    //            return Unauthorized();
-    //        }
-    //        var removed = await _gameService.RemoveGameFromUserAsync(user.Id, gameId);
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteReview(string userId, int reviewId)
+    {
+        try
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
 
+            if (currentUser == null || currentUser.Id != userId)
+            {
+                return Unauthorized();
+            }
 
-    //        TempData[removed ? "success" : "error"] = removed
-    //            ? "Game successfully removed from your list."
-    //            : "Failed to remove the game from your list.";
-    //        return Ok(new { success = removed });
-    //    }
-    //    catch (Exception)
-    //    {
-    //        TempData["error"] = "An error occurred while removing the game from your list. Please try again.";
-    //        return BadRequest(new { success = false });
-    //    }
-    //}
+            var deleted = await _gameService.DeleteReviewAsync(userId, reviewId);
+
+            TempData[deleted ? "success" : "error"] = deleted
+                ? "Review successfully deleted."
+                : "Could not delete review.";
+
+            return Ok(new { success = deleted });
+        }
+        catch (Exception)
+        {
+            TempData["error"] = "An error occurred while removing the review from your list. Please try again.";
+            return BadRequest(new { success = false });
+        }
+    }
 
 
     [HttpPost]

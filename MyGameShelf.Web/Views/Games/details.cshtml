@@ -3,6 +3,8 @@
 
 @model GameDetailsViewModel
 
+@Html.AntiForgeryToken()
+
 @{
     ViewData["Title"] = Model.Game.Name;
 }
@@ -286,12 +288,35 @@
                 if (isFavorited) {
                     favoriteBtn.style.color = '#FFD700'; // Bright gold
                     favoriteBtn.innerHTML = '<i class="fa-solid fa-star"></i>'; // Filled star
-                    // TODO: Add your AJAX call here to save favorite state
                 } else {
                     favoriteBtn.style.color = 'white';
                     favoriteBtn.innerHTML = '<i class="fa-regular fa-star"></i>'; // Outline star
-                    // TODO: Add your AJAX call here to remove favorite
                 }
+
+                // Send the toggle request to server
+                $.ajax({
+                    type: "POST",
+                    url: "/GameList/ToggleFavoriteGame",
+                    data: { gameId: gameId },
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    success: function (response) {
+                        console.log("ToggleFavoriteGame response:", response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error toggling favorite:", error);
+
+                        // Revert on error
+                        isFavorited = !isFavorited;
+                        $btn.attr("data-favorited", isFavorited.toString());
+                        $btn.html(isFavorited
+                            ? '<i class="fa-solid fa-star"></i>'
+                            : '<i class="fa-regular fa-star"></i>');
+                        $btn.css("color", isFavorited ? "#FFD700" : "white");
+                    }
+                });
+
             });
         });
 
