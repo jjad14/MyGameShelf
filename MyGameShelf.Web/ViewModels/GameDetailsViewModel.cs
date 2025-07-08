@@ -14,7 +14,6 @@ public class GameDetailsViewModel
 
     public AddGameToListViewModel? AddToList { get; set; }
 
-
     public List<SelectListItem> GameStatusOptions { get; set; } = new()
     {
         new SelectListItem { Text = "Playing", Value = "Playing" },

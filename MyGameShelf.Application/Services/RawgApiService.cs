@@ -352,7 +352,8 @@ public class RawgApiService : IRawgApiService
         }
         catch (Exception ex)
         {
-            throw new RawgApiException("Failed to check related games by publisher from RAWG.", ex);
+            //throw new RawgApiException("Failed to check related games by publisher from RAWG.", ex);
+            return false;
         }
 
     }
@@ -416,7 +417,8 @@ public class RawgApiService : IRawgApiService
         }
         catch (Exception ex)
         {
-            throw new RawgApiException("Failed to check for game additions from RAWG.", ex);
+            //throw new RawgApiException("Failed to check for game additions from RAWG.", ex);
+            return false;
         }
 
     }
@@ -481,7 +483,8 @@ public class RawgApiService : IRawgApiService
         catch (Exception ex)
         {
 
-            throw new RawgApiException("Failed to check for game additions from RAWG.", ex);
+            //throw new RawgApiException("Failed to check for game additions from RAWG.", ex);
+            return false;
         }
 
     }
