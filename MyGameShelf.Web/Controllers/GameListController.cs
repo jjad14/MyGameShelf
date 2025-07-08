@@ -212,6 +212,61 @@ public class GameListController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveGame(string userId, int gameId)
+    {
+        try
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null || currentUser.Id != userId)
+            {
+                return Unauthorized();
+            }
+
+            var removed = await _gameService.RemoveGameFromUserAsync(userId, gameId);
+
+            TempData[removed ? "success" : "error"] = removed
+                ? "Game successfully removed from your list."
+                : "Failed to remove the game from your list.";
+
+            return Ok(new { success = removed });
+        }
+        catch (Exception)
+        {
+            TempData["error"] = "An error occurred while removing the game from your list. Please try again.";
+            return BadRequest(new { success = false });
+        }
+    }
+
+    //[HttpPost]
+    //[ValidateAntiForgeryToken]
+    //public async Task<IActionResult> RemoveReview(int reviewId)
+    //{
+    //    try
+    //    {
+    //        var user = await _userManager.GetUserAsync(User);
+    //        if (user == null)
+    //        {
+    //            return Unauthorized();
+    //        }
+    //        var removed = await _gameService.RemoveGameFromUserAsync(user.Id, gameId);
+
+
+    //        TempData[removed ? "success" : "error"] = removed
+    //            ? "Game successfully removed from your list."
+    //            : "Failed to remove the game from your list.";
+    //        return Ok(new { success = removed });
+    //    }
+    //    catch (Exception)
+    //    {
+    //        TempData["error"] = "An error occurred while removing the game from your list. Please try again.";
+    //        return BadRequest(new { success = false });
+    //    }
+    //}
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleFavoriteGame(int gameId)
     {
         try

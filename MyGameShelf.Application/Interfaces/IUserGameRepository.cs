@@ -15,6 +15,7 @@ public interface IUserGameRepository
     Task<UserGame?> GetUserGameAsync(string userId, int gameId);
     Task AddUserGame(UserGame userGame);
     Task UpdateUserGame(string userId, int gameId, string content, bool isRecommended);
-    Task DeleteUserGame(UserGame userGame);
+    Task<bool> RemoveUserGameAsync(string userId, int gameId);
+
     Task<bool> SaveChangesAsync();
 }

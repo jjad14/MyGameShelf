@@ -1,5 +1,6 @@
 ﻿@using MyGameShelf.Web.ViewModels
 @model UserGamesTabViewModel
+@Html.AntiForgeryToken()
 
 @if (!Model.GamesWithFavorites.Any())
 {
@@ -28,7 +29,11 @@ else
                                     <i class="@(userGame.IsFavorited ? "fa-solid" : "fa-regular") fa-star"></i>
                                 </button>
 
-                                <button type="button" class="btn btn-link p-0" title="Remove"
+                                <button type="button"
+                                        class="btn btn-link p-0 remove-game"
+                                        title="Remove"
+                                        data-game-id="@userGame.UserGame.Game.Id"
+                                        data-user-id="@Model.UserId"
                                         style="color: red; font-size: 1.5rem;">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
@@ -73,6 +78,39 @@ else
             </ul>
         </nav>
     }
+}
+
+@section Scripts 
+{
+    <script>
+        $(document).on("click", ".remove-game", function () {
+            if (!confirm("Are you sure you want to remove this game from your list?")) return;
+
+            const gameId = $(this).data("game-id");
+            const userId = $(this).data("user-id");
+            const token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/GameList/RemoveGame",
+                data: { gameId: gameId, userId: userId },
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Refresh list (basic reload)
+                        location.reload();
+                    } else {
+                        alert("Failed to remove game.");
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while trying to remove the game.");
+                }
+            });
+        });
+    </script>
 
 }
 

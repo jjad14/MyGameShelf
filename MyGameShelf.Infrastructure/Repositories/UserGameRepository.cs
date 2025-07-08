@@ -101,10 +101,48 @@ public class UserGameRepository : IUserGameRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteUserGame(UserGame userGame)
+    public async Task<bool> RemoveUserGameAsync(string userId, int gameId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var userGame = await _context.UserGames
+                .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GameId == gameId);
+
+            if (userGame == null)
+            { 
+                return false;
+            }
+
+            // Remove Review (if exists)
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(r => r.UserId == userId && r.GameId == gameId);
+
+            if (review != null)
+            { 
+                _context.Reviews.Remove(review);
+            }
+
+            // Remove Favorite (if exists)
+            var favorite = await _context.Favorites
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.GameId == gameId);
+            if (favorite != null)
+            { 
+                _context.Favorites.Remove(favorite);
+            }
+
+            // Remove UserGame
+            _context.UserGames.Remove(userGame);
+
+            await _context.SaveChangesAsync();
+        
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
+
 
     public Task UpdateUserGame(string userId, int gameId, string content, bool isRecommended)
     {
