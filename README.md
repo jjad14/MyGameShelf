@@ -135,7 +135,7 @@ Before running the application, configure your keys and connection strings in `a
 },
 ```
 
-// IP Info Token (for geolocation services)
+IP Info Token (for geolocation services)
 
 ```json
 "IPInfoToken": "<Your-IPInfo-Token>"
