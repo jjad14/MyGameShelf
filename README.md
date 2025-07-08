@@ -143,13 +143,12 @@ IP Info Token (for geolocation services)
 
 ---
 
-## ⏳ Coming Soon
+## ⏳ Coming Soon (Additional updates and features)
 
 - Redis caching for improved performance  
 - Following users and social interactions
 - View popular games users are interacting with
 - IP geolocation features  
-- Additional updates and features
 - Likes/dislikes reviews
 - Profile Posts/Guides
 
