@@ -348,7 +348,11 @@
         $(document).on('click', '.user-games-page', function (e) {
             e.preventDefault();
             const page = $(this).data('page');
-            loadGamesByStatus(page);
+            loadGames(page);
+
+            $('html, body').animate({
+                scrollTop: $('#gameStatusResult').offset().top - 100
+            }, 300);
         });
 
         function loadReviews(page = 1) {
@@ -370,6 +374,10 @@
             e.preventDefault();
             const page = $(this).data('page');
             loadReviews(page);
+
+            $('html, body').animate({
+                scrollTop: $('#reviewStatusResult').offset().top - 100
+            }, 300);
         });
 
         function loadFavoriteGames(page = 1)
@@ -395,14 +403,18 @@
         $(document).on('click', '.user-favorites-page', function (e) {
             e.preventDefault();
             const page = $(this).data('page');
-            loadReviews(page);
+            loadFavoriteGames(page);
+
+            $('html, body').animate({
+                scrollTop: $('#favoriteGameStatusResult').offset().top - 100
+            }, 300);
         });
 
         $(document).ready(function () {
             loadGames(); // Load games by default
 
             // refetch games when filters changed
-            $('#statusFilter, #sortFilter').on('change', function () {
+            $('#gameStatusFilter, #gameSortFilter').on('change', function () {
                 loadGames();
             });
 
