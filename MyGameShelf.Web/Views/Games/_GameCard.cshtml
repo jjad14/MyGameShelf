@@ -52,13 +52,19 @@ else
                         }
                     </div>
                 }
-                <a href="/Games/Details/@Model.Id" class="btn btn-primary mt-auto">View Details</a>
 
-                <a href="@Url.Action("Details", "Games", new { id = @Model.Id, returnPage = Model.ReturnUrl })"
-                   class="btn btn-sm btn-primary w-100">
+                <a href="@Url.Action("Details", "Games", new {
+                    id = Model.Id,
+                    search = Model.Search,
+                    platform = Model.Platform,
+                    genre = Model.Genre,
+                    metacritic = Model.MetacriticFilter,
+                    orderBy = Model.OrderBy,
+                    page = Model.Page,
+                    pageSize = Model.PageSize
+                })" class="btn btn-sm btn-primary w-100">
                     View Game
                 </a>
-
 
             </div>
             <div class="card-footer bg-transparent border-top-0">

@@ -8,6 +8,19 @@
 }
 
 <div class="container mt-4">
+    <div class="row mb-2">
+        <a asp-action="Index"
+           asp-route-search="@ViewBag.Search"
+           asp-route-platform="@ViewBag.Platform"
+           asp-route-genre="@ViewBag.Genre"
+           asp-route-metacritic="@ViewBag.Metacritic"
+           asp-route-orderBy="@ViewBag.OrderBy"
+           asp-route-page="@ViewBag.Page"
+           asp-route-pageSize="@ViewBag.PageSize"
+           class="btn btn-outline-secondary mt-4">
+            ← Back to Game List
+        </a>
+    </div>
     <div class="row g-4">
         <!-- Game Image -->
         <div class="col-md-5 d-flex flex-column">

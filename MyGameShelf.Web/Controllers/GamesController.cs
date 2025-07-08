@@ -85,13 +85,11 @@ public class GamesController : BaseController
                 TotalPages = 1
             });
         }
-
-
     }
 
     [HttpGet("details/{id}")]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, NoStore = false)]
-    public async Task<IActionResult> Details(int id)
+    public async Task<IActionResult> Details(int id, string search, string platform, string genre, string metacritic, string orderBy, int page = 1, int pageSize = 20)
     {
         try
         {
@@ -153,6 +151,14 @@ public class GamesController : BaseController
                 } : null
             };
 
+            // Save Filters
+            ViewBag.Search = search;
+            ViewBag.Platform = platform;
+            ViewBag.Genre = genre;
+            ViewBag.Metacritic = metacritic;
+            ViewBag.OrderBy = orderBy;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
 
             return View(gameDetailsVM);
         }

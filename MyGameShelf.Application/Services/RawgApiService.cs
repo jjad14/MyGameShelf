@@ -203,6 +203,13 @@ public class RawgApiService : IRawgApiService
                     Genres = r.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>(),
                     Tags = r.Tags?.Where(t => t.Language == "eng").Select(g => g.Name) ?? Enumerable.Empty<string>(),
                     Platforms = r.Platforms?.Select(p => p.Platform.Name) ?? Enumerable.Empty<string>(),
+                    Search = search,
+                    Platform = platform,
+                    Genre = genre,
+                    MetacriticFilter = metacritic,
+                    OrderBy = orderBy,
+                    Page = page,
+                    PageSize = pageSize
                 }),
                 TotalCount = result.Count
             };

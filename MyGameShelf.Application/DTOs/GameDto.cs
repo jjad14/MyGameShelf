@@ -15,5 +15,14 @@ public class GameDto
     public int? Metacritic { get; set; }
     public IEnumerable<string> Genres { get; set; } 
     public IEnumerable<string> Tags { get; set; } 
-    public IEnumerable<string> Platforms { get; set; } 
+    public IEnumerable<string> Platforms { get; set; }
+
+    // Filters to preserve
+    public string? Search { get; set; }
+    public string? Platform { get; set; }
+    public string? Genre { get; set; }
+    public string? MetacriticFilter { get; set; }
+    public string? OrderBy { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
 }
