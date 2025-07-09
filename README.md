@@ -135,6 +135,14 @@ Before running the application, configure your keys and connection strings in `a
 },
 ```
 
+### Redis Connection
+
+```json
+"Redis": {
+    "Configuration": "<Connection-string>"
+}
+```
+
 IP Info Token (for geolocation services)
 
 ```json
@@ -145,7 +153,6 @@ IP Info Token (for geolocation services)
 
 ## ⏳ Coming Soon (Additional updates and features)
 
-- Redis caching for improved performance  
 - Following users and social interactions
 - View popular games users are interacting with
 - IP geolocation features  
