@@ -130,8 +130,7 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error/Internal");
     app.UseHsts();
 }
 else
@@ -154,9 +153,19 @@ app.UseAuthorization();
 // Catch all unhandled 404s:
 app.UseStatusCodePages(async context =>
 {
-    if (context.HttpContext.Response.StatusCode == 404)
+    var response = context.HttpContext.Response;
+
+    switch (response.StatusCode)
     {
-        context.HttpContext.Response.Redirect("/Error/NotFound");
+        case 404:
+            response.Redirect("/Error/NotFound");
+            break;
+        case 403:
+            response.Redirect("/Error/Forbidden");
+            break;
+        case 401:
+            response.Redirect("/Error/Unauthorized");
+            break;
     }
 });
 
