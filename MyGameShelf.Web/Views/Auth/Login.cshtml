@@ -10,12 +10,6 @@
         <h2 class="text-center mb-4">@ViewData["Title"]</h2>
 
         <form asp-action="Login" method="post" novalidate>
-            @* @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
-            {
-                <div class="alert alert-danger text-center d-flex align-items-center p-1" role="alert" style="height: 50px;">
-                    <p class="mb-0 w-100">Error: @ViewData.ModelState[string.Empty].Errors[0].ErrorMessage</p>
-                </div>
-            } *@
 
             @if (TempData["ErrorMessage"] != null)
             {
