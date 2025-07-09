@@ -40,7 +40,7 @@
 
             <hr />
 
-            <form method="post" asp-controller="GameList" asp-action="@(Model.AddToList != null ? "Update" : "Add")" class="">
+            <form id="add-to-list-form"  method="post" asp-controller="GameList" asp-action="@(Model.AddToList != null ? "Update" : "Add")">
                 <input type="hidden" name="AddToList.GameId" value="@Model.Game.Id" />
 
                 <div class="mb-3">
@@ -275,4 +275,16 @@
 
 @section Scripts {
     <script src="~/js/games/game-details.js"></script>
+
+    <script>
+        document.getElementById('add-to-list-form').addEventListener('submit', function (e) {
+            const isAuthenticated = @User.Identity.IsAuthenticated.ToString().ToLower(); // outputs true/false
+
+            if (!isAuthenticated) {
+                e.preventDefault(); // Stop the form from submitting
+                const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.href = `/Auth/Login?ReturnUrl=${returnUrl}`;
+            }
+        });
+    </script>
 }

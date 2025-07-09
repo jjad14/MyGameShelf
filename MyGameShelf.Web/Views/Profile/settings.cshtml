@@ -1,14 +1,20 @@
 ﻿@using MyGameShelf.Web.ViewModels
 @model SettingsPageViewModel
 
-@* <a asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name" class="btn btn-secondary mb-3">
-    &larr; Back to Profile
-</a> *@
-<div class="container my-5" style="max-width: 900px;">
+
+
+<div class="container" style="max-width: 900px;">
     <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <i class="fa-solid fa-gear"></i> Settings
+        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fa-solid fa-gear"></i> Settings
+            </div>
+            <a asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name"
+                class="btn btn-secondary btn-sm py-2">
+                <i class="fa-solid fa-arrow-left"></i> Back to Profile
+            </a>
         </div>
+
         <div class="card-body">
             <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -25,8 +31,6 @@
                 </li>
             </ul>
             <div class="tab-content pt-4" id="settingsTabsContent">
-
-
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <form asp-controller="Profile" asp-action="update-profile" method="post" enctype="multipart/form-data">
                         @* Validation summary *@
@@ -72,7 +76,7 @@
                                 <label class="form-label">Current Profile Picture</label><br />
                                 @if (!string.IsNullOrEmpty(Model.Profile.ProfilePictureUrl))
                                 {
-                                    <img src="Profile.ProfilePictureUrl" alt="Profile Picture" class="img-thumbnail mb-2" style="max-width: 150px; max-height: 150px;" />
+                                    <img src="@Model.Profile.ProfilePictureUrl" alt="Profile Picture" class="img-thumbnail mb-2" style="max-width: 150px; max-height: 150px;" />
                                 }
                                 else
                                 {

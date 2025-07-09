@@ -495,7 +495,10 @@ public class ProfileController : BaseController
                 YoutubeSocialLink = user.YoutubeSocialLink,
                 TwitchSocialLink = user.TwitchSocialLink,
             },
-            Account = new UpdateAccountViewModel(),
+            Account = new UpdateAccountViewModel
+            {
+                IsPublic = user.IsPublic,
+            },
             SettingsCheck = new SettingsCheck
             {
                 IsPublic = user.IsPublic,
