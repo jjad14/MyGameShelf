@@ -163,15 +163,18 @@ public class AuthController : BaseController
 
     }
 
-    public IActionResult Login()
+    public IActionResult Login(string? returnUrl = null)
     {
-        var response = new LoginViewModel();
-        return View(response);
+        var vm = new LoginViewModel
+        {
+            ReturnUrl = returnUrl
+        };
+        return View(vm);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel, string? returnUrl = null)
+    public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
         try
         {
@@ -206,6 +209,9 @@ public class AuthController : BaseController
                 TempData["ErrorMessage"] = "You need to confirm your email before you can log in.";
                 return RedirectToAction("Login");
             }
+
+            var returnUrl = loginViewModel.ReturnUrl;
+
 
             // Check if User has 2FA enabled
             if (result.RequiresTwoFactor)

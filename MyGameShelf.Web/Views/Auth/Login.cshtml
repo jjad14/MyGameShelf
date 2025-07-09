@@ -10,6 +10,7 @@
         <h2 class="text-center mb-4">@ViewData["Title"]</h2>
 
         <form asp-action="Login" method="post" novalidate>
+            <input type="hidden" asp-for="ReturnUrl" />
 
             @if (TempData["ErrorMessage"] != null)
             {
