@@ -31,6 +31,7 @@ builder.Services.AddScoped<IDeveloperRepository, DeveloperRepository>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<ITagsRepository, TagRepository>();
 
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -69,6 +70,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "MyGameShelf_";
+});
 
 // AddMemoryCache is used to cache data in memory, which can improve performance by reducing database calls.
 builder.Services.AddMemoryCache();

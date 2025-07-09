@@ -11,7 +11,6 @@ namespace MyGameShelf.Application.Interfaces;
 public interface IGameService
 {
     Task<IEnumerable<UserGameWithFavoriteStatus>> GetUserGamesAsync(string userId, string? status, string? sort, int page = 1, int pageSize = 10);
-    Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId);
     Task<Game?> AddGameMetadataAsync(Game incomingGame);
     Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId);
     Task<UserGameWithReviewDto?> GetUserGameWithReviewAsync(string userId, int rawgId);

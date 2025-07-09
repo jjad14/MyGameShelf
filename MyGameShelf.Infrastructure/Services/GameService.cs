@@ -25,7 +25,31 @@ public class GameService : IGameService
     {
         return await _unitOfWork.UserGames.GetUserGamesAsync(userId, status, sort, page, pageSize);
     }
-    
+        
+    public async Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId)
+    {
+        // Get the UserGame along with the Game (to check RawgId)
+        var userGame = await _unitOfWork.UserGames.GetUserGameAsync(userId, rawgId);
+
+        if (userGame == null)
+        { 
+            return null;
+        }
+
+        // Now separately query the Review
+        var review = await _unitOfWork.Reviews.GetReviewAsync(userId, userGame.GameId);
+
+        return new UserGameDetailsDto
+        {
+            Status = userGame.Status,
+            Rating = userGame.Rating,
+            Difficulty = userGame.Difficulty,
+            ReviewContent = review?.Content,
+            IsRecommended = review?.IsRecommended,
+            ReviewUpdatedAt = review?.UpdatedAt
+        };
+    }
+
     public async Task<Game?> AddGameMetadataAsync(Game incomingGame)
     {
         try
@@ -107,52 +131,7 @@ public class GameService : IGameService
             return null;
         }
     }
-    
-    public async Task<Dictionary<GameStatus, List<UserGameDto>>> GetUserGameListAsync(string userId)
-    {
-        var userGames = await _unitOfWork.Games.GetUserGamesAsync(userId);
 
-        var dtos = userGames.Select(ug => new UserGameDto
-        {
-            GameId = ug.Game.Id,
-            Name = ug.Game.Name,
-            BackgroundImage = ug.Game.BackgroundImage,
-            Status = ug.Status,
-            Difficulty = ug.Difficulty,
-            AddedOn = ug.AddedOn,
-            Genres = ug.Game.GameGenres.Select(gg => gg.Genre.Name).ToList(),
-            Platforms = ug.Game.Platforms.Select(gp => gp.Platform.Name).ToList(),
-            Tags = ug.Game.GameTags.Select(gt => gt.Tag.Name).ToList()
-        }).ToList();
-
-        return dtos
-            .GroupBy(dto => dto.Status)
-            .ToDictionary(g => g.Key, g => g.ToList());
-    }
-    
-    public async Task<UserGameDetailsDto?> GetUserGameDetailsAsync(string userId, int rawgId)
-    {
-        // Get the UserGame along with the Game (to check RawgId)
-        var userGame = await _unitOfWork.UserGames.GetUserGameAsync(userId, rawgId);
-
-        if (userGame == null)
-        { 
-            return null;
-        }
-
-        // Now separately query the Review
-        var review = await _unitOfWork.Reviews.GetReviewAsync(userId, userGame.GameId);
-
-        return new UserGameDetailsDto
-        {
-            Status = userGame.Status,
-            Rating = userGame.Rating,
-            Difficulty = userGame.Difficulty,
-            ReviewContent = review?.Content,
-            IsRecommended = review?.IsRecommended,
-            ReviewUpdatedAt = review?.UpdatedAt
-        };
-    }
 
     public async Task<int> CountGamesByStatusAsync(string userId, string? status)
     {
