@@ -128,6 +128,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Cache common rawg api calls
+//using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); // auto cancel after 30s
 using (var scope = app.Services.CreateScope())
 {
     var rawgService = scope.ServiceProvider.GetRequiredService<IRawgApiService>();
