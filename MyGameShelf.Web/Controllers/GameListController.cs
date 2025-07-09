@@ -302,7 +302,7 @@ public class GameListController : BaseController
 
         try
         {
-            const int pageSize = 10;
+            const int pageSize = 12;
 
             var games = await _gameService.GetUserGamesAsync(userId, status, sort, page, pageSize);
 
@@ -346,7 +346,7 @@ public class GameListController : BaseController
 
         try
         {
-            const int pageSize = 10;
+            const int pageSize = 12;
 
             var favorites = await _gameService.GetUserFavoritesAsync(userId, sort, page, pageSize);
 
