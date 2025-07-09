@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
 using MyGameShelf.Application.Configurations;
+using MyGameShelf.Application.Interfaces;
 using MyGameShelf.Application.Services;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace MyGameShelf.Tests.Services;
 public class RawgAPIServiceTests
 {
     private readonly Mock<IOptions<RawgSettings>> _mockOptions;
-    private readonly Mock<IMemoryCache> _mockCache;
+    private readonly Mock<ICacheService> _mockCache;
     private readonly Mock<HttpMessageHandler> _mockHttpHandler;
     private readonly HttpClient _httpClient;
     private readonly RawgApiService _service;
@@ -28,7 +29,7 @@ public class RawgAPIServiceTests
             ApiKey = "fake-api-key"
         });
 
-        _mockCache = new Mock<IMemoryCache>();
+        _mockCache = new Mock<ICacheService>();
 
         _mockHttpHandler = new Mock<HttpMessageHandler>();
 
