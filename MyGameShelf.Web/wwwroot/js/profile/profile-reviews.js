@@ -69,12 +69,12 @@
     // Function to load reviews with pagination and sorting
     function loadReviews(page = 1) {
         const profileData = document.getElementById('profile-data');
-        const userId = profileData?.dataset.userId;
+        const reviewUserId = profileData?.dataset.userId;
         const sort = $('#reviewSortFilter').val();
 
         $('#reviewsResult').html('<p>Loading reviews...</p>');
 
-        $.get('/GameList/UserReviews', { userId, sort, page })
+        $.get('/GameList/UserReviews', { reviewUserId, sort, page })
             .done(function (html) {
                 $('#reviewsResult').html(html);
             })

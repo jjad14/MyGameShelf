@@ -4,35 +4,40 @@
 
 
 <div class="container" style="max-width: 900px;">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+    <div class="card bg-primary rounded-4 h-100 text-white p-2">
+        <div class="card-header text-white d-flex align-items-center justify-content-between">
             <div>
-                <i class="fa-solid fa-gear"></i> Settings
+                <h5>
+                    <i class="fa-solid fa-gear"></i>&nbsp; User Settings
+                </h5>
             </div>
             <a asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name"
-                class="btn btn-secondary btn-sm py-2">
-                <i class="fa-solid fa-arrow-left"></i> Back to Profile
+                class="btn btn-dark btn-sm py-2 rounded-3">
+                <i class="fa-solid fa-arrow-left"></i>&nbsp; Back to Profile
             </a>
         </div>
 
         <div class="card-body">
-            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+            <ul class="nav nav-tabs border-bottom border-dark border-2" id="settingsTabs" role="tablist">
+                <li class="nav-item rounded-top-3" role="presentation">
+                    <button class="nav-link active text-white" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
                             type="button" role="tab" aria-controls="profile" aria-selected="true">
                         Edit Profile
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account"
+                <li class="nav-item rounded-top-3" role="presentation">
+                    <button class="nav-link text-white" id="account-tab" data-bs-toggle="tab" data-bs-target="#account"
                             type="button" role="tab" aria-controls="account" aria-selected="false">
                         Account Settings
                     </button>
                 </li>
             </ul>
+
             <div class="tab-content pt-4" id="settingsTabsContent">
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <form asp-controller="Profile" asp-action="update-profile" method="post" enctype="multipart/form-data">
+                        <h4 class="mb-4 border-bottom pb-2">Profile Settings</h4>
+
                         @* Validation summary *@
                         @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
                         {
@@ -68,7 +73,7 @@
 
                             <div class="col-md-12">
                                 <label asp-for="Profile.ProfileMessage" class="form-label"></label>
-                                <textarea asp-for="Profile.ProfileMessage" class="form-control" rows="3"></textarea>
+                                <textarea asp-for="Profile.ProfileMessage" class="form-control rounded-3" rows="4"></textarea>
                                 <span asp-validation-for="Profile.ProfileMessage" class="text-danger"></span>
                             </div>
 
@@ -164,12 +169,10 @@
                         </div>
 
                         <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-success px-5 text-light">Save Changes</button>
+                            <button type="submit" class="btn btn-secondary px-5 text-white">Save Changes</button>
                         </div>
                     </form>
                 </div>
-
-
 
                 <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab">
 
@@ -224,7 +227,7 @@
                                 </div>
                             </div>
 
-                            <hr />                            
+                            <hr class="border-dark border-2"/>                            
                         }
 
                         <div class="mb-4">
@@ -239,43 +242,43 @@
                         </div>
 
                         <div class="text-end">
-                            <button type="submit" class="btn btn-success text-light">Save Changes</button>
+                            <button type="submit" class="btn btn-secondary text-white">Save Changes</button>
                         </div>
                     </form>
 
-                    <hr />
+                    <hr class="border-dark border-2" />
 
                     @if (!Model.SettingsCheck.IsExternalLogin)
                     {
                         @* Separate form for Two-Factor Authentication *@
                         <form asp-controller="Profile" asp-action="toggle-two-factor" method="post" class="mx-auto" style="max-width: 800px;">
-                            <h5>Two-Factor Authentication</h5>
+                            <h5 class="text-white">Two-Factor Authentication</h5>
     
                             @if (Model.SettingsCheck.TwoFactorEnabled)
                             {
-                                <p class="text-success">2FA is currently <strong>enabled</strong>.</p>
+                                <p class="text-white">2FA is currently <strong>enabled</strong>.</p>
 
-                                <button type="submit" name="actionType" value="disable" class="btn btn-warning">
+                                <button type="submit" name="actionType" value="disable" class="btn btn-danger text-white">
                                     Disable 2FA
                                 </button>
                             }
                             else
                             {
-                                <p class="text-muted">2FA is currently <strong>disabled</strong>.</p>
+                                <p class="text-white">2FA is currently <strong>disabled</strong>.</p>
         
-                                <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-primary">
+                                <a asp-controller="Profile" asp-action="Setup2FA" class="btn btn-success text-white">
                                     Enable 2FA
                                 </a>
                             }
                         </form>
 
-                        <hr />
+                        <hr class="border-dark border-2" />
                     }
 
                     @* Separate form for Delete Account *@
                     <form asp-controller="Profile" asp-action="delete-account" method="post" class="mx-auto" style="max-width: 800px;">
-                        <h5 class="text-danger">Delete Account</h5>
-                        <p class="text-muted">This action is irreversible. All your data will be permanently deleted.</p>
+                        <h5 class="text-white">Delete Account</h5>
+                        <p class="text-white">This action is irreversible. All your data will be permanently deleted.</p>
                         <button type="submit" class="btn btn-danger"
                                 onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
                             Delete My Account

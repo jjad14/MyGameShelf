@@ -12,16 +12,16 @@ else
         @foreach (var game in Model.Favorites)
         {
             <div class="col-md-4 mb-3">
-                <div class="card h-100">
+                <div class="card bg-primary rounded-4 h-100 text-white p-2">
                     <div class="position-relative">
-                        <img src="@game.GameImageUrl" class="card-img-top" alt="@game.GameTitle">
+                        <img src="@game.GameImageUrl" class="card-img-top profile-related-game-image" alt="@game.GameTitle">
 
                         @if (Model.IsOwner)
                         {
                             <!-- Icons overlay (matching Game Details style) -->
                             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column align-items-end gap-2">
 
-                                <button type="button" class="btn btn-link p-0" title="Remove"
+                                <button type="button" class="btn btn-link bg-white rounded-5 p-0" title="Remove"
                                         style="color: red; font-size: 1.5rem;">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
@@ -35,7 +35,7 @@ else
                         <p>Added On: @game.CreatedAt.ToString("MMM dd, yyyy")</p>
                     </div>
                     <div class="card-footer bg-transparent border-top-0">
-                        <a href="@Url.Action("Details", "Games", new { id = game.GameId })" class="btn btn-sm btn-primary w-100">
+                        <a href="@Url.Action("Details", "Games", new { id = game.GameId })" class="btn btn-sm btn-secondary w-100">
                             View Game
                         </a>
                     </div>

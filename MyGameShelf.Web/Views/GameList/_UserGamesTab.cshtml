@@ -11,16 +11,16 @@ else
         @foreach (var userGame in Model.GamesWithFavorites)
         {
             <div class="col-md-4 mb-3">
-                <div class="card h-100">
+                <div class="card bg-primary rounded-4 h-100 text-white p-2">
                     <div class="position-relative">
-                        <img src="@userGame.UserGame.Game!.BackgroundImage" class="card-img-top" alt="@userGame.UserGame.Game.Name">
+                        <img src="@userGame.UserGame.Game!.BackgroundImage" class="card-img-top profile-related-game-image" alt="@userGame.UserGame.Game.Name">
 
                         @if (Model.IsOwner)
                         {
                             <!-- Icons overlay (matching Game Details style) -->
                             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column align-items-end gap-2">
                                 <button type="button"
-                                        class="btn btn-link p-0 favorite-toggle"
+                                        class="btn btn-link bg-info rounded-5 m-0 p-0 favorite-toggle"
                                         data-game-id="@userGame.UserGame.Game.Id"
                                         data-favorited="@userGame.IsFavorited.ToString().ToLower()"
                                         title="Favorite"
@@ -29,7 +29,7 @@ else
                                 </button>
 
                                 <button type="button"
-                                        class="btn btn-link p-0 remove-game"
+                                        class="btn btn-link bg-white rounded-5 p-0 remove-game"
                                         title="Remove"
                                         data-game-id="@userGame.UserGame.Game.Id"
                                         data-user-id="@Model.UserId"
@@ -47,7 +47,7 @@ else
                         <p>Added On: @userGame.UserGame.AddedOn.ToString("MMM dd, yyyy")</p>
                     </div>
                     <div class="card-footer bg-transparent border-top-0">
-                        <a href="@Url.Action("Details", "Games", new { id = userGame.UserGame.Game.RawgId })" class="btn btn-sm btn-primary w-100">
+                        <a href="@Url.Action("Details", "Games", new { id = userGame.UserGame.Game.RawgId })" class="btn btn-sm btn-secondary w-100">
                             View Game
                         </a>
                     </div>

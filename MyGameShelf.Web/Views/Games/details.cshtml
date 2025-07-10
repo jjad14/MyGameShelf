@@ -10,7 +10,7 @@
 }
 
 <div class="container mt-4">
-    <div class="row mb-2">
+    <div class="row mb-3 mx-2">
         <a asp-action="Index"
            asp-route-search="@ViewBag.Search"
            asp-route-platform="@ViewBag.Platform"
@@ -20,16 +20,17 @@
            asp-route-page="@ViewBag.Page"
            asp-route-pageSize="@ViewBag.PageSize"
            class="btn btn-outline-secondary mt-4">
-            ← Back to Game List
+            <i class="fa-solid fa-arrow-left"></i>&nbsp;
+            Back to Game List
         </a>
     </div>
-    <div class="row g-4">
+    <div class="row g-4 text-white">
         <!-- Game Image -->
         <div class="col-md-5 d-flex flex-column">
             <div class="position-relative">
                 <img src="@Model.Game.BackgroundImage"
                      alt="@Model.Game.Name"
-                     class="img-fluid rounded shadow"
+                     class="img-fluid rounded-3 shadow"
                      style="max-height: 500px; object-fit: cover; width: 100%;" />
 
                 <button type="button" id="favoriteBtn" class="btn btn-link p-0 position-absolute top-0 end-0 m-2"
@@ -154,7 +155,7 @@
                     <strong>Tags:</strong><br />
                     @foreach (var tag in Model.Game.Tags)
                     {
-                        <span class="badge me-1" style="background-color: #20c997; color: white;">@tag</span>
+                        <span class="badge me-1" style="background-color: #20c997; color: black;">@tag</span>
                     }
                 </div>
             }
@@ -182,7 +183,7 @@
 @if (Model.HasSequels)
 {
     <hr />
-    <button class="btn btn-link no-shadow d-inline-flex align-items-center gap-1"
+    <button class="btn btn-link no-shadow text-white d-inline-flex align-items-center gap-1 text-decoration-none"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#gamesSequelsCollapse"
@@ -194,7 +195,7 @@
     </button>
 
     <div class="collapse mt-2" id="gamesSequelsCollapse">
-        <div id="gameSequelsContent" class="d-flex flex-wrap gap-3">
+        <div id="gameSequelsContent" class="d-flex flex-wrap gap-3 text-white">
             <p>Loading...</p>
         </div>
     </div>
@@ -204,7 +205,7 @@
 @if (Model.HasAdditions)
 {
     <hr />
-    <button class="btn btn-link no-shadow d-inline-flex align-items-center gap-1"
+    <button class="btn btn-link no-shadow text-white d-inline-flex align-items-center gap-1 text-decoration-none"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#gamesDLCsCollapse"
@@ -216,7 +217,7 @@
     </button>
 
     <div class="collapse mt-2" id="gamesDLCsCollapse">
-        <div id="gameDLCsContent" class="d-flex flex-wrap gap-3">
+        <div id="gameDLCsContent" class="d-flex flex-wrap gap-3 text-white">
             <p>Loading...</p>
         </div>
     </div>
@@ -225,7 +226,7 @@
 @if (Model.HasRelatedGames && !string.IsNullOrWhiteSpace(Model.PublisherIdsString))
 {
     <hr />
-    <button class="btn btn-link no-shadow d-inline-flex align-items-center gap-1"
+    <button class="btn btn-link no-shadow text-white d-inline-flex align-items-center gap-1 text-decoration-none"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#gamesByPublisherCollapse"
@@ -237,7 +238,7 @@
     </button>
 
     <div class="collapse mt-2" id="gamesByPublisherCollapse">
-        <div id="gamesByPublisherContent" class="d-flex flex-wrap gap-3">
+        <div id="gamesByPublisherContent" class="d-flex flex-wrap gap-3 text-white">
             <p>Loading...</p>
         </div>
     </div>

@@ -8,8 +8,8 @@
 
 <div class="mx-auto" style="max-width: 800px;">
     <form asp-action="Register" enctype="multipart/form-data" method="post">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white text-center fs-4">
+        <div class="card shadow-sm bg-primary rounded-4 mb-4">
+            <div class="card-header bg-secondary text-white text-center fs-4">
                 Create Your MyGameShelf Account
             </div>
 
@@ -153,16 +153,15 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="row mt-3 text-center">
-                    <span>Already have an account? </span>
-                    <a asp-controller="Auth" asp-action="Login">Login</a>
-                </div>
-
             </div>
 
             <div class="card-footer text-center">
-                <button type="submit" class="btn btn-success px-5 text-light">Register</button>
+                <button type="submit" class="btn btn-secondary px-5">Register</button>
+            </div>
+
+            <div class="row my-3 text-center">
+                <span class="text-white">Already have an account? </span>
+                <a asp-controller="Auth" asp-action="Login">Login</a>
             </div>
         </div>
     </form>

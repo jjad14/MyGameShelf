@@ -70,14 +70,14 @@ async function loadGamesByPublisher(publisherIds) {
     games.forEach(game => {
         const card = document.createElement('div');
 
-        card.className = 'card';
+        card.className = 'card bg-primary text-white rounded-3 p-2';
         card.style.width = '12rem';
 
         card.innerHTML = `
         <img src="${game.backgroundImage}" class="card-img-top related-game-image" alt="${game.name}" />
         <div class="card-body p-2">
             <p class="card-text text-center mb-0">
-                <a href="/games/details/${game.id}" class="text-decoration-none">
+                <a href="/games/details/${game.id}" class="text-decoration-none text-white">
                     ${game.name}
                 </a>
             </p>
@@ -113,14 +113,14 @@ async function loadGameDLCs() {
 
     games.forEach(game => {
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = 'card bg-primary text-white rounded-3 p-2';
         card.style.width = '12rem';
 
         card.innerHTML = `
         <img src="${game.backgroundImage}" class="card-img-top related-game-image" alt="${game.name}" />
         <div class="card-body p-2">
             <p class="card-text text-center mb-0">
-                <a href="/games/details/${game.id}" class="text-decoration-none">
+                <a href="/games/details/${game.id}" class="text-decoration-none text-white">
                     ${game.name}
                 </a>
             </p>
@@ -156,14 +156,14 @@ async function loadGameSequels() {
 
     games.forEach(game => {
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = 'card bg-primary text-white rounded-3 p-2';
         card.style.width = '12rem';
 
         card.innerHTML = `
         <img src="${game.backgroundImage}" class="card-img-top related-game-image" alt="${game.name}" />
         <div class="card-body p-2">
             <p class="card-text text-center mb-0">
-                <a href="/games/details/${game.id}" class="text-decoration-none">
+                <a href="/games/details/${game.id}" class="text-decoration-none text-white">
                     ${game.name}
                 </a>
             </p>

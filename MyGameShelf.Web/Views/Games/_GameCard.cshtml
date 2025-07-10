@@ -12,7 +12,7 @@
 else
 {
     <div class="col">
-        <div class="card h-100" style="width: 18rem;">
+        <div class="card bg-primary rounded-4 h-100 text-white p-2" style="width: 18rem;">
             <div class="position-relative">
                 <img src="@Model.BackgroundImage" class="card-img-top" alt="@Model.Name" style="height: 200px; object-fit: cover;">
                 @if (Model.Metacritic.HasValue && Model.Metacritic > 0)
@@ -41,18 +41,23 @@ else
                             var platformName = platform.ToLower();
                             var badgeColor = platformName switch
                             {
-                                var p when p.ToLower().Contains("playstation") => "#003791",   // PlayStation
-                                var p when p.ToLower().Contains("xbox") => "#107C10",           // Xbox
-                                var p when p.ToLower().Contains("nintendo") => "#E60012",       // Nintendo
-                                var p when p.ToLower().Contains("pc") || p.Contains("windows") => "#6f42c1", // PC
-                                _ => "#fd7e14"                                        // Other
+                                var p when p.ToLower().Contains("playstation") || p.ToLower().Contains("psp") || p.ToLower().Contains("vita") => "#003791",
+                                var p when p.ToLower().Contains("xbox") => "#107C10",
+                                var p when p.ToLower().Contains("nintendo") || p.ToLower().Contains("wii") => "#E60012",
+                                var p when p.ToLower().Contains("pc") || p.ToLower().Contains("windows") => "#59359a",
+                                var p when p.ToLower().Contains("android") => "#3DDC84",
+                                var p when p.ToLower().Contains("linux") => "#FCC624",
+                                var p when p.ToLower().Contains("mac") || p.ToLower().Contains("macos") => "#999999",
+                                var p when p.ToLower().Contains("ios") => "#0A84FF",
+                                _ => "#fd7e14"// Other
                             };
 
                             <span class="badge me-1" style="background-color:@badgeColor; color: white;">@platform</span>
                         }
                     </div>
                 }
-
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
                 <a href="@Url.Action("Details", "Games", new {
                     id = Model.Id,
                     search = Model.Search,
@@ -62,19 +67,17 @@ else
                     orderBy = Model.OrderBy,
                     page = Model.Page,
                     pageSize = Model.PageSize
-                })" class="btn btn-sm btn-primary w-100">
+                })" class="btn btn-sm btn-secondary w-100 mb-2">
                     View Game
                 </a>
 
-            </div>
-            <div class="card-footer bg-transparent border-top-0">
-                <button class="btn btn-link text-decoration-none w-100"
+                <button class="btn btn-link text-decoration-none w-100 text-white bg-info"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#collapseDetails-@Model.Id"
                         aria-expanded="false"
                         aria-controls="collapseDetails-@Model.Id"
-                        style="background-color: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 0.25rem; height: 32px;">
+                        style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; height: 32px;">
                     Show Details <i class="fas fa-chevron-down ms-1"></i>
                 </button>
                 <div class="collapse mt-2" id="collapseDetails-@Model.Id">

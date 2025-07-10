@@ -16,7 +16,7 @@ else
         {
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card">
+                    <div class="card bg-primary rounded-4 text-white p-2">
                         <div class="row g-0">
                             <!-- Left Column: Game Image -->
                             <div class="col-3">
@@ -33,7 +33,7 @@ else
                                     <h5 class="mb-0">@review.GameTitle</h5>
                                     @if (review.IsRecommended.HasValue)
                                     {
-                                        <span class="badge @(review.IsRecommended.Value ? "bg-success" : "bg-danger")">
+                                        <span class="badge @(review.IsRecommended.Value ? "bg-success text-dark" : "bg-danger text-dark")">
                                             @(review.IsRecommended.Value ? "Recommends 👍" : "Not Recommended 👎")
                                         </span>
                                     }
@@ -46,7 +46,7 @@ else
 
                                 <!-- Third Row: Edit Button -->
                                 <div class="d-flex justify-content-end gap-1">
-                                    <a href="@Url.Action("Details", "Games", new { id = review.GameId })" class="btn btn-sm btn-primary">
+                                    <a href="@Url.Action("Details", "Games", new { id = review.GameId })" class="btn btn-sm btn-secondary">
                                         View Details
                                     </a>
 
